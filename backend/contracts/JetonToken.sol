@@ -68,8 +68,7 @@ contract JETON is ERC20, ERC20Permit, Ownable {
     uint256 stakedTimeInSeconds = block.timestamp - _stakeTimes[gamer];
     uint256 precision = 1e18; 
 
-    // taux journalier en taux par seconde, en ajustant par la précision ajoutée
-    // 86400 secondes dans un jour
+    // taux journalier en taux par seconde, en ajustant par la précision ajoutée (86400 secondes dans un jour )
     uint256 rewardPerSecondRate = (_dailyInterestRate * precision) / (100 * 86400);
     uint256 reward = (stakedAmount * rewardPerSecondRate * stakedTimeInSeconds) / precision;
 
