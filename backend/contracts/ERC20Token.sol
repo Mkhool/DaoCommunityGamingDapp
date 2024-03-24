@@ -11,8 +11,8 @@ contract JETON is ERC20, ERC20Permit, Ownable {
     mapping(address => uint256) private _stakes;
     mapping(address => uint256) private _stakeTimes; // Temps de staking pour chaque adresse
 
-    event Staked(address indexed user, uint256 amount);
-    event Unstaked(address indexed user, uint256 amount);
+    event Staked(address indexed gamer, uint256 amount);
+    event Unstaked(address indexed gamer, uint256 amount);
 
     constructor(address initialOwner)
         ERC20("JETON", "JET")
@@ -76,8 +76,8 @@ contract JETON is ERC20, ERC20Permit, Ownable {
     return reward;
 }
 
-    function gamerRank(address user) public view returns (string memory) {
-        uint256 stakedAmount = _stakes[user];
+    function gamerRank(address gamer) public view returns (string memory) {
+        uint256 stakedAmount = _stakes[gamer];
         if (stakedAmount >= 500 * (10**decimals())) return "Diamant";
         if (stakedAmount >= 400 * (10**decimals())) return "Platine";
         if (stakedAmount >= 300 * (10**decimals())) return "Or";
