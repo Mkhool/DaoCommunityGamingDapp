@@ -2,7 +2,6 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract JetonToken is ERC20, Ownable {
@@ -11,7 +10,6 @@ contract JetonToken is ERC20, Ownable {
     mapping(address => uint256) private _stakes;
     mapping(address => uint256) private _stakeTimes; 
 
-   
     event Staked(address indexed gamer, uint256 amount);
     event Unstaked(address indexed user, uint256 amount, uint256 reward);
 
