@@ -3,7 +3,7 @@ const { ethers } = require('hardhat');
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
 
 describe("Test Jeton ERC20", function () {
-  let DeployedJeton, owner, otherAccount;
+  let DeployedJeton, owner
 
   beforeEach(async function () {
     [owner, otherAccount] = await ethers.getSigners();
@@ -33,7 +33,7 @@ describe("Test Jeton ERC20", function () {
       ethers.parseUnits("1000000"))
 
   })
-// a utiliser dans le 2eme contract
+  // a utiliser dans le 2eme contract
   describe("transfer", function () {
     let DeployedJeton, owner, addr1, addr2;
 
@@ -57,4 +57,28 @@ describe("Test Jeton ERC20", function () {
       await expect(DeployedJeton.connect(owner).transferFrom(addr1.address, addr2.address, amount)).to.changeTokenBalances(DeployedJeton, [addr1, addr2], [-amount, amount]);
     });
   });
+
+  describe("Minting tokens", async function () {
+    let DeployedJeton, owner, addr1
+
+    beforeEach(async function () {
+      [owner, addr1] = await ethers.getSigners();
+      const Jeton = await ethers.getContractFactory("Jeton");
+      DeployedJeton = await Jeton.deploy();
+     
+    });
+    it("Should mint if owner", async function () {
+      const mintAmount = ethers.parseUnits("1000000", 18); 
+      await DeployedJeton.mint(owner.address, mintAmount);
+      const expectedBalance = ethers.parseUnits("2000000", 18);
+      expect(await DeployedJeton.balanceOf(owner.address)).to.equal(expectedBalance);
+    });
+
+    it("Shouldn't mint if not owner", async function () {
+      const mintAmount = ethers.parseUnits("1000000", 18); 
+      await expect(DeployedJeton.connect(addr1).mint(addr1.address, mintAmount))
+      .to.be.revertedWith("Seul le proprietaire peut mint des tokens");
+    });
+  });
+
 });
