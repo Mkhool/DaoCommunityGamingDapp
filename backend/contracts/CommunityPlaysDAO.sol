@@ -202,7 +202,7 @@ struct GameSession {
             uint256 correctVotes = countCorrectVotes(_sessionId, gamerAddress);
             uint256 totalVotes = gameSessions[_sessionId]
                 .playerChoices[gamerAddress]
-                .length; // Assurez-vous que cette logique correspond à votre structure de données
+                .length;
             uint256 percentageCorrect = (correctVotes * 100) / totalVotes;
 
             // Calculer l'expérience gagnée en fonction du pourcentage de choix corrects
@@ -236,8 +236,7 @@ struct GameSession {
 function countCorrectVotes(uint256 _sessionId, address _gamer) private view returns (uint256) {
     uint256 correctVotes = 0;
     GameSession storage session = gameSessions[_sessionId];
-    // Assurez-vous d'avoir une logique pour déterminer les directions gagnantes de la session
-    // Dans votre cas, cela semble être stocké dans session.winningDirections
+
     
     // On parcourt chaque vote du joueur
     for (uint i = 0; i < session.playerChoices[_gamer].length; i++) {
