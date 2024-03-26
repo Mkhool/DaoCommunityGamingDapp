@@ -34,7 +34,7 @@ contract Jeton is ERC20 {
      * @param amount La quantité de tokens à mint.
      */
     function mint(address to, uint256 amount) public {
-    require(msg.sender == owner, "Seul le proprietaire peut mint des tokens");
+    require(msg.sender == owner, "You are not the owner");
         _mint(to, amount);
     }
 }

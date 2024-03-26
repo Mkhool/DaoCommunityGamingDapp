@@ -77,7 +77,7 @@ describe("Test Jeton ERC20", function () {
     it("Shouldn't mint if not owner", async function () {
       const mintAmount = ethers.parseUnits("1000000", 18); 
       await expect(DeployedJeton.connect(addr1).mint(addr1.address, mintAmount))
-      .to.be.revertedWith("Seul le proprietaire peut mint des tokens");
+      .to.be.revertedWith("You are not the owner");
     });
   });
 
