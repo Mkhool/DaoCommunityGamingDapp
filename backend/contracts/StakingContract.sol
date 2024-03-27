@@ -44,7 +44,7 @@ contract StakingContract is ReentrancyGuard, Ownable {
     }
 
     /// @notice Permet à un utilisateur de retirer (unstake) ses tokens et les récompenses accumulées du contrat.
-    /// @dev Transfère les tokens du contrat au staker, ajuste le solde de staking et met à jour les états de staking.
+    /// @dev Transfère les tokens du contrat au staker, calcule les récompenses, ajuste le solde de staking et met à jour les états de staking.
     /// @param _amount Le montant de tokens à retirer.
     function unstake(uint256 _amount) public nonReentrant {
         require(isStaking[msg.sender], "You have no tokens staked");
@@ -52,13 +52,18 @@ contract StakingContract is ReentrancyGuard, Ownable {
             _amount <= stakingBalance[msg.sender],
             "Cannot withdraw more than you have staked"
         );
+        uint256 reward = calculateReward(msg.sender);
+        require(
+            stakingToken.balanceOf(address(this)) >= _amount + reward,
+            "Contract does not have enough tokens for rewards"
+        );
 
         stakingBalance[msg.sender] -= _amount;
         if (stakingBalance[msg.sender] == 0) {
             isStaking[msg.sender] = false;
         }
-
-        stakingToken.transfer(msg.sender, _amount);
+        uint256 amountToTransfer = _amount + reward;
+        stakingToken.transfer(msg.sender, amountToTransfer);
 
         emit Unstaked(msg.sender, _amount);
     }
@@ -68,6 +73,9 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @param newRate Le nouveau taux d'intérêt quotidien, exprimé en pourcentage avec une précision de deux décimales (par exemple, 100 pour 1%).
     function setDailyInterestRate(uint256 newRate) public onlyOwner {
         _dailyInterestRate = newRate;
+    }
+    function dailyInterestRate() public view returns (uint256) {
+        return _dailyInterestRate;
     }
 
     /// @notice Calcule la récompense accumulée pour un utilisateur en fonction de son montant en staking et du temps écoulé.
