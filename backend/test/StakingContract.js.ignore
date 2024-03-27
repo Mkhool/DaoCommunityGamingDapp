@@ -19,7 +19,6 @@ async function deployContractFixture() {
     return { jeton, stakingContract, stakingContractAdress, owner, addr1 };
 };
 
-
 describe("StakingContract", function () {
 
     describe("Deployment", function () {

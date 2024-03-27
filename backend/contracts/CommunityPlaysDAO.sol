@@ -2,33 +2,44 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./JetonToken.sol";
+import "./Jeton.sol";
+import "./StakingContract.sol";
 
 /* 
 faire un modifier onlyGamer
 verifier les requires
 faire les events
 */
-interface IJetonToken {
+
+interface IJeton {
     function mint(address to, uint256 amount) external;
-    function stake(uint256 amount) external;
+}
+
+interface IStakingContract {
+    function mint(address to, uint256 amount) external;
+    function stake(uint256 amount) external; // ou _amount ?
     function unstake(uint256 amount) external;
+    function setDailyInterestRate(uint256 newRate) external;
+    function dailyInterestRate() external;
+    function calculateReward(address gamer) external;
 }
 
 contract CommunityPlaysDAO is Ownable {
-    //L’instance ERC20Token à déployer
-    IJetonToken public jetonTokenContract;
+    //L’instance ERC20Token et de staking à déployer
+    IJeton public jetonContract;
+    IStakingContract public stakingContract;
     address[] public listOfGamers;
     mapping(uint256 => GameSession) public gameSessions;
     mapping(uint256 => GameProposal) public gameProposals;
     mapping(address => Gamer) public Gamers;
-    mapping(uint256 => Partner) public partners; // Mapping d'ID de jeu à l'éditeur
+    // mapping(uint256 => Partner) public partners; // Mapping d'ID de jeu à l'éditeur
     mapping(address => uint256) public experience; // Suivi de l'expérience des joueurs
     uint256[] private partnerGameIds; // Stocke les IDs de jeux proposés par les éditeurs
 
     uint256 constant EXP_PER_LEVEL = 100;
     uint256 public currentSessionId;
     uint256 private nextGameId = 1;
+    uint256 public quorumPercentage = 50;
 
     event GameSessionStarted(uint256 indexed sessionId, uint256 gameId);
     event GameSessionEnded(uint256 indexed sessionId);
@@ -36,13 +47,13 @@ contract CommunityPlaysDAO is Ownable {
     event ExperienceAdded(address indexed gamer, uint256 expAmount);
     event GameVoted(uint256 indexed gameId, address indexed voter);
     event GamerJoinedSession(address indexed gamer, uint256 indexed sessionId);
+    event ChoiceMade(uint256 indexed sessionId, string winningDirection);
+    event GameProposalAccepted(uint256 indexed gameId);
     event ExperienceAndRewardsAdded(
         address indexed gamer,
         uint256 experienceGained,
         uint256 tokensRewarded
     );
-    event ChoiceMade(uint256 indexed sessionId, string winningDirection);
-
 
     modifier onlyGamer() {
         require(Gamers[msg.sender].isActive, "Not an active gamer");
@@ -58,23 +69,24 @@ contract CommunityPlaysDAO is Ownable {
     }
 
     // Structure de données pour représenter une session de jeu
-struct GameSession {
-    uint256 id;
-    uint256 gameId;
-    bool isActive;
-    address[] gamerInSession;
-    mapping(string => uint256) votes; // Nombre de votes pour chaque direction
-    string[] winningDirections; // Directions gagnantes des cycles de vote
-    mapping(address => string[]) playerChoices; // Les choix de chaque joueur pour les cycles de vote
-}
-
+    struct GameSession {
+        uint256 id;
+        uint256 gameId;
+        bool isActive;
+        address[] gamerInSession;
+        mapping(string => uint256) votes; // Nombre de votes pour chaque direction
+        string[] winningDirections; // Directions gagnantes des cycles de vote
+        mapping(address => string[]) playerChoices; // Les choix de chaque joueur pour les cycles de vote
+    }
 
     // Structure de données pour représenter un jeu proposé
     struct GameProposal {
         uint256 id;
         string name;
         uint256 voteCount;
-        bool isPartnerGame; // Indique si le jeu vient d'un éditeur
+        bool isPartnerGame;
+        bool isAccepted;
+        uint256 quorum; // Indique si le jeu vient d'un éditeur
     }
 
     // Structure pour représenter un utilisateur et son engagement
@@ -92,11 +104,12 @@ struct GameSession {
     }
 
     // Initialiser le contrat avec des paramètres de base
-    constructor(address _tokenAddress) Ownable(msg.sender) {
-        // Initialisation si nécessaire
-        jetonTokenContract = IJetonToken(_tokenAddress);
-        // gameProposals.push(GameProposal(1, "Jeu 1", 0, false));
-        // gameProposals.push(GameProposal(2, "Jeu 2", 0, true)); // Proposé par un éditeur
+    constructor(
+        address _tokenAddress,
+        address _stakingContractAddress
+    ) Ownable(msg.sender) {
+        jetonContract = IJeton(_tokenAddress);
+        stakingContract = IStakingContract(_stakingContractAddress);
     }
 
     //////////////////////////////////////////// PROPOSAL /////////////////////////////////////////////////////////////////////////////
@@ -111,22 +124,35 @@ struct GameSession {
         nextGameId++;
     }
 
-    // Voter pour un jeu
-    function voteForGame(uint256 _gameId) public onlyGamer {
-        // Logique de vote
+    // Voter pour un jeu en fonction de son poids de staking
+    function voteForGame(
+        uint256 _gameId,
+        uint256 _voteWeight
+    ) public onlyGamer {
+        require(gameProposals[_gameId].id != 0, "Game proposal does not exist");
+        uint256 stakedAmount = stakingContract.stakingBalance(msg.sender);
+        require(stakedAmount > 0, "You must have tokens staked to vote");
+
+        // Utiliser le solde staké comme poids de vote
+        gameProposals[_gameId].voteCount += stakedAmount; // ou toute autre logique de pondération
+
+        // Vérifier si le quorum est atteint en fonction des votes pondérés
+        if (gameProposals[_gameId].voteCount >= gameProposals[_gameId].quorum) {
+            gameProposals[_gameId].isAccepted = true;
+            emit GameProposalAccepted(_gameId);
+        }
     }
 
-    // Ajouter un jeu proposé par un éditeur (réservé au propriétaire)
-    function addPartnerGame(
-        string memory _name,
-        string memory _partnerName,
-        address _partnerAddress
-    ) public onlyOwner {
-        partners[nextGameId] = Partner(_partnerName, _partnerAddress);
-        gameProposals[nextGameId] = GameProposal(nextGameId, _name, 0, true);
-        partnerGameIds.push(nextGameId);
-        nextGameId++;
+    function calculateQuorum() private view returns (uint256) {
+        uint256 totalStaked = stakingContract.totalStaked(); // Assurez-vous d'implémenter cette fonction dans StakingContract
+        uint256 quorum = (totalStaked * quorumPercentage) / 100;
+        return quorum;
     }
+
+function setQuorumPercentage(uint256 newQuorumPercentage) public onlyOwner {
+    require(newQuorumPercentage > 0 && newQuorumPercentage <= 100, "Quorum percentage must be between 1 and 100");
+    quorumPercentage = newQuorumPercentage;
+}
 
     // Getter pour récupérer les jeux proposés par la communauté
     function getCommunityGameProposals()
@@ -134,41 +160,6 @@ struct GameSession {
         view
         returns (GameProposal[] memory)
     {}
-
-    // Getter pour récupérer les jeux proposés par les éditeurs
-    function getpartnerGameProposals()
-        public
-        view
-        returns (GameProposal[] memory)
-    {
-        // Voir la version précédente pour le code complet
-    }
-
-    /*
-    // Fonction pour obtenir toutes les propositions de jeux
-    function getAllGameProposals() public view 
-    returns (
-        uint256[] memory ids, 
-        string[] memory names, 
-        uint256[] memory voteCounts, 
-        bool[] memory isPublisherGames
-    ) {
-        uint256 totalGames = gameProposals.length;
-        ids = new uint256[](totalGames);
-        names = new string[](totalGames);
-        voteCounts = new uint256[](totalGames);
-        isPublisherGames = new bool[](totalGames);
-
-        for (uint256 i = 0; i < totalGames; i++) {
-            ids[i] = gameProposals[i].id;
-            names[i] = gameProposals[i].name;
-            voteCounts[i] = gameProposals[i].voteCount;
-            isPublisherGames[i] = gameProposals[i].isPublisherGame;
-        }
-        return (ids, names, voteCounts, isPublisherGames);
-    }
-}
-*/
 
     // Fonctions pour la gestion des utilisateurs et des récompenses
 
@@ -219,7 +210,7 @@ struct GameSession {
             );
 
             // Distribuer les tokens de récompense
-            jetonTokenContract.mint(gamerAddress, rewardAmount);
+            jetonContract.mint(gamerAddress, rewardAmount);
 
             // Émettre un événement pour chaque joueur récompensé
             emit ExperienceAndRewardsAdded(
@@ -233,24 +224,29 @@ struct GameSession {
         emit GameSessionEnded(_sessionId);
     }
 
-function countCorrectVotes(uint256 _sessionId, address _gamer) private view returns (uint256) {
-    uint256 correctVotes = 0;
-    GameSession storage session = gameSessions[_sessionId];
+    function countCorrectVotes(
+        uint256 _sessionId,
+        address _gamer
+    ) private view returns (uint256) {
+        uint256 correctVotes = 0;
+        GameSession storage session = gameSessions[_sessionId];
 
-    
-    // On parcourt chaque vote du joueur
-    for (uint i = 0; i < session.playerChoices[_gamer].length; i++) {
-        string memory playerChoice = session.playerChoices[_gamer][i];
-        // On vérifie si le choix du joueur correspond à l'une des directions gagnantes
-        for(uint j = 0; j < session.winningDirections.length; j++) {
-            if (keccak256(bytes(playerChoice)) == keccak256(bytes(session.winningDirections[j]))) {
-                correctVotes++;
-                break; // Arrête la recherche dès qu'une correspondance est trouvée pour ce vote
+        // On parcourt chaque vote du joueur
+        for (uint i = 0; i < session.playerChoices[_gamer].length; i++) {
+            string memory playerChoice = session.playerChoices[_gamer][i];
+            // On vérifie si le choix du joueur correspond à l'une des directions gagnantes
+            for (uint j = 0; j < session.winningDirections.length; j++) {
+                if (
+                    keccak256(bytes(playerChoice)) ==
+                    keccak256(bytes(session.winningDirections[j]))
+                ) {
+                    correctVotes++;
+                    break; // Arrête la recherche dès qu'une correspondance est trouvée pour ce vote
+                }
             }
         }
+        return correctVotes;
     }
-    return correctVotes;
-}
 
     // Fonction pour calculer l'expérience gagnée en fonction du pourcentage de réponses correctes
     function calculateExperienceGained(
@@ -279,28 +275,28 @@ function countCorrectVotes(uint256 _sessionId, address _gamer) private view retu
     }
     ////////////////////////////////// GAMER /////////////////////////////////
     // Fonction pour participer à une partie (utilisation de token)
-    function participateInGame(uint256 sessionId) public {
-        require(
-            gameSessions[sessionId].isActive,
-            "This session is not active."
-        );
-        Gamer storage gamer = Gamers[msg.sender];
-        require(
-            !gamer.isActive ||
-                (gamer.isActive && gamer.currentSessionId != sessionId),
-            "Already participating in an active session."
-        );
+    // function participateInGame(uint256 sessionId) public {
+    //     require(
+    //         gameSessions[sessionId].isActive,
+    //         "This session is not active."
+    //     );
+    //     Gamer storage gamer = Gamers[msg.sender];
+    //     require(
+    //         !gamer.isActive ||
+    //             (gamer.isActive && gamer.currentSessionId != sessionId),
+    //         "Already participating in an active session."
+    //     );
 
-        uint256 stakeAmount = 1 * 10 ** 18; // 1 jeton, en supposant que votre jeton suit la même précision que l'Ether (18 décimales)
-        // Exiger que le joueur stake 1 jeton
-        jetonTokenContract.stake(stakeAmount);
-        // Mettre à jour le joueur pour qu'il soit actif dans la nouvelle session
-        gamer.isActive = true;
-        gamer.currentSessionId = sessionId; // Associer le joueur à la nouvelle session de jeu
-        gamer.stakeAmount += stakeAmount; // Ajouter le montant misé à l'enregistrement du joueur
+    //     uint256 stakeAmount = 1 * 10 ** 18; // 1 jeton, en supposant que votre jeton suit la même précision que l'Ether (18 décimales)
+    //     // Exiger que le joueur stake 1 jeton
+    //     StakingContract.stake(stakeAmount);
+    //     // Mettre à jour le joueur pour qu'il soit actif dans la nouvelle session
+    //     gamer.isActive = true;
+    //     gamer.currentSessionId = sessionId; // Associer le joueur à la nouvelle session de jeu
+    //     gamer.stakeAmount += stakeAmount; // Ajouter le montant misé à l'enregistrement du joueur
 
-        emit GamerJoinedSession(msg.sender, sessionId);
-    }
+    //     emit GamerJoinedSession(msg.sender, sessionId);
+    // }
 
     function vote(uint256 _sessionId, string memory _direction) public {
         require(gameSessions[_sessionId].isActive, "Session not active");
@@ -309,24 +305,25 @@ function countCorrectVotes(uint256 _sessionId, address _gamer) private view retu
         gameSessions[_sessionId].votes[_direction]++;
     }
 
-function calculateWinningDirection(uint256 _sessionId) private view returns (string memory) {
-    GameSession storage session = gameSessions[_sessionId];
-    uint256 highestVoteCount = 0;
-    string memory winningDirection = "";
+    function calculateWinningDirection(
+        uint256 _sessionId
+    ) private view returns (string memory) {
+        GameSession storage session = gameSessions[_sessionId];
+        uint256 highestVoteCount = 0;
+        string memory winningDirection = "";
 
-    // Parcourir les directions possibles et compter les votes
-    string[4] memory directions = ["haut", "bas", "gauche", "droite"];
-    for (uint i = 0; i < directions.length; i++) {
-        string memory direction = directions[i];
-        uint256 votesForDirection = session.votes[direction];
-        if (votesForDirection > highestVoteCount) {
-            highestVoteCount = votesForDirection;
-            winningDirection = direction;
+        // Parcourir les directions possibles et compter les votes
+        string[4] memory directions = ["haut", "bas", "gauche", "droite"];
+        for (uint i = 0; i < directions.length; i++) {
+            string memory direction = directions[i];
+            uint256 votesForDirection = session.votes[direction];
+            if (votesForDirection > highestVoteCount) {
+                highestVoteCount = votesForDirection;
+                winningDirection = direction;
+            }
         }
+        return winningDirection;
     }
-
-    return winningDirection;
-}
 
     function closeVotingCycle(uint256 _sessionId) public onlyOwner {
         require(gameSessions[_sessionId].isActive, "Session not active.");
@@ -361,7 +358,7 @@ function calculateWinningDirection(uint256 _sessionId) private view returns (str
             uint256 rewardAmount = calculateRewardBasedOnExp(experienceLevel);
 
             // Appeler le contrat JETON pour transférer les tokens
-            jetonTokenContract.mint(gamerAddress, rewardAmount);
+            jetonContract.mint(gamerAddress, rewardAmount);
         }
     }
 
@@ -410,7 +407,7 @@ function calculateWinningDirection(uint256 _sessionId) private view returns (str
         );
 
         // Appeler le contrat JETON pour transférer les tokens
-        jetonTokenContract.mint(gamerAddress, rewardAmount);
+        jetonContract.mint(gamerAddress, rewardAmount);
 
         // Émettre un événement pour indiquer l'ajout d'expérience et de récompenses
         emit ExperienceAndRewardsAdded(
@@ -427,3 +424,50 @@ function calculateWinningDirection(uint256 _sessionId) private view returns (str
 
     // le calcul des votes, la distribution des récompenses, etc.
 }
+
+// // Ajouter un jeu proposé par un éditeur (réservé au propriétaire)
+// function addPartnerGame(
+//     string memory _name,
+//     string memory _partnerName,
+//     address _partnerAddress
+// ) public onlyOwner {
+//     partners[nextGameId] = Partner(_partnerName, _partnerAddress);
+//     gameProposals[nextGameId] = GameProposal(nextGameId, _name, 0, true);
+//     partnerGameIds.push(nextGameId);
+//     nextGameId++;
+// }
+
+/*
+    // Fonction pour obtenir toutes les propositions de jeux
+    function getAllGameProposals() public view 
+    returns (
+        uint256[] memory ids, 
+        string[] memory names, 
+        uint256[] memory voteCounts, 
+        bool[] memory isPublisherGames
+    ) {
+        uint256 totalGames = gameProposals.length;
+        ids = new uint256[](totalGames);
+        names = new string[](totalGames);
+        voteCounts = new uint256[](totalGames);
+        isPublisherGames = new bool[](totalGames);
+
+        for (uint256 i = 0; i < totalGames; i++) {
+            ids[i] = gameProposals[i].id;
+            names[i] = gameProposals[i].name;
+            voteCounts[i] = gameProposals[i].voteCount;
+            isPublisherGames[i] = gameProposals[i].isPublisherGame;
+        }
+        return (ids, names, voteCounts, isPublisherGames);
+    }
+}
+*/
+// function gamerRank(address gamer) public view returns (string memory) {
+//     uint256 stakedAmount = _stakes[gamer];
+//     if (stakedAmount >= 500 * (10 ** decimals())) return "Diamant";
+//     if (stakedAmount >= 400 * (10 ** decimals())) return "Platine";
+//     if (stakedAmount >= 300 * (10 ** decimals())) return "Or";
+//     if (stakedAmount >= 200 * (10 ** decimals())) return "Argent";
+//     if (stakedAmount >= 100 * (10 ** decimals())) return "Bronze";
+//     return "Aucun rang";
+// }

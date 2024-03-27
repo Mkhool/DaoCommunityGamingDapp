@@ -5,9 +5,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-/// @title Un contrat de Staking pour les tokens ERC20
+/// @title Un contrat de Staking pour le token ERC20 Jeton
 /**
- * @dev Ce contrat permet aux utilisateurs de staker des tokens ERC20, gagner des récompenses basées sur un taux d'intérêt quotidien,
+ * @dev Ce contrat permet aux utilisateurs de staker des tokens JETON, gagner des récompenses basées sur un taux d'intérêt quotidien,
  * et retirer leurs tokens plus les récompenses accumulées. Le propriétaire du contrat peut ajuster le taux d'intérêt.
  */
 
@@ -19,6 +19,7 @@ contract StakingContract is ReentrancyGuard, Ownable {
     mapping(address => uint256) private _stakeTimes;
 
     uint256 private _dailyInterestRate;
+    uint256 public totalStaked;
 
     event Staked(address indexed gamer, uint256 amount);
     event Unstaked(address indexed gamer, uint256 amount);
@@ -31,11 +32,12 @@ contract StakingContract is ReentrancyGuard, Ownable {
     }
 
     /// @notice Permet à un utilisateur de déposer (staker) des tokens dans le contrat pour commencer à accumuler des récompenses.
-    /// @dev Transfère les tokens du staker au contrat et met à jour les soldes et les états de staking.
+    /// @dev Transfère les tokens du staker au contrat, met à jour les soldes, les états de staking et ajoute le montant au total staké
     /// @param _amount Le montant de tokens à staker.
     function stake(uint256 _amount) public nonReentrant {
         require(_amount > 0, "Cannot stake 0 tokens");
 
+totalStaked += _amount;
         stakingToken.transferFrom(msg.sender, address(this), _amount);
         stakingBalance[msg.sender] += _amount;
         isStaking[msg.sender] = true;
@@ -44,7 +46,7 @@ contract StakingContract is ReentrancyGuard, Ownable {
     }
 
     /// @notice Permet à un utilisateur de retirer (unstake) ses tokens et les récompenses accumulées du contrat.
-    /// @dev Transfère les tokens du contrat au staker, calcule les récompenses, ajuste le solde de staking et met à jour les états de staking.
+    /// @dev Transfère les tokens du contrat au staker, calcule les récompenses, ajuste le solde de staking,  met à jour les états de staking et soustrait le montant du total staké.
     /// @param _amount Le montant de tokens à retirer.
     function unstake(uint256 _amount) public nonReentrant {
         require(isStaking[msg.sender], "You have no tokens staked");
@@ -52,6 +54,7 @@ contract StakingContract is ReentrancyGuard, Ownable {
             _amount <= stakingBalance[msg.sender],
             "Cannot withdraw more than you have staked"
         );
+        totalStaked -= _amount;
         uint256 reward = calculateReward(msg.sender);
         require(
             stakingToken.balanceOf(address(this)) >= _amount + reward,
