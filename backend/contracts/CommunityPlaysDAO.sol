@@ -17,11 +17,13 @@ interface IJeton {
 
 interface IStakingContract {
     function mint(address to, uint256 amount) external;
-    function stake(uint256 amount) external; // ou _amount ?
+    function stake(uint256 amount) external;
     function unstake(uint256 amount) external;
     function setDailyInterestRate(uint256 newRate) external;
-    function dailyInterestRate() external;
-    function calculateReward(address gamer) external;
+    function dailyInterestRate() external view returns (uint256);
+    function calculateReward(address gamer) external view returns (uint256);
+    function stakingBalance(address user) external view returns (uint256);
+    function totalStaked() external view returns (uint256);
 }
 
 contract CommunityPlaysDAO is Ownable {
@@ -59,6 +61,13 @@ contract CommunityPlaysDAO is Ownable {
         require(Gamers[msg.sender].isActive, "Not an active gamer");
         _;
     }
+    modifier onlyStakingGamer() {
+        require(
+            stakingContract.stakingBalance(msg.sender) > 0,
+            "Must have tokens staked to participate"
+        );
+        _;
+    }
 
     // énumération des différents états possibles d'un jeu
     enum GameStatus {
@@ -84,9 +93,8 @@ contract CommunityPlaysDAO is Ownable {
         uint256 id;
         string name;
         uint256 voteCount;
-        bool isPartnerGame;
         bool isAccepted;
-        uint256 quorum; // Indique si le jeu vient d'un éditeur
+        uint256 quorum;
     }
 
     // Structure pour représenter un utilisateur et son engagement
@@ -95,12 +103,6 @@ contract CommunityPlaysDAO is Ownable {
         uint256 experienceLevel; // Niveau d'expérience
         bool isActive; // indique si le joueur est actif dans une session
         uint256 currentSessionId; // ID de la session de jeu actuelle
-    }
-
-    // Structure pour représenter un éditeur de jeu
-    struct Partner {
-        string name;
-        address wallet;
     }
 
     // Initialiser le contrat avec des paramètres de base
@@ -114,27 +116,27 @@ contract CommunityPlaysDAO is Ownable {
 
     //////////////////////////////////////////// PROPOSAL /////////////////////////////////////////////////////////////////////////////
     // Proposer un nouveau jeu par la communauté
-    function proposeGame(string memory _gameName) public onlyGamer {
-        gameProposals[nextGameId] = GameProposal(
-            nextGameId,
-            _gameName,
-            0,
-            false
-        );
+    function proposeGame(string memory _gameName) public onlyStakingGamer {
+        uint256 quorum = calculateQuorum();
+        gameProposals[nextGameId] = GameProposal({
+            id: nextGameId,
+            name: _gameName,
+            voteCount: 0,
+            isAccepted: false,
+            quorum: quorum
+        });
+
         nextGameId++;
     }
 
     // Voter pour un jeu en fonction de son poids de staking
-    function voteForGame(
-        uint256 _gameId,
-        uint256 _voteWeight
-    ) public onlyGamer {
+    function voteForGame(uint256 _gameId) public onlyStakingGamer {
         require(gameProposals[_gameId].id != 0, "Game proposal does not exist");
         uint256 stakedAmount = stakingContract.stakingBalance(msg.sender);
         require(stakedAmount > 0, "You must have tokens staked to vote");
 
         // Utiliser le solde staké comme poids de vote
-        gameProposals[_gameId].voteCount += stakedAmount; // ou toute autre logique de pondération
+        gameProposals[_gameId].voteCount += stakedAmount;
 
         // Vérifier si le quorum est atteint en fonction des votes pondérés
         if (gameProposals[_gameId].voteCount >= gameProposals[_gameId].quorum) {
@@ -143,23 +145,27 @@ contract CommunityPlaysDAO is Ownable {
         }
     }
 
-    function calculateQuorum() private view returns (uint256) {
-        uint256 totalStaked = stakingContract.totalStaked(); // Assurez-vous d'implémenter cette fonction dans StakingContract
-        uint256 quorum = (totalStaked * quorumPercentage) / 100;
-        return quorum;
-    }
-
-function setQuorumPercentage(uint256 newQuorumPercentage) public onlyOwner {
-    require(newQuorumPercentage > 0 && newQuorumPercentage <= 100, "Quorum percentage must be between 1 and 100");
-    quorumPercentage = newQuorumPercentage;
-}
-
-    // Getter pour récupérer les jeux proposés par la communauté
-    function getCommunityGameProposals()
+    // Getter pour récupérer les propositions
+    function getProposals()
         public
         view
         returns (GameProposal[] memory)
     {}
+
+    ////////// GESTION QUORUM ///////////////////
+    function calculateQuorum() private view returns (uint256) {
+        uint256 totalStaked = stakingContract.totalStaked();
+        uint256 quorum = (totalStaked * quorumPercentage) / 100;
+        return quorum;
+    }
+
+    function setQuorumPercentage(uint256 newQuorumPercentage) public onlyOwner {
+        require(
+            newQuorumPercentage > 0 && newQuorumPercentage <= 100,
+            "Quorum percentage must be between 1 and 100"
+        );
+        quorumPercentage = newQuorumPercentage;
+    }
 
     // Fonctions pour la gestion des utilisateurs et des récompenses
 
@@ -425,43 +431,9 @@ function setQuorumPercentage(uint256 newQuorumPercentage) public onlyOwner {
     // le calcul des votes, la distribution des récompenses, etc.
 }
 
-// // Ajouter un jeu proposé par un éditeur (réservé au propriétaire)
-// function addPartnerGame(
-//     string memory _name,
-//     string memory _partnerName,
-//     address _partnerAddress
-// ) public onlyOwner {
-//     partners[nextGameId] = Partner(_partnerName, _partnerAddress);
-//     gameProposals[nextGameId] = GameProposal(nextGameId, _name, 0, true);
-//     partnerGameIds.push(nextGameId);
-//     nextGameId++;
-// }
 
-/*
-    // Fonction pour obtenir toutes les propositions de jeux
-    function getAllGameProposals() public view 
-    returns (
-        uint256[] memory ids, 
-        string[] memory names, 
-        uint256[] memory voteCounts, 
-        bool[] memory isPublisherGames
-    ) {
-        uint256 totalGames = gameProposals.length;
-        ids = new uint256[](totalGames);
-        names = new string[](totalGames);
-        voteCounts = new uint256[](totalGames);
-        isPublisherGames = new bool[](totalGames);
 
-        for (uint256 i = 0; i < totalGames; i++) {
-            ids[i] = gameProposals[i].id;
-            names[i] = gameProposals[i].name;
-            voteCounts[i] = gameProposals[i].voteCount;
-            isPublisherGames[i] = gameProposals[i].isPublisherGame;
-        }
-        return (ids, names, voteCounts, isPublisherGames);
-    }
-}
-*/
+
 // function gamerRank(address gamer) public view returns (string memory) {
 //     uint256 stakedAmount = _stakes[gamer];
 //     if (stakedAmount >= 500 * (10 ** decimals())) return "Diamant";
