@@ -30,37 +30,31 @@ contract CommunityPlaysDAO is Ownable {
     //L’instance ERC20Token et de staking à déployer
     IJeton public jetonContract;
     IStakingContract public stakingContract;
-    address[] public listOfGamers;
+  
     mapping(uint256 => GameSession) public gameSessions;
     mapping(uint256 => GameProposal) public gameProposals;
     mapping(address => Gamer) public Gamers;
-    // mapping(uint256 => Partner) public partners; // Mapping d'ID de jeu à l'éditeur
-    mapping(address => uint256) public experience; // Suivi de l'expérience des joueurs
-    uint256[] private partnerGameIds; // Stocke les IDs de jeux proposés par les éditeurs
+    mapping(address => uint256) public experience; 
 
-    uint256 constant EXP_PER_LEVEL = 100;
     uint256 public currentSessionId;
     uint256 private nextGameId = 1;
     uint256 public quorumPercentage = 50;
 
     event GameSessionStarted(uint256 indexed sessionId, uint256 gameId);
     event GameSessionEnded(uint256 indexed sessionId);
-    event TokenRewardsDistributed(address indexed gamer, uint256 rewardAmount);
-    event ExperienceAdded(address indexed gamer, uint256 expAmount);
-    event GameVoted(uint256 indexed gameId, address indexed voter);
-    event GamerJoinedSession(address indexed gamer, uint256 indexed sessionId);
-    event ChoiceMade(uint256 indexed sessionId, string winningDirection);
-    event GameProposalAccepted(uint256 indexed gameId);
-    event ExperienceAndRewardsAdded(
-        address indexed gamer,
-        uint256 experienceGained,
-        uint256 tokensRewarded
+    event GameChoiceSubmitted(
+        uint256 indexed sessionId,
+        address indexed voter,
+        string direction
     );
+    event GamerJoinedSession(address indexed gamer, uint256 indexed sessionId);
+    event ChoiceMade(
+        uint256 indexed sessionId,
+        uint256 cycle,
+        string direction
+    );
+    event GameProposalAccepted(uint256 indexed gameId);
 
-    modifier onlyGamer() {
-        require(Gamers[msg.sender].isActive, "Not an active gamer");
-        _;
-    }
     modifier onlyStakingGamer() {
         require(
             stakingContract.stakingBalance(msg.sender) > 0,
@@ -83,9 +77,11 @@ contract CommunityPlaysDAO is Ownable {
         uint256 gameId;
         bool isActive;
         address[] gamerInSession;
-        mapping(string => uint256) votes; // Nombre de votes pour chaque direction
-        string[] winningDirections; // Directions gagnantes des cycles de vote
-        mapping(address => string[]) playerChoices; // Les choix de chaque joueur pour les cycles de vote
+        mapping(string => uint256) choicesCount; // Nombre de choix pour chaque direction
+        mapping(uint256 => string) winningDirectionPerCycle; // Direction gagnante par cycle
+        mapping(address => mapping(uint256 => string)) playerChoicesPerCycle; // Choix des joueurs par cycle
+        mapping(address => uint256) lastCycleParticipated; // Dernier cycle de vote auquel chaque joueur a participé
+        uint256 currentCycle; // Identifiant du cycle actuel de vote
     }
 
     // Structure de données pour représenter un jeu proposé
@@ -99,7 +95,7 @@ contract CommunityPlaysDAO is Ownable {
 
     // Structure pour représenter un utilisateur et son engagement
     struct Gamer {
-        uint256 stakeAmount; // Montant du token staké
+        // uint256 stakeAmount; // Montant du token staké
         uint256 experienceLevel; // Niveau d'expérience
         bool isActive; // indique si le joueur est actif dans une session
         uint256 currentSessionId; // ID de la session de jeu actuelle
@@ -145,12 +141,19 @@ contract CommunityPlaysDAO is Ownable {
         }
     }
 
-    // Getter pour récupérer les propositions
-    function getProposals()
-        public
-        view
-        returns (GameProposal[] memory)
-    {}
+// Retourne les détails d'une proposition de jeu par son ID
+function getProposal(uint256 proposalId) public view returns (uint256, string memory, uint256, bool, uint256) {
+    require(proposalId > 0 && proposalId < nextGameId, "Proposal ID is out of bounds.");
+    
+    GameProposal storage proposal = gameProposals[proposalId];
+    return (
+        proposal.id,
+        proposal.name,
+        proposal.voteCount,
+        proposal.isAccepted,
+        proposal.quorum
+    );
+}
 
     ////////// GESTION QUORUM ///////////////////
     function calculateQuorum() private view returns (uint256) {
@@ -166,8 +169,6 @@ contract CommunityPlaysDAO is Ownable {
         );
         quorumPercentage = newQuorumPercentage;
     }
-
-    // Fonctions pour la gestion des utilisateurs et des récompenses
 
     ///////////////////////////////////////////////////////////////////////////////////////// GAMING //////////////////////////////////////////////////////////////////////////////
 
@@ -188,251 +189,183 @@ contract CommunityPlaysDAO is Ownable {
         session.gameId = gameId; // Stocker l'ID du jeu dans la session
     }
 
-    // Fonction pour terminer une session de jeu spécifique
+    // Fonction pour terminer une session de jeu spécifique et distribuer les récompenses
     function endGameSession(uint256 _sessionId) public onlyOwner {
         require(gameSessions[_sessionId].isActive, "Session not active");
-        gameSessions[_sessionId].isActive = false;
 
-        // Calculer et attribuer les récompenses en fonction des choix corrects
-        for (uint256 i = 0; i < listOfGamers.length; i++) {
-            address gamerAddress = listOfGamers[i];
-            uint256 correctVotes = countCorrectVotes(_sessionId, gamerAddress);
-            uint256 totalVotes = gameSessions[_sessionId]
-                .playerChoices[gamerAddress]
-                .length;
-            uint256 percentageCorrect = (correctVotes * 100) / totalVotes;
+        GameSession storage session = gameSessions[_sessionId];
+        session.isActive = false;
 
-            // Calculer l'expérience gagnée en fonction du pourcentage de choix corrects
-            uint256 experienceGained = calculateExperienceGained(
-                percentageCorrect
+        uint256 baseExperienceReward = 10; // Récompense de base pour la participation
+        uint256 bonusExperience = 100; // Bonus pour avoir choisi la direction majoritaire
+
+        // Distribuer les récompenses
+        for (uint256 i = 0; i < session.gamerInSession.length; i++) {
+            address gamerAddress = session.gamerInSession[i];
+            uint256 totalCorrectChoices = countCorrectChoices(
+                _sessionId,
+                gamerAddress
             );
+
+            // Chaque joueur reçoit une récompense de base pour la participation
+            uint256 totalReward = baseExperienceReward;
+
+            // Ajout d'un bonus basé sur les choix corrects
+            if (totalCorrectChoices > 0) {
+                totalReward += bonusExperience * totalCorrectChoices;
+            }
 
             // Ajouter l'expérience au joueur
-            addExperience(gamerAddress, experienceGained);
-
-            // Utiliser une fonction existante pour calculer les récompenses basées sur le nouvel niveau d'expérience
-            uint256 rewardAmount = calculateRewardBasedOnExp(
-                experience[gamerAddress]
-            );
-
-            // Distribuer les tokens de récompense
-            jetonContract.mint(gamerAddress, rewardAmount);
-
-            // Émettre un événement pour chaque joueur récompensé
-            emit ExperienceAndRewardsAdded(
-                gamerAddress,
-                experienceGained,
-                rewardAmount
-            );
+            experience[gamerAddress] += totalReward;
         }
 
         // Émettre un événement pour signaler la fin de la session
         emit GameSessionEnded(_sessionId);
     }
 
-    function countCorrectVotes(
+    function countCorrectChoices(
         uint256 _sessionId,
         address _gamer
     ) private view returns (uint256) {
-        uint256 correctVotes = 0;
         GameSession storage session = gameSessions[_sessionId];
+        uint256 correctChoices = 0;
 
-        // On parcourt chaque vote du joueur
-        for (uint i = 0; i < session.playerChoices[_gamer].length; i++) {
-            string memory playerChoice = session.playerChoices[_gamer][i];
-            // On vérifie si le choix du joueur correspond à l'une des directions gagnantes
-            for (uint j = 0; j < session.winningDirections.length; j++) {
-                if (
-                    keccak256(bytes(playerChoice)) ==
-                    keccak256(bytes(session.winningDirections[j]))
-                ) {
-                    correctVotes++;
-                    break; // Arrête la recherche dès qu'une correspondance est trouvée pour ce vote
-                }
+        for (uint256 cycle = 1; cycle <= session.currentCycle; cycle++) {
+            string memory playerChoice = session.playerChoicesPerCycle[_gamer][
+                cycle
+            ];
+            string memory winningDirection = session.winningDirectionPerCycle[
+                cycle
+            ];
+
+            if (
+                keccak256(abi.encodePacked(playerChoice)) ==
+                keccak256(abi.encodePacked(winningDirection))
+            ) {
+                correctChoices++;
             }
         }
-        return correctVotes;
+
+        return correctChoices;
     }
 
-    // Fonction pour calculer l'expérience gagnée en fonction du pourcentage de réponses correctes
-    function calculateExperienceGained(
-        uint256 percentageCorrect
-    ) private pure returns (uint256) {
-        // Exemple : 10 d'expérience pour chaque tranche de 25% de réponses correctes
-        return (percentageCorrect / 25) * 10;
-    }
-
-    function resetSessionVotes(uint256 _sessionId) private {
+    function resetSessionChoices(uint256 _sessionId) private {
         GameSession storage session = gameSessions[_sessionId];
-        // Réinitialiser les votes pour chaque direction
-        session.votes["haut"] = 0;
-        session.votes["bas"] = 0;
-        session.votes["gauche"] = 0;
-        session.votes["droite"] = 0;
+        // Préparation pour le nouveau cycle de vote
+        session.currentCycle++;
 
-        // Réinitialiser les choix des joueurs
-        address[] memory gamers = session.gamerInSession; // Assurez-vous d'avoir cette liste ou une structure similaire
-        for (uint256 i = 0; i < gamers.length; i++) {
-            delete session.playerChoices[gamers[i]];
-        }
-
-        // Réinitialiser la liste des directions gagnantes si nécessaire
-        delete session.winningDirections;
+        // Réinitialiser les comptes de choix pour chaque direction pour le nouveau cycle
+        session.choicesCount["haut"] = 0;
+        session.choicesCount["bas"] = 0;
+        session.choicesCount["gauche"] = 0;
+        session.choicesCount["droite"] = 0;
     }
-    ////////////////////////////////// GAMER /////////////////////////////////
-    // Fonction pour participer à une partie (utilisation de token)
-    // function participateInGame(uint256 sessionId) public {
-    //     require(
-    //         gameSessions[sessionId].isActive,
-    //         "This session is not active."
-    //     );
-    //     Gamer storage gamer = Gamers[msg.sender];
-    //     require(
-    //         !gamer.isActive ||
-    //             (gamer.isActive && gamer.currentSessionId != sessionId),
-    //         "Already participating in an active session."
-    //     );
 
-    //     uint256 stakeAmount = 1 * 10 ** 18; // 1 jeton, en supposant que votre jeton suit la même précision que l'Ether (18 décimales)
-    //     // Exiger que le joueur stake 1 jeton
-    //     StakingContract.stake(stakeAmount);
-    //     // Mettre à jour le joueur pour qu'il soit actif dans la nouvelle session
-    //     gamer.isActive = true;
-    //     gamer.currentSessionId = sessionId; // Associer le joueur à la nouvelle session de jeu
-    //     gamer.stakeAmount += stakeAmount; // Ajouter le montant misé à l'enregistrement du joueur
+    //////////////////////////////// GAMER /////////////////////////////////
+    // Fonction pour participer à une partie
+    function participateInGame(uint256 sessionId) public onlyStakingGamer {
+        require(
+            gameSessions[sessionId].isActive,
+            "This session is not active."
+        );
+        gameSessions[sessionId].gamerInSession.push(msg.sender);
 
-    //     emit GamerJoinedSession(msg.sender, sessionId);
-    // }
+        emit GamerJoinedSession(msg.sender, sessionId);
+    }
 
-    function vote(uint256 _sessionId, string memory _direction) public {
+    function makeChoice(
+        uint256 _sessionId,
+        string memory _direction
+    ) public onlyStakingGamer {
         require(gameSessions[_sessionId].isActive, "Session not active");
+        GameSession storage session = gameSessions[_sessionId];
 
-        gameSessions[_sessionId].playerChoices[msg.sender].push(_direction);
-        gameSessions[_sessionId].votes[_direction]++;
+        if (!isGamerInSession(msg.sender, _sessionId)) {
+            session.gamerInSession.push(msg.sender);
+        }
+
+        require(
+            session.lastCycleParticipated[msg.sender] < session.currentCycle,
+            "Already participated in the current cycle"
+        );
+
+        session.playerChoicesPerCycle[msg.sender][
+            session.currentCycle
+        ] = _direction;
+        session.choicesCount[_direction]++;
+        session.lastCycleParticipated[msg.sender] = session.currentCycle;
+
+        if (
+            session.choicesCount[_direction] > session.gamerInSession.length / 2
+        ) {
+            session.winningDirectionPerCycle[session.currentCycle] = _direction;
+            emit ChoiceMade(_sessionId, session.currentCycle, _direction);
+            resetSessionChoices(_sessionId);
+            session.currentCycle++;
+        }
     }
 
-    function calculateWinningDirection(
+    // Fonction pour vérifier si un joueur participe déjà à la session
+    function isGamerInSession(
+        address _gamer,
         uint256 _sessionId
-    ) private view returns (string memory) {
-        GameSession storage session = gameSessions[_sessionId];
-        uint256 highestVoteCount = 0;
-        string memory winningDirection = "";
-
-        // Parcourir les directions possibles et compter les votes
-        string[4] memory directions = ["haut", "bas", "gauche", "droite"];
-        for (uint i = 0; i < directions.length; i++) {
-            string memory direction = directions[i];
-            uint256 votesForDirection = session.votes[direction];
-            if (votesForDirection > highestVoteCount) {
-                highestVoteCount = votesForDirection;
-                winningDirection = direction;
+    ) private view returns (bool) {
+        address[] memory gamers = gameSessions[_sessionId].gamerInSession;
+        for (uint256 i = 0; i < gamers.length; i++) {
+            if (gamers[i] == _gamer) {
+                return true;
             }
         }
-        return winningDirection;
+        return false;
     }
 
-    function closeVotingCycle(uint256 _sessionId) public onlyOwner {
-        require(gameSessions[_sessionId].isActive, "Session not active.");
+    /////// EXP  and RANK /////
 
-        // Déterminer la direction gagnante
-        string memory winningDirection = calculateWinningDirection(_sessionId);
-        gameSessions[_sessionId].winningDirections.push(winningDirection);
-
-        emit ChoiceMade(_sessionId, winningDirection);
+    // Fonction pour déterminer le rang du joueur basé sur le montant staké
+    function determineRankByStake(
+        address _player
+    ) public view returns (string memory) {
+        uint256 stakedAmount = stakingContract.stakingBalance(_player); // Assurez-vous d'avoir accès à cette fonction dans IStakingContract
+        if (stakedAmount >= 500 * 10 ** 18) return "Diamant";
+        if (stakedAmount >= 400 * 10 ** 18) return "Platine";
+        if (stakedAmount >= 300 * 10 ** 18) return "Or";
+        if (stakedAmount >= 200 * 10 ** 18) return "Argent";
+        if (stakedAmount >= 100 * 10 ** 18) return "Bronze";
+        return "Aucun rang";
     }
 
-    /////// EXP , REWARD and RANK /////
-    function addExperience(address gamer, uint256 expAmount) public onlyOwner {
-        experience[gamer] += expAmount;
-    }
-
-    function calculateRank(uint256 exp) public pure returns (string memory) {
-        if (exp >= 5000) return "Diamant";
-        if (exp >= 4000) return "Platine";
-        if (exp >= 3000) return "Or";
-        if (exp >= 2000) return "Argent";
-        if (exp >= 1000) return "Bronze";
-        return "Pas de rang";
-    }
-
-    // Distribuer les récompenses en token
-    function distributeTokenRewards() public onlyOwner {
-        for (uint256 i = 0; i < listOfGamers.length; i++) {
-            address gamerAddress = listOfGamers[i];
-            Gamer storage gamer = Gamers[gamerAddress];
-            uint256 experienceLevel = gamer.experienceLevel;
-            uint256 rewardAmount = calculateRewardBasedOnExp(experienceLevel);
-
-            // Appeler le contrat JETON pour transférer les tokens
-            jetonContract.mint(gamerAddress, rewardAmount);
+    // Fonction pour déterminer le niveau du joueur basé sur son expérience
+    function determineLevelByExperience(
+        address _player
+    ) public view returns (string memory level) {
+        uint256 playerExperience = experience[_player];
+        if (playerExperience >= 5000) {
+            level = "Niveau 10";
+        } else if (playerExperience >= 4500) {
+            level = "Niveau 9";
+        } else if (playerExperience >= 4000) {
+            level = "Niveau 8";
+        } else if (playerExperience >= 3500) {
+            level = "Niveau 7";
+        } else if (playerExperience >= 3000) {
+            level = "Niveau 6";
+        } else if (playerExperience >= 2500) {
+            level = "Niveau 5";
+        } else if (playerExperience >= 2000) {
+            level = "Niveau 4";
+        } else if (playerExperience >= 1500) {
+            level = "Niveau 3";
+        } else if (playerExperience >= 1000) {
+            level = "Niveau 2";
+        } else {
+            level = "Niveau 1"; // Moins de 1000 points d'expérience correspond au niveau le plus bas
         }
     }
-
-    function calculateRewardBasedOnExp(
-        uint256 exp
-    ) private pure returns (uint256) {
-        string memory rank = calculateRank(exp);
-
-        // Logique pour déterminer la récompense basée sur le rang
-        if (
-            keccak256(abi.encodePacked(rank)) ==
-            keccak256(abi.encodePacked("Diamant"))
-        ) return 500; // Exemple de récompense pour le rang Diamant
-        if (
-            keccak256(abi.encodePacked(rank)) ==
-            keccak256(abi.encodePacked("Platine"))
-        ) return 400;
-        if (
-            keccak256(abi.encodePacked(rank)) ==
-            keccak256(abi.encodePacked("Or"))
-        ) return 300;
-        if (
-            keccak256(abi.encodePacked(rank)) ==
-            keccak256(abi.encodePacked("Argent"))
-        ) return 200;
-        if (
-            keccak256(abi.encodePacked(rank)) ==
-            keccak256(abi.encodePacked("Bronze"))
-        ) return 100;
-        return 0; // Pas de récompense si pas de rang
-    }
-
-    // Fonction pour ajouter de l'expérience et attribuer des récompenses en tokens basées sur le pourcentage de réponses correctes
-    function addExperienceAndRewards(
-        address gamerAddress,
-        uint256 percentageCorrect
-    ) internal {
-        // Déterminer l'expérience gagnée en fonction du pourcentage de réponses correctes
-        uint256 experienceGained = calculateExperienceGained(percentageCorrect);
-        // Ajouter l'expérience au joueur
-        experience[gamerAddress] += experienceGained;
-
-        // Déterminer le nouveau rang basé sur l'expérience totale et attribuer des tokens récompensés
-        uint256 rewardAmount = calculateRewardBasedOnExp(
-            experience[gamerAddress]
-        );
-
-        // Appeler le contrat JETON pour transférer les tokens
-        jetonContract.mint(gamerAddress, rewardAmount);
-
-        // Émettre un événement pour indiquer l'ajout d'expérience et de récompenses
-        emit ExperienceAndRewardsAdded(
-            gamerAddress,
-            experienceGained,
-            rewardAmount
-        );
-    }
+    /// GESTION DES JOUEURS OWNER ///
     function banGamer(address _address) public onlyOwner {
         delete Gamers[_address];
     }
-
-    // Fonctions supplémentaires selon les besoins, comme l'amélioration du niveau d'expérience
-
-    // le calcul des votes, la distribution des récompenses, etc.
 }
-
-
-
 
 // function gamerRank(address gamer) public view returns (string memory) {
 //     uint256 stakedAmount = _stakes[gamer];

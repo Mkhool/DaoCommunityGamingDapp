@@ -37,7 +37,7 @@ contract StakingContract is ReentrancyGuard, Ownable {
     function stake(uint256 _amount) public nonReentrant {
         require(_amount > 0, "Cannot stake 0 tokens");
 
-totalStaked += _amount;
+        totalStaked += _amount;
         stakingToken.transferFrom(msg.sender, address(this), _amount);
         stakingBalance[msg.sender] += _amount;
         isStaking[msg.sender] = true;
