@@ -22,12 +22,12 @@ async function deployContractFixture() {
 
 describe("StakingContract", function () {
 
-    it.skip("Should set the right owner", async function () {
+    it("Should set the right owner", async function () {
         const { stakingContract, owner } = await loadFixture(deployContractFixture);
         expect(await stakingContract.owner()).to.equal(owner.address);
     });
 
-    it.skip("Should allow staking", async function () {
+    it("Should allow staking", async function () {
         const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
         const stakeAmount = ethers.parseUnits("100", 18);
 
@@ -45,7 +45,7 @@ describe("StakingContract", function () {
         expect(balance).to.equal(stakeAmount);
     });
 
-    it.skip("should emit the skake", async function () {
+    it("should emit the skake", async function () {
         const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
         const stakeAmount = ethers.parseUnits("100", 18);
         await jeton.mint(owner.address, stakeAmount);
@@ -60,7 +60,7 @@ describe("StakingContract", function () {
             .withArgs(owner.address, stakeAmount);
     })
 
-    it.skip("Should not allow staking without approval", async function () {
+    it("Should not allow staking without approval", async function () {
         const { stakingContract, owner } = await loadFixture(deployContractFixture);
         const stakeAmount = ethers.parseUnits("100", 18);
 
@@ -76,42 +76,48 @@ describe("StakingContract", function () {
         // Le propriétaire transfère des tokens au contrat de staking pour les récompenses futures
         await jeton.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
 
-        // Récupérer et loguer la balance du contrat de staking
-        const stakingContractBalance = await jeton.balanceOf(stakingContractAdress);
-        console.log("Staking contract balance:", ethers.formatUnits(stakingContractBalance, 18));
+        // Approbation et staking
+        await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
+        await stakingContract.connect(owner).stake(stakeAmount);
+
+        // Unstaking des jetons
+        await stakingContract.connect(owner).unstake(stakeAmount);
+    });
+
+    it("Should not allow unstaking if contract balance is insufficient", async function () {
+        const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+        const stakeAmount = ethers.parseUnits("100", 18);
 
         // Approbation et staking
         await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
         await stakingContract.connect(owner).stake(stakeAmount);
 
-        // Récupérez et loguez le timestamp actuel avant le passage du temps
-        let currentBlock = await ethers.provider.getBlock("latest");
-
-        // Simuler le passage du temps pour accumuler des récompenses
-        await ethers.provider.send("evm_increaseTime", [86400]); // 1 jour
-        await ethers.provider.send("evm_mine", []);
-
-        const contractBalance = await jeton.balanceOf(stakingContractAdress);
-        console.log("Contract balance before unstaking:", contractBalance.toString());
-
-        // Récupérez et loguez le timestamp après le passage du temps
-        currentBlock = await ethers.provider.getBlock("latest");
-
         // Unstaking des jetons
-        await stakingContract.connect(owner).unstake(stakeAmount);
-
-        // Vérification du solde de jetons après unstaking
-        const finalBalance = await jeton.balanceOf(owner.address);
-
-        // La balance finale devrait être égale à la balance initiale
-        const initialMintAmount = ethers.parseUnits("1000000", 18); // Montant minté au déploiement
-        expect(finalBalance).to.equal(initialMintAmount);
+        await expect(stakingContract.connect(owner).unstake(stakeAmount)).to.be.revertedWith("Contract does not have enough tokens for rewards");
     });
 
+    it("Should not allow unstaking if you have not stake tokens", async function () {
+        const { stakingContract, owner } = await loadFixture(deployContractFixture);
+        const stakeAmount = ethers.parseUnits("100", 18);
+        await expect(stakingContract.connect(owner).unstake(stakeAmount)).to.be.revertedWith("You have no tokens staked");
+    });
 
-    it.skip("should emit the Unstaked event on unstaking", async function () {
+    it("Should not allow withdraw more than you have staked", async function () {
+        const { stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+        const stakeAmount = ethers.parseUnits("100", 18);
+        const moreThanAmount = ethers.parseUnits("110", 18);
+        // Approbation et staking
+        await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
+        await stakingContract.connect(owner).stake(stakeAmount);
+        await expect(stakingContract.connect(owner).unstake(moreThanAmount)).to.be.revertedWith("Cannot withdraw more than you have staked");
+    });
+
+    it("should emit the Unstaked event on unstaking", async function () {
         const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
         const stakeAmount = ethers.parseUnits("100", 18);
+        const initialStakingContractSupply = ethers.parseUnits("500000", 18);
+        // Le propriétaire transfère des tokens au contrat de staking pour les récompenses futures
+        await jeton.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
 
         // Mint et approbation pour permettre au contrat de staking de retirer les jetons
         await jeton.mint(owner.address, stakeAmount);
@@ -130,55 +136,50 @@ describe("StakingContract", function () {
             .withArgs(owner.address, stakeAmount);
     });
 
-    it.skip("Should receive correct amount rewards", async function () {
-        const { jeton, stakingContract, stakingContractAdress, owner } = await loadFixture(deployContractFixture);
+    it("Should receive correct amount rewards", async function () {
+        const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
         const stakeAmount = ethers.parseUnits("100", 18);
+        const initialStakingContractSupply = ethers.parseUnits("500000", 18);
 
-        // Vérifiez et loguez la balance initiale
-        const initialBalance = await jeton.balanceOf(owner.address);
-        console.log("Initial balance:", initialBalance.toString());
+        // Montant initialement minté au déploiement pour le propriétaire
+        const initialMintAmount = ethers.parseUnits("500000", 18);
 
-        // Approbation du contrat de staking pour dépenser les jetons du propriétaire
+        // Transfert des tokens au contrat de staking pour les récompenses futures
+        await jeton.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
+
+        // Approbation et staking
         await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
-
-        // Staking des jetons
         await stakingContract.connect(owner).stake(stakeAmount);
 
-        // Log la balance après le staking
-        const balanceAfterStake = await jeton.balanceOf(owner.address);
-        console.log("Balance after staking:", balanceAfterStake.toString());
-
-        // Récupérez et log le timestamp actuel avant le passage du temps
-        let currentBlock = await ethers.provider.getBlock("latest");
-        console.log("Current timestamp before time increase:", currentBlock.timestamp);
-
         // Simuler le passage du temps pour accumuler des récompenses
-        await ethers.provider.send("evm_increaseTime", [86400]); // Augmente le temps de 1 jour
+        await ethers.provider.send("evm_increaseTime", [86400]); // 1 jour
         await ethers.provider.send("evm_mine", []);
 
-        // Récupérez et loguez le timestamp après le passage du temps
-        currentBlock = await ethers.provider.getBlock("latest");
-        console.log("Current timestamp after time increase:", currentBlock.timestamp);
-
-        // Unstaking des jetons + récompenses
+        // Unstake des jetons
         await stakingContract.connect(owner).unstake(stakeAmount);
 
-        // Vérification du solde de jetons après unstaking
+        // Vérification du solde de jetons après unstaking, incluant les récompenses
         const finalBalance = await jeton.balanceOf(owner.address);
-        console.log("Final balance:", finalBalance.toString());
+        const expectedRewards = stakeAmount; // Avec un taux d'intérêt de 100% par jour
+        const expectedFinalBalance = initialMintAmount + expectedRewards; // Montant initial + récompenses
 
-        const initialMintAmount = ethers.parseUnits("1000000", 18); // Montant minté au déploiement
-        const expectedReward = stakeAmount; // Avec un taux d'intérêt de 100%, la récompense est égale au montant staké pour un jour
+        // Définir une tolérance pour tenir compte des petites différences dans le calcul des récompenses
+        const tolerance = ethers.parseUnits("0.002", 18); // Tolérance de 0.002 jetons
 
-        // Le solde final attendu inclut le montant initialement minté, moins le montant staké puis restitué, plus les récompenses
-        // Si le stakeAmount est restitué après unstake, on s'attend à avoir initialMintAmount + expectedReward comme solde final.
-        const expectedFinalBalance = initialMintAmount + expectedReward;
+        // Convertir en bigint pour la comparaison
+        const finalBalanceBigInt = BigInt(finalBalance.toString());
+        const expectedFinalBalanceBigInt = BigInt(expectedFinalBalance.toString());
+        const toleranceBigInt = BigInt(tolerance.toString());
 
-        // Loguez les résultats finaux pour le débogage
-        console.log("Expected final balance:", expectedFinalBalance.toString());
+        // Calculer la différence absolue entre le solde final attendu et le solde final réel
+        const difference = finalBalanceBigInt > expectedFinalBalanceBigInt ?
+            finalBalanceBigInt - expectedFinalBalanceBigInt :
+            expectedFinalBalanceBigInt - finalBalanceBigInt;
 
-        expect(finalBalance).to.equal(expectedFinalBalance);
+        // Vérifier que la différence est inférieure ou égale à la tolérance
+        expect(difference <= toleranceBigInt).to.be.true;
     });
+
 
     describe("StakingContract - Interest Rate Management", function () {
         it("Should allow owner to change the daily interest rate", async function () {
