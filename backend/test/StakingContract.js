@@ -45,7 +45,7 @@ describe("StakingContract", function () {
         expect(balance).to.equal(stakeAmount);
     });
 
-    it("should emit the skake", async function () {
+    it("should emit the skate", async function () {
         const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
         const stakeAmount = ethers.parseUnits("100", 18);
         await jeton.mint(owner.address, stakeAmount);
@@ -59,15 +59,6 @@ describe("StakingContract", function () {
             .to.emit(stakingContract, "Staked")
             .withArgs(owner.address, stakeAmount);
     })
-
-    it("Should not allow staking without approval", async function () {
-        const { stakingContract, owner } = await loadFixture(deployContractFixture);
-        const stakeAmount = ethers.parseUnits("100", 18);
-
-        // Essayer de staker sans approbation préalable devrait être rejeté
-        await expect(stakingContract.connect(owner).stake(stakeAmount)).to.be.reverted;
-    });
-
     it("Should allow unstaking", async function () {
         const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
         const stakeAmount = ethers.parseUnits("100", 18);
@@ -84,6 +75,15 @@ describe("StakingContract", function () {
         await stakingContract.connect(owner).unstake(stakeAmount);
     });
 
+    it("Should not allow staking without approval", async function () {
+        const { stakingContract, owner } = await loadFixture(deployContractFixture);
+        const stakeAmount = ethers.parseUnits("100", 18);
+
+        // Essayer de staker sans approbation préalable devrait être rejeté
+        await expect(stakingContract.connect(owner).stake(stakeAmount)).to.be.reverted;
+    });
+
+
     it("Should not allow unstaking if contract balance is insufficient", async function () {
         const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
         const stakeAmount = ethers.parseUnits("100", 18);
@@ -95,13 +95,7 @@ describe("StakingContract", function () {
         // Unstaking des jetons
         await expect(stakingContract.connect(owner).unstake(stakeAmount)).to.be.revertedWith("Contract does not have enough tokens for rewards");
     });
-
-    it("Should not allow unstaking if you have not stake tokens", async function () {
-        const { stakingContract, owner } = await loadFixture(deployContractFixture);
-        const stakeAmount = ethers.parseUnits("100", 18);
-        await expect(stakingContract.connect(owner).unstake(stakeAmount)).to.be.revertedWith("You have no tokens staked");
-    });
-
+    
     it("Should not allow withdraw more than you have staked", async function () {
         const { stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
         const stakeAmount = ethers.parseUnits("100", 18);
@@ -110,6 +104,36 @@ describe("StakingContract", function () {
         await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
         await stakingContract.connect(owner).stake(stakeAmount);
         await expect(stakingContract.connect(owner).unstake(moreThanAmount)).to.be.revertedWith("Cannot withdraw more than you have staked");
+    });
+
+    it("Should return 0 reward for no stake or staking time not started", async function () {
+        const { stakingContract, owner } = await loadFixture(deployContractFixture);
+    
+        // Cas où le montant staké est 0
+        let reward = await stakingContract.calculateReward(owner.address);
+        expect(reward).to.equal(0);
+    });
+
+
+    it("Should not allow unstaking if you have not stake tokens", async function () {
+        const { stakingContract, owner } = await loadFixture(deployContractFixture);
+        const stakeAmount = ethers.parseUnits("100", 18);
+        await expect(stakingContract.connect(owner).unstake(stakeAmount)).to.be.revertedWith("You have no tokens staked");
+    });
+
+    it("Should return 0 reward immediately after staking", async function () {
+        const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+        const stakeAmount = ethers.parseUnits("100", 18);
+    
+        // Approbation et staking
+        await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
+        await stakingContract.connect(owner).stake(stakeAmount);
+    
+        // Calculer immédiatement la récompense après le staking
+        const reward = await stakingContract.calculateReward(owner.address);
+    
+        // Vérifier que la récompense est 0 puisque le temps de staking n'a pas encore commencé à accumuler des récompenses
+        expect(reward).to.equal(0);
     });
 
     it("should emit the Unstaked event on unstaking", async function () {
@@ -136,7 +160,7 @@ describe("StakingContract", function () {
             .withArgs(owner.address, stakeAmount);
     });
 
-    it("Should receive correct amount rewards", async function () {
+    it("Should receive correct amount rewards when unstaking", async function () {
         const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
         const stakeAmount = ethers.parseUnits("100", 18);
         const initialStakingContractSupply = ethers.parseUnits("500000", 18);
