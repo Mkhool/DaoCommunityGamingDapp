@@ -22,10 +22,15 @@ async function deployContractFixture() {
 
 describe("StakingContract", function () {
 
-    it("Should set the right owner", async function () {
-        const { stakingContract, owner } = await loadFixture(deployContractFixture);
-        expect(await stakingContract.owner()).to.equal(owner.address);
+    describe("Deployment", function() {
+        // Tests relatifs au déploiement du contrat
+        it("Should set the right owner", async function () {
+            const { stakingContract, owner } = await loadFixture(deployContractFixture);
+            expect(await stakingContract.owner()).to.equal(owner.address);
+        });
     });
+
+
 
     it("Should allow staking", async function () {
         const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
