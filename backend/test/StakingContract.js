@@ -74,25 +74,21 @@ describe("StakingContract", function () {
             expect(reward).to.equal(0);
         });
 
-        
-    it("should set isStaking to false when staking balance goes to 0", async function() {
+    it("should keep isStaking as true when staking balance is not zero after unstaking", async function() {
         const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
         const initialStakingContractSupply = ethers.parseUnits("500000", 18);
         await jeton.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
         const stakeAmount = ethers.parseUnits("100", 18);
         await jeton.approve(stakingContractAdress, stakeAmount);
         await stakingContract.stake(stakeAmount);
-
-        // Unstake du même montant
-        await stakingContract.unstake(stakeAmount);
-
-        // Vérifier que isStaking est maintenant false pour le sender
+    
+        // Unstake d'un montant inférieur à celui staké
+        const unstakeAmount = ethers.parseUnits("50", 18);
+        await stakingContract.unstake(unstakeAmount);
+    
+        // Vérifier que isStaking est toujours true pour le sender
         const isStakingAfter = await stakingContract.isStaking(owner.address);
-        expect(isStakingAfter).to.equal(false);
-
-        // Vérifier que le solde de staking est maintenant 0 pour le sender
-        const stakingBalanceAfter = await stakingContract.stakingBalance(owner.address);
-        expect(stakingBalanceAfter).to.equal(0);
+        expect(isStakingAfter).to.equal(true);
     });
 
         it("Should not allow staking without approval", async function () {
