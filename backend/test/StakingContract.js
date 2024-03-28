@@ -19,6 +19,22 @@ async function deployContractFixture() {
     return { jeton, stakingContract, stakingContractAdress, owner, addr1 };
 };
 
+async function deployContractFixtureForInternalFunction() {
+    // Déployer le contract Jeton
+    [owner, addr1] = await ethers.getSigners();
+    const JetonFactory = await ethers.getContractFactory("Jeton");
+    jeton = await JetonFactory.deploy();
+    await jeton.waitForDeployment();
+    const jetonAdress = await jeton.getAddress();
+
+    // Déployer TestStakingContract avec l'adresse de Jeton 
+    const TestStakingContractFactory = await ethers.getContractFactory("TestStakingContract");
+    TestStakingContract = await TestStakingContractFactory.deploy(jetonAdress);
+    const TestStakingContractAdress = await TestStakingContract.getAddress();
+
+    return { jeton, TestStakingContract, TestStakingContractAdress, owner, addr1 };
+};
+
 describe("StakingContract", function () {
 
     describe("Deployment", function () {
@@ -50,45 +66,28 @@ describe("StakingContract", function () {
             expect(balance).to.equal(stakeAmount);
         });
 
+
         it("Should return 0 reward for no stake", async function () {
-            const { stakingContract, owner } = await loadFixture(deployContractFixture);0
+            const { TestStakingContract, owner } = await loadFixture(deployContractFixtureForInternalFunction);
 
             // Cas où le montant staké est 0
-            let reward = await stakingContract.CalculateReward(owner.address);
+            let reward = await TestStakingContract.testCalculateReward(owner.address);
             expect(reward).to.equal(0);
         });
 
         it("Should return 0 reward immediately after staking", async function () {
-            const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const { jeton, TestStakingContract, owner, TestStakingContractAdress } = await loadFixture(deployContractFixtureForInternalFunction);
             const stakeAmount = ethers.parseUnits("100", 18);
 
             // Approbation et staking
-            await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
-            await stakingContract.connect(owner).Stake(stakeAmount);
+            await jeton.connect(owner).approve(TestStakingContractAdress, stakeAmount);
+            await TestStakingContract.connect(owner).Stake(stakeAmount);
 
             // Calculer immédiatement la récompense après le staking
-            const reward = await stakingContract.CalculateReward(owner.address);
-
+            const reward = await TestStakingContract.testCalculateReward(owner.address);
             // Vérifier que la récompense est 0 puisque le temps de staking n'a pas encore commencé à accumuler des récompenses
             expect(reward).to.equal(0);
         });
-
-    it("should keep isStaking as true when staking balance is not zero after unstaking", async function() {
-        const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
-        const initialStakingContractSupply = ethers.parseUnits("500000", 18);
-        await jeton.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
-        const stakeAmount = ethers.parseUnits("100", 18);
-        await jeton.approve(stakingContractAdress, stakeAmount);
-        await stakingContract.Stake(stakeAmount);
-    
-        // Unstake d'un montant inférieur à celui staké
-        const unstakeAmount = ethers.parseUnits("50", 18);
-        await stakingContract.Unstake(unstakeAmount);
-    
-        // Vérifier que isStaking est toujours true pour le sender
-        const isStakingAfter = await stakingContract.isStaking(owner.address);
-        expect(isStakingAfter).to.equal(true);
-    });
 
         it("Should not allow staking without approval", async function () {
             const { stakingContract, owner } = await loadFixture(deployContractFixture);
@@ -171,29 +170,58 @@ describe("StakingContract", function () {
             await stakingContract.connect(owner).Stake(stakeAmount);
 
             // Unstaking des jetons
-            await expect(stakingContract.connect(owner).Unstake(stakeAmount)).to.be.revertedWith("Contract does not have enough tokens for rewards");
+            await expect(stakingContract.connect(owner).Unstake(stakeAmount)).to.be.revertedWithCustomError(
+                stakingContract,
+                "NotEnoughFundInContract"
+            )            
         });
 
         it("Should not allow unstake more than you have staked", async function () {
-            const { stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const approveAmount = ethers.parseUnits("120", 18);
             const stakeAmount = ethers.parseUnits("100", 18);
             const moreThanAmount = ethers.parseUnits("110", 18);
             // Approbation et staking
-            await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
+            await jeton.connect(owner).approve(stakingContractAdress, approveAmount);
             await stakingContract.connect(owner).Stake(stakeAmount);
-            await expect(stakingContract.connect(owner).Unstake(moreThanAmount)).to.be.revertedWith("Cannot withdraw more than you have staked");
+            await expect(stakingContract.connect(owner).Unstake(moreThanAmount)).to.be.revertedWithCustomError(
+                stakingContract,
+                "CannotwithdrawMorThanYouHaveStake"
+            )
         });
 
         it("Should not allow unstaking if you have not stake tokens", async function () {
             const { stakingContract, owner } = await loadFixture(deployContractFixture);
             const stakeAmount = ethers.parseUnits("100", 18);
-            await expect(stakingContract.connect(owner).Unstake(stakeAmount)).to.be.revertedWith("You have no tokens staked");
+            await expect(stakingContract.connect(owner).Unstake(stakeAmount)).to.be.revertedWithCustomError(
+                stakingContract,
+                "YouDontHaveTokenToUnstake"
+            )
         });
 
         it("Should not allow staking 0 tokens", async function () {
             const { stakingContract, owner } = await loadFixture(deployContractFixture);
             const stakeAmount = ethers.parseUnits("0", 18);
-            await expect(stakingContract.connect(owner).Stake(stakeAmount)).to.be.revertedWith("Cannot stake 0 tokens");
+            await expect(stakingContract.connect(owner).Stake(stakeAmount)).to.be.revertedWithCustomError(
+                stakingContract,
+                "CanStakeZeroToken"
+            )
+        });
+        it("should keep isStaking as true when staking balance is not zero after unstaking", async function() {
+            const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const initialStakingContractSupply = ethers.parseUnits("500000", 18);
+            await jeton.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
+            const stakeAmount = ethers.parseUnits("100", 18);
+            await jeton.approve(stakingContractAdress, stakeAmount);
+            await stakingContract.Stake(stakeAmount);
+        
+            // Unstake d'un montant inférieur à celui staké
+            const unstakeAmount = ethers.parseUnits("50", 18);
+            await stakingContract.Unstake(unstakeAmount);
+        
+            // Vérifier que isStaking est toujours true pour le sender
+            const isStakingAfter = await stakingContract.isStaking(owner.address);
+            expect(isStakingAfter).to.equal(true);
         });
     });
 
