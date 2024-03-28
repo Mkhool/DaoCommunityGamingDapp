@@ -74,3 +74,35 @@ create sepolia.js in network/env NEXT_PUBLIC_ALCHEMY_RPC=YOUR_ALCHEMYRPC in clie
 ----- PACKAGE SUPP ------
 
 npm install pino-pretty npm install encoding
+
+###Propositions de Jeux :###
+Inscription des Joueurs pour grace au staking :
+Les joueurs doivent d'abord déposer des jetons dans le contrat de staking pour devenir des participants actifs.
+
+Proposition d'un Nouveau Jeu :
+Les joueurs ayant déposé des jetons peuvent proposer de nouveaux jeux en appelant la fonction proposeGame, en indiquant le nom du jeu proposé.
+
+Vote pour les Jeux Proposés :
+Les joueurs actifs votent pour leur jeu préféré parmi les propositions enregistrées en appelant la fonction voteForGame, en utilisant l'ID de la proposition comme argument.
+Le vote est pondéré par la quantité de jetons que chaque joueur a misée.
+
+Quorum et Acceptation des Propositions :
+Une proposition est acceptée si elle atteint le quorum défini, basé sur le pourcentage total de jetons misés. Le système vérifie automatiquement si une proposition a atteint le quorum nécessaire pour être acceptée après chaque vote.
+
+###Participation à un Jeu :###
+
+Démarrage de la Session de Jeu :
+L'administrateur (owner) du contrat commence une nouvelle session de jeu avec un jeu spécifique qui a été accepté, en appelant la fonction startGameSession. Ceci est possible seulement si aucun autre jeu n'est actuellement actif.
+
+Participation des Joueurs :
+Les joueurs actifs peuvent rejoindre la session de jeu en cours en appelant la fonction participateInGame, indiquant l'ID de la session à laquelle ils veulent participer.
+
+Soumission des Choix par les Joueurs :
+Pendant la session de jeu, les joueurs soumettent leur choix de jeu (par exemple, des mouvements ou des décisions dans le cadre du jeu) en appelant la fonction makeChoice.
+
+Fin de la Session de Jeu et Distribution des Récompenses :
+L'administrateur termine la session de jeu en cours en appelant la fonction endGameSession. Les récompenses, basées sur les choix corrects et la participation, sont calculées et distribuées automatiquement aux joueurs.
+La session de jeu passe alors au statut terminé, et une nouvelle session peut être démarrée par l'administrateur.
+
+Vérification des Résultats et des Récompenses :
+Les joueurs et autres parties intéressées peuvent vérifier le statut et les résultats des jeux, ainsi que les récompenses distribuées, grâce aux événements émis par le contrat et les fonctions de lecture disponibles.

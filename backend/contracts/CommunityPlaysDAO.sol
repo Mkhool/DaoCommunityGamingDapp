@@ -5,11 +5,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./Jeton.sol";
 import "./StakingContract.sol";
 
-/* 
-faire un modifier onlyGamer
-verifier les requires
-faire les events
-*/
+/**
+ * @title Dao gaming
+ * @author Khoule Medhi
+ * @notice smart contract for Dao gaming
+ */
 
 interface IJeton {
     function mint(address to, uint256 amount) external;
@@ -30,16 +30,18 @@ contract CommunityPlaysDAO is Ownable {
     //L’instance ERC20Token et de staking à déployer
     IJeton public jetonContract;
     IStakingContract public stakingContract;
-  
+
     mapping(uint256 => GameSession) public gameSessions;
     mapping(uint256 => GameProposal) public gameProposals;
     mapping(address => Gamer) public Gamers;
-    mapping(address => uint256) public experience; 
+    mapping(address => uint256) public experience;
 
     uint256 public currentSessionId;
     uint256 private nextGameId = 1;
     uint256 public quorumPercentage = 50;
+    GameStatus public gameStatus = GameStatus.NotStarted;
 
+    event GameStatusChanged(GameStatus previousStatus, GameStatus newStatus);
     event GameSessionStarted(uint256 indexed sessionId, uint256 gameId);
     event GameSessionEnded(uint256 indexed sessionId);
     event GameChoiceSubmitted(
@@ -110,9 +112,13 @@ contract CommunityPlaysDAO is Ownable {
         stakingContract = IStakingContract(_stakingContractAddress);
     }
 
-    //////////////////////////////////////////// PROPOSAL /////////////////////////////////////////////////////////////////////////////
-    // Proposer un nouveau jeu par la communauté
+    ///Propositions et Votes
+    // Proposition par la communauté
     function proposeGame(string memory _gameName) public onlyStakingGamer {
+        require(
+            keccak256(abi.encode(_gameName)) != keccak256(abi.encode("")),
+            "Proposal can not be empty"
+        );
         uint256 quorum = calculateQuorum();
         gameProposals[nextGameId] = GameProposal({
             id: nextGameId,
@@ -141,21 +147,26 @@ contract CommunityPlaysDAO is Ownable {
         }
     }
 
-// Retourne les détails d'une proposition de jeu par son ID
-function getProposal(uint256 proposalId) public view returns (uint256, string memory, uint256, bool, uint256) {
-    require(proposalId > 0 && proposalId < nextGameId, "Proposal ID is out of bounds.");
-    
-    GameProposal storage proposal = gameProposals[proposalId];
-    return (
-        proposal.id,
-        proposal.name,
-        proposal.voteCount,
-        proposal.isAccepted,
-        proposal.quorum
-    );
-}
+    // Retourne les détails d'une proposition de jeu par son ID
+    function getProposal(
+        uint256 proposalId
+    ) public view returns (uint256, string memory, uint256, bool, uint256) {
+        require(
+            proposalId > 0 && proposalId < nextGameId,
+            "Proposal ID is out of bounds."
+        );
 
-    ////////// GESTION QUORUM ///////////////////
+        GameProposal storage proposal = gameProposals[proposalId];
+        return (
+            proposal.id,
+            proposal.name,
+            proposal.voteCount,
+            proposal.isAccepted,
+            proposal.quorum
+        );
+    }
+
+    ///Gestion du Quorum
     function calculateQuorum() private view returns (uint256) {
         uint256 totalStaked = stakingContract.totalStaked();
         uint256 quorum = (totalStaked * quorumPercentage) / 100;
@@ -170,29 +181,34 @@ function getProposal(uint256 proposalId) public view returns (uint256, string me
         quorumPercentage = newQuorumPercentage;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////// GAMING //////////////////////////////////////////////////////////////////////////////
-
+    ///Gestion des Sessions de Jeu
     // Fonction pour démarrer une nouvelle session de jeu avec un jeu spécifique
-    function startGameSession(uint256 gameId) public onlyOwner {
+    function startGameSession(uint256 gameId) public onlyOwner { //// external ?
         require(
-            currentSessionId == 0 || !gameSessions[currentSessionId].isActive,
-            "Une session est deja active."
+            gameStatus == GameStatus.NotStarted,
+            "The game session cannot start now."
         );
-        currentSessionId++; // Incrémenter l'ID pour une nouvelle session
+        require(gameProposals[gameId].id != 0, "The game does not exist.");
 
-        // S'assurer que le jeu spécifié existe et est valide
-        require(gameProposals[gameId].id != 0, "Le jeu n'existe pas.");
+        currentSessionId++; // Incrémenter l'ID pour une nouvelle session
 
         GameSession storage session = gameSessions[currentSessionId];
         session.id = currentSessionId;
         session.isActive = true;
         session.gameId = gameId; // Stocker l'ID du jeu dans la session
+        session.currentCycle = 1; // Initialiser le cycle de vote à 1
+        gameStatus = GameStatus.Started;
+        emit GameStatusChanged(GameStatus.NotStarted, GameStatus.Started);
+        emit GameSessionStarted(currentSessionId, gameId);
     }
 
     // Fonction pour terminer une session de jeu spécifique et distribuer les récompenses
-    function endGameSession(uint256 _sessionId) public onlyOwner {
-        require(gameSessions[_sessionId].isActive, "Session not active");
-
+    function endGameSession(uint256 _sessionId) external onlyOwner {
+        require(
+            gameStatus == GameStatus.Started,
+            "There's no active session to end."
+        );
+        require(gameSessions[_sessionId].isActive, "Session not active.");
         GameSession storage session = gameSessions[_sessionId];
         session.isActive = false;
 
@@ -219,7 +235,8 @@ function getProposal(uint256 proposalId) public view returns (uint256, string me
             experience[gamerAddress] += totalReward;
         }
 
-        // Émettre un événement pour signaler la fin de la session
+        gameStatus = GameStatus.Finished;
+        emit GameStatusChanged(GameStatus.Started, GameStatus.Finished);
         emit GameSessionEnded(_sessionId);
     }
 
@@ -251,8 +268,6 @@ function getProposal(uint256 proposalId) public view returns (uint256, string me
 
     function resetSessionChoices(uint256 _sessionId) private {
         GameSession storage session = gameSessions[_sessionId];
-        // Préparation pour le nouveau cycle de vote
-        session.currentCycle++;
 
         // Réinitialiser les comptes de choix pour chaque direction pour le nouveau cycle
         session.choicesCount["haut"] = 0;
@@ -261,9 +276,9 @@ function getProposal(uint256 proposalId) public view returns (uint256, string me
         session.choicesCount["droite"] = 0;
     }
 
-    //////////////////////////////// GAMER /////////////////////////////////
+    ///Participation et Choix des Joueurs
     // Fonction pour participer à une partie
-    function participateInGame(uint256 sessionId) public onlyStakingGamer {
+    function participateInGame(uint256 sessionId) external onlyStakingGamer {
         require(
             gameSessions[sessionId].isActive,
             "This session is not active."
@@ -276,14 +291,12 @@ function getProposal(uint256 proposalId) public view returns (uint256, string me
     function makeChoice(
         uint256 _sessionId,
         string memory _direction
-    ) public onlyStakingGamer {
+    ) external onlyStakingGamer {
         require(gameSessions[_sessionId].isActive, "Session not active");
         GameSession storage session = gameSessions[_sessionId];
-
         if (!isGamerInSession(msg.sender, _sessionId)) {
             session.gamerInSession.push(msg.sender);
         }
-
         require(
             session.lastCycleParticipated[msg.sender] < session.currentCycle,
             "Already participated in the current cycle"
@@ -319,8 +332,7 @@ function getProposal(uint256 proposalId) public view returns (uint256, string me
         return false;
     }
 
-    /////// EXP  and RANK /////
-
+    ///Expérience et Rang
     // Fonction pour déterminer le rang du joueur basé sur le montant staké
     function determineRankByStake(
         address _player
@@ -361,18 +373,8 @@ function getProposal(uint256 proposalId) public view returns (uint256, string me
             level = "Niveau 1"; // Moins de 1000 points d'expérience correspond au niveau le plus bas
         }
     }
-    /// GESTION DES JOUEURS OWNER ///
-    function banGamer(address _address) public onlyOwner {
+    /// Gestion Administrative
+    function banGamer(address _address) external onlyOwner {
         delete Gamers[_address];
     }
 }
-
-// function gamerRank(address gamer) public view returns (string memory) {
-//     uint256 stakedAmount = _stakes[gamer];
-//     if (stakedAmount >= 500 * (10 ** decimals())) return "Diamant";
-//     if (stakedAmount >= 400 * (10 ** decimals())) return "Platine";
-//     if (stakedAmount >= 300 * (10 ** decimals())) return "Or";
-//     if (stakedAmount >= 200 * (10 ** decimals())) return "Argent";
-//     if (stakedAmount >= 100 * (10 ** decimals())) return "Bronze";
-//     return "Aucun rang";
-// }
