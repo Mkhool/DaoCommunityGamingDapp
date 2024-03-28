@@ -39,9 +39,9 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @notice Permet à un utilisateur de déposer (staker) des tokens dans le contrat pour commencer à accumuler des récompenses.
     /// @dev Transfère les tokens du staker au contrat, met à jour les soldes, les états de staking et ajoute le montant au total staké
     /// @param _amount Le montant de tokens à staker.
-    function stake(uint256 _amount) external nonReentrant {
+    function Stake(uint256 _amount) external nonReentrant {
         // require(_amount > 0, "Vous ne pouvez pas staker 0 token");
-        if(_amount > 0) revert CanStakeZeroToken();
+        if(_amount <= 0) revert CanStakeZeroToken();
         totalStaked += _amount;
         stakingToken.transferFrom(msg.sender, address(this), _amount);
         stakingBalance[msg.sender] += _amount;
@@ -57,11 +57,11 @@ contract StakingContract is ReentrancyGuard, Ownable {
         // require(isStaking[msg.sender], "Vous n'avez pas de token a unstake");
         if(!isStaking[msg.sender]) revert YouDontHaveTokenToUnstake();
         // require(_amount <= stakingBalance[msg.sender],"Vous ne pouvez pas retirer retirer plus que ce que vous avez stake");
-        if(_amount <= stakingBalance[msg.sender]) revert CannotwithdrawMorThanYouHaveStake();
+        if(_amount > stakingBalance[msg.sender]) revert CannotwithdrawMorThanYouHaveStake();
         totalStaked -= _amount;
         uint256 reward = CalculateReward(msg.sender);
         // require(stakingToken.balanceOf(address(this)) >= _amount + reward,"Pas assez de recompenses dans le contrat");
-        if(stakingToken.balanceOf(address(this)) >= _amount + reward) revert NotEnoughFundInContract();
+        if(stakingToken.balanceOf(address(this)) < _amount + reward) revert NotEnoughFundInContract();
         stakingBalance[msg.sender] -= _amount;
         if (stakingBalance[msg.sender] == 0) {
             isStaking[msg.sender] = false;
