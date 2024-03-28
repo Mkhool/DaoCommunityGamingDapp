@@ -37,7 +37,7 @@ describe("StakingContract", function () {
             const stakeAmount = ethers.parseUnits("100", 18);
 
             // Mint des jetons pour le propriétaire pour tester le staking
-            await jeton.mint(owner.address, stakeAmount);
+            await jeton.Mint(owner.address, stakeAmount);
 
             // Approbation du contrat de staking pour dépenser les jetons du propriétaire
             await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
@@ -54,7 +54,7 @@ describe("StakingContract", function () {
             const { stakingContract, owner } = await loadFixture(deployContractFixture);
 
             // Cas où le montant staké est 0
-            let reward = await stakingContract.calculateReward(owner.address);
+            let reward = await stakingContract.CalculateReward(owner.address);
             expect(reward).to.equal(0);
         });
 
@@ -83,7 +83,7 @@ describe("StakingContract", function () {
     
         // Unstake d'un montant inférieur à celui staké
         const unstakeAmount = ethers.parseUnits("50", 18);
-        await stakingContract.unstake(unstakeAmount);
+        await stakingContract.Unstake(unstakeAmount);
     
         // Vérifier que isStaking est toujours true pour le sender
         const isStakingAfter = await stakingContract.isStaking(owner.address);
@@ -115,7 +115,7 @@ describe("StakingContract", function () {
             await stakingContract.connect(owner).stake(stakeAmount);
 
             // Unstaking des jetons
-            await stakingContract.connect(owner).unstake(stakeAmount);
+            await stakingContract.connect(owner).Unstake(stakeAmount);
         });
 
         it("Should receive correct amount rewards when unstaking", async function () {
@@ -138,7 +138,7 @@ describe("StakingContract", function () {
             await ethers.provider.send("evm_mine", []);
 
             // Unstake des jetons
-            await stakingContract.connect(owner).unstake(stakeAmount);
+            await stakingContract.connect(owner).Unstake(stakeAmount);
 
             // Vérification du solde de jetons après unstaking, incluant les récompenses
             const finalBalance = await jeton.balanceOf(owner.address);
@@ -171,7 +171,7 @@ describe("StakingContract", function () {
             await stakingContract.connect(owner).stake(stakeAmount);
 
             // Unstaking des jetons
-            await expect(stakingContract.connect(owner).unstake(stakeAmount)).to.be.revertedWith("Contract does not have enough tokens for rewards");
+            await expect(stakingContract.connect(owner).Unstake(stakeAmount)).to.be.revertedWith("Contract does not have enough tokens for rewards");
         });
 
         it("Should not allow unstake more than you have staked", async function () {
@@ -181,13 +181,13 @@ describe("StakingContract", function () {
             // Approbation et staking
             await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
             await stakingContract.connect(owner).stake(stakeAmount);
-            await expect(stakingContract.connect(owner).unstake(moreThanAmount)).to.be.revertedWith("Cannot withdraw more than you have staked");
+            await expect(stakingContract.connect(owner).Unstake(moreThanAmount)).to.be.revertedWith("Cannot withdraw more than you have staked");
         });
 
         it("Should not allow unstaking if you have not stake tokens", async function () {
             const { stakingContract, owner } = await loadFixture(deployContractFixture);
             const stakeAmount = ethers.parseUnits("100", 18);
-            await expect(stakingContract.connect(owner).unstake(stakeAmount)).to.be.revertedWith("You have no tokens staked");
+            await expect(stakingContract.connect(owner).Unstake(stakeAmount)).to.be.revertedWith("You have no tokens staked");
         });
 
         it("Should not allow staking 0 tokens", async function () {
@@ -203,7 +203,7 @@ describe("StakingContract", function () {
             const newInterestRate = 200; // Exemple de nouveau taux d'intérêt de 2%
 
             // Tentative de modification du taux par le propriétaire doit réussir
-            await expect(stakingContract.connect(owner).setDailyInterestRate(newInterestRate))
+            await expect(stakingContract.connect(owner).SetDailyInterestRate(newInterestRate))
                 .to.not.be.reverted;
 
             // Vérifier que le taux d'intérêt a été mis à jour
@@ -215,7 +215,7 @@ describe("StakingContract", function () {
             const { addr1 } = await loadFixture(deployContractFixture);
             const newInterestRate = 200; // Exemple de nouveau taux d'intérêt de 2%
             // Tentative de modification du taux par un autre compte doit échouer
-            await expect(stakingContract.connect(addr1).setDailyInterestRate(newInterestRate))
+            await expect(stakingContract.connect(addr1).SetDailyInterestRate(newInterestRate))
                 .to.be.reverted;
         })
     });
@@ -224,7 +224,7 @@ describe("StakingContract", function () {
         it("should emit the skate", async function () {
             const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
             const stakeAmount = ethers.parseUnits("100", 18);
-            await jeton.mint(owner.address, stakeAmount);
+            await jeton.Mint(owner.address, stakeAmount);
             await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
 
             const allowance = await jeton.allowance(owner.address, stakingContractAdress);
@@ -244,7 +244,7 @@ describe("StakingContract", function () {
             await jeton.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
 
             // Mint et approbation pour permettre au contrat de staking de retirer les jetons
-            await jeton.mint(owner.address, stakeAmount);
+            await jeton.Mint(owner.address, stakeAmount);
             await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
 
             // Staking des jetons
@@ -255,7 +255,7 @@ describe("StakingContract", function () {
             expect(initialStakeBalance).to.equal(stakeAmount);
 
             // Unstaking des jetons et attente de l'événement Unstaked
-            await expect(stakingContract.connect(owner).unstake(stakeAmount))
+            await expect(stakingContract.connect(owner).Unstake(stakeAmount))
                 .to.emit(stakingContract, "Unstaked")
                 .withArgs(owner.address, stakeAmount);
         });

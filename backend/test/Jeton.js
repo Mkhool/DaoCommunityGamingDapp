@@ -49,14 +49,14 @@ describe("Test Jeton ERC20", function () {
     });
     it("Should mint if owner", async function () {
       const mintAmount = ethers.parseUnits("1000000", 18); 
-      await DeployedJeton.mint(owner.address, mintAmount);
+      await DeployedJeton.Mint(owner.address, mintAmount);
       const expectedBalance = ethers.parseUnits("2000000", 18);
       expect(await DeployedJeton.balanceOf(owner.address)).to.equal(expectedBalance);
     });
 
     it("Shouldn't mint if not owner", async function () {
       const mintAmount = ethers.parseUnits("1000000", 18); 
-      await expect(DeployedJeton.connect(addr1).mint(addr1.address, mintAmount))
+      await expect(DeployedJeton.connect(addr1).Mint(addr1.address, mintAmount))
       .to.be.reverted;
     });
   });
