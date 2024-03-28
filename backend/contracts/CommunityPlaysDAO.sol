@@ -65,6 +65,10 @@ contract CommunityPlaysDAO is Ownable {
         _;
     }
 
+modifier inGameStatus(GameStatus expectedStatus) {
+    require(gameStatus == expectedStatus, "Transition d'etat non autorisee");
+    _;
+}
     // énumération des différents états possibles d'un jeu
     enum GameStatus {
         NotStarted, // Le jeu n'a pas encore démarré
@@ -183,13 +187,8 @@ contract CommunityPlaysDAO is Ownable {
 
     ///Gestion des Sessions de Jeu
     // Fonction pour démarrer une nouvelle session de jeu avec un jeu spécifique
-    function startGameSession(uint256 gameId) public onlyOwner { //// external ?
-        require(
-            gameStatus == GameStatus.NotStarted,
-            "The game session cannot start now."
-        );
+    function startGameSession(uint256 gameId) public onlyOwner inGameStatus(GameStatus.NotStarted) { //// external ?
         require(gameProposals[gameId].id != 0, "The game does not exist.");
-
         currentSessionId++; // Incrémenter l'ID pour une nouvelle session
 
         GameSession storage session = gameSessions[currentSessionId];
@@ -203,11 +202,7 @@ contract CommunityPlaysDAO is Ownable {
     }
 
     // Fonction pour terminer une session de jeu spécifique et distribuer les récompenses
-    function endGameSession(uint256 _sessionId) external onlyOwner {
-        require(
-            gameStatus == GameStatus.Started,
-            "There's no active session to end."
-        );
+    function endGameSession(uint256 _sessionId) external onlyOwner inGameStatus(GameStatus.Started) {
         require(gameSessions[_sessionId].isActive, "Session not active.");
         GameSession storage session = gameSessions[_sessionId];
         session.isActive = false;

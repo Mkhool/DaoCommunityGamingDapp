@@ -34,7 +34,7 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @notice Permet à un utilisateur de déposer (staker) des tokens dans le contrat pour commencer à accumuler des récompenses.
     /// @dev Transfère les tokens du staker au contrat, met à jour les soldes, les états de staking et ajoute le montant au total staké
     /// @param _amount Le montant de tokens à staker.
-    function stake(uint256 _amount) public nonReentrant {
+    function stake(uint256 _amount) external nonReentrant {
         require(_amount > 0, "Cannot stake 0 tokens");
 
         totalStaked += _amount;
@@ -48,7 +48,7 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @notice Permet à un utilisateur de retirer (unstake) ses tokens et les récompenses accumulées du contrat.
     /// @dev Transfère les tokens du contrat au staker, calcule les récompenses, ajuste le solde de staking,  met à jour les états de staking et soustrait le montant du total staké.
     /// @param _amount Le montant de tokens à retirer.
-    function unstake(uint256 _amount) public nonReentrant {
+    function unstake(uint256 _amount) external nonReentrant {
         require(isStaking[msg.sender], "You have no tokens staked");
         require(
             _amount <= stakingBalance[msg.sender],
@@ -85,7 +85,7 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @dev Cette fonction retourne le montant des récompenses calculé sans affecter le solde de l'utilisateur.
     /// @param gamer L'adresse de l'utilisateur pour lequel calculer les récompenses.
     /// @return reward Le montant des récompenses accumulées pour l'utilisateur.
-    function calculateReward(address gamer) public view returns (uint256) {
+    function calculateReward(address gamer) internal view returns (uint256) {
         uint256 stakedAmount = stakingBalance[gamer];
         if (stakedAmount == 0 || block.timestamp <= _stakeTimes[gamer]) {
             return 0;
