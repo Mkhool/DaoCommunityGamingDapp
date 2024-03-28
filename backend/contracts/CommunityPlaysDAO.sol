@@ -12,17 +12,17 @@ import "./StakingContract.sol";
  */
 
 interface IJeton {
-    function mint(address to, uint256 amount) external;
+    function Mint(address to, uint256 amount) external;
 }
 
 interface IStakingContract {
-    function mint(address to, uint256 amount) external;
-    function stake(uint256 amount) external;
-    function unstake(uint256 amount) external;
-    function setDailyInterestRate(uint256 newRate) external;
-    function dailyInterestRate() external view returns (uint256);
-    function calculateReward(address gamer) external view returns (uint256);
-    function stakingBalance(address user) external view returns (uint256);
+    function Mint(address to, uint256 amount) external;
+    function Stake(uint256 amount) external;
+    function Unstake(uint256 amount) external;
+    function SetDailyInterestRate(uint256 newRate) external;
+    function DailyInterestRate() external view returns (uint256);
+    function CalculateReward(address gamer) external view returns (uint256);
+    function StakingBalance(address user) external view returns (uint256);
     function totalStaked() external view returns (uint256);
 }
 
@@ -59,7 +59,7 @@ contract CommunityPlaysDAO is Ownable {
 
     modifier onlyStakingGamer() {
         require(
-            stakingContract.stakingBalance(msg.sender) > 0,
+            stakingContract.StakingBalance(msg.sender) > 0,
             "Must have tokens staked to participate"
         );
         _;
@@ -118,12 +118,12 @@ modifier inGameStatus(GameStatus expectedStatus) {
 
     ///Propositions et Votes
     // Proposition par la communauté
-    function proposeGame(string memory _gameName) public onlyStakingGamer {
+    function ProposeGame(string memory _gameName) public onlyStakingGamer {
         require(
             keccak256(abi.encode(_gameName)) != keccak256(abi.encode("")),
             "Proposal can not be empty"
         );
-        uint256 quorum = calculateQuorum();
+        uint256 quorum = CalculateQuorum();
         gameProposals[nextGameId] = GameProposal({
             id: nextGameId,
             name: _gameName,
@@ -136,9 +136,9 @@ modifier inGameStatus(GameStatus expectedStatus) {
     }
 
     // Voter pour un jeu en fonction de son poids de staking
-    function voteForGame(uint256 _gameId) public onlyStakingGamer {
+    function VoteForGame(uint256 _gameId) public onlyStakingGamer {
         require(gameProposals[_gameId].id != 0, "Game proposal does not exist");
-        uint256 stakedAmount = stakingContract.stakingBalance(msg.sender);
+        uint256 stakedAmount = stakingContract.StakingBalance(msg.sender);
         require(stakedAmount > 0, "You must have tokens staked to vote");
 
         // Utiliser le solde staké comme poids de vote
@@ -152,7 +152,7 @@ modifier inGameStatus(GameStatus expectedStatus) {
     }
 
     // Retourne les détails d'une proposition de jeu par son ID
-    function getProposal(
+    function GetProposal(
         uint256 proposalId
     ) public view returns (uint256, string memory, uint256, bool, uint256) {
         require(
@@ -171,13 +171,13 @@ modifier inGameStatus(GameStatus expectedStatus) {
     }
 
     ///Gestion du Quorum
-    function calculateQuorum() private view returns (uint256) {
+    function CalculateQuorum() private view returns (uint256) {
         uint256 totalStaked = stakingContract.totalStaked();
         uint256 quorum = (totalStaked * quorumPercentage) / 100;
         return quorum;
     }
 
-    function setQuorumPercentage(uint256 newQuorumPercentage) public onlyOwner {
+    function SetQuorumPercentage(uint256 newQuorumPercentage) public onlyOwner {
         require(
             newQuorumPercentage > 0 && newQuorumPercentage <= 100,
             "Quorum percentage must be between 1 and 100"
@@ -187,7 +187,7 @@ modifier inGameStatus(GameStatus expectedStatus) {
 
     ///Gestion des Sessions de Jeu
     // Fonction pour démarrer une nouvelle session de jeu avec un jeu spécifique
-    function startGameSession(uint256 gameId) public onlyOwner inGameStatus(GameStatus.NotStarted) { //// external ?
+    function StartGameSession(uint256 gameId) public onlyOwner inGameStatus(GameStatus.NotStarted) { //// external ?
         require(gameProposals[gameId].id != 0, "The game does not exist.");
         currentSessionId++; // Incrémenter l'ID pour une nouvelle session
 
@@ -202,7 +202,7 @@ modifier inGameStatus(GameStatus expectedStatus) {
     }
 
     // Fonction pour terminer une session de jeu spécifique et distribuer les récompenses
-    function endGameSession(uint256 _sessionId) external onlyOwner inGameStatus(GameStatus.Started) {
+    function EndGameSession(uint256 _sessionId) external onlyOwner inGameStatus(GameStatus.Started) {
         require(gameSessions[_sessionId].isActive, "Session not active.");
         GameSession storage session = gameSessions[_sessionId];
         session.isActive = false;
@@ -213,7 +213,7 @@ modifier inGameStatus(GameStatus expectedStatus) {
         // Distribuer les récompenses
         for (uint256 i = 0; i < session.gamerInSession.length; i++) {
             address gamerAddress = session.gamerInSession[i];
-            uint256 totalCorrectChoices = countCorrectChoices(
+            uint256 totalCorrectChoices = CountCorrectChoices(
                 _sessionId,
                 gamerAddress
             );
@@ -235,7 +235,7 @@ modifier inGameStatus(GameStatus expectedStatus) {
         emit GameSessionEnded(_sessionId);
     }
 
-    function countCorrectChoices(
+    function CountCorrectChoices(
         uint256 _sessionId,
         address _gamer
     ) private view returns (uint256) {
@@ -261,7 +261,7 @@ modifier inGameStatus(GameStatus expectedStatus) {
         return correctChoices;
     }
 
-    function resetSessionChoices(uint256 _sessionId) private {
+    function ResetSessionChoices(uint256 _sessionId) private {
         GameSession storage session = gameSessions[_sessionId];
 
         // Réinitialiser les comptes de choix pour chaque direction pour le nouveau cycle
@@ -273,7 +273,7 @@ modifier inGameStatus(GameStatus expectedStatus) {
 
     ///Participation et Choix des Joueurs
     // Fonction pour participer à une partie
-    function participateInGame(uint256 sessionId) external onlyStakingGamer {
+    function ParticipateInGame(uint256 sessionId) external onlyStakingGamer {
         require(
             gameSessions[sessionId].isActive,
             "This session is not active."
@@ -283,13 +283,13 @@ modifier inGameStatus(GameStatus expectedStatus) {
         emit GamerJoinedSession(msg.sender, sessionId);
     }
 
-    function makeChoice(
+    function MakeChoice(
         uint256 _sessionId,
         string memory _direction
     ) external onlyStakingGamer {
         require(gameSessions[_sessionId].isActive, "Session not active");
         GameSession storage session = gameSessions[_sessionId];
-        if (!isGamerInSession(msg.sender, _sessionId)) {
+        if (!IsGamerInSession(msg.sender, _sessionId)) {
             session.gamerInSession.push(msg.sender);
         }
         require(
@@ -308,13 +308,13 @@ modifier inGameStatus(GameStatus expectedStatus) {
         ) {
             session.winningDirectionPerCycle[session.currentCycle] = _direction;
             emit ChoiceMade(_sessionId, session.currentCycle, _direction);
-            resetSessionChoices(_sessionId);
+            ResetSessionChoices(_sessionId);
             session.currentCycle++;
         }
     }
 
     // Fonction pour vérifier si un joueur participe déjà à la session
-    function isGamerInSession(
+    function IsGamerInSession(
         address _gamer,
         uint256 _sessionId
     ) private view returns (bool) {
@@ -329,10 +329,10 @@ modifier inGameStatus(GameStatus expectedStatus) {
 
     ///Expérience et Rang
     // Fonction pour déterminer le rang du joueur basé sur le montant staké
-    function determineRankByStake(
+    function DetermineRankByStake(
         address _player
     ) public view returns (string memory) {
-        uint256 stakedAmount = stakingContract.stakingBalance(_player); // Assurez-vous d'avoir accès à cette fonction dans IStakingContract
+        uint256 stakedAmount = stakingContract.StakingBalance(_player); // Assurez-vous d'avoir accès à cette fonction dans IStakingContract
         if (stakedAmount >= 500 * 10 ** 18) return "Diamant";
         if (stakedAmount >= 400 * 10 ** 18) return "Platine";
         if (stakedAmount >= 300 * 10 ** 18) return "Or";
@@ -342,7 +342,7 @@ modifier inGameStatus(GameStatus expectedStatus) {
     }
 
     // Fonction pour déterminer le niveau du joueur basé sur son expérience
-    function determineLevelByExperience(
+    function DetermineLevelByExperience(
         address _player
     ) public view returns (string memory level) {
         uint256 playerExperience = experience[_player];
@@ -369,7 +369,7 @@ modifier inGameStatus(GameStatus expectedStatus) {
         }
     }
     /// Gestion Administrative
-    function banGamer(address _address) external onlyOwner {
+    function BanGamer(address _address) external onlyOwner {
         delete Gamers[_address];
     }
 }

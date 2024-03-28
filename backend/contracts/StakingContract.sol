@@ -24,6 +24,11 @@ contract StakingContract is ReentrancyGuard, Ownable {
     event Staked(address indexed gamer, uint256 amount);
     event Unstaked(address indexed gamer, uint256 amount);
 
+    error CanStakeZeroToken();
+    error YouDontHaveTokenToUnstake();
+    error NotEnoughFundInContract();
+    error CannotwithdrawMorThanYouHaveStake();
+
     /// @notice Constructeur pour initialiser le contrat avec le token de staking spécifique et un taux d'intérêt initial.
     /// @param _stakingToken L'adresse du token ERC20 à utiliser pour le staking.
     constructor(address _stakingToken) Ownable(msg.sender) {
@@ -35,8 +40,8 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @dev Transfère les tokens du staker au contrat, met à jour les soldes, les états de staking et ajoute le montant au total staké
     /// @param _amount Le montant de tokens à staker.
     function stake(uint256 _amount) external nonReentrant {
-        require(_amount > 0, "Cannot stake 0 tokens");
-
+        // require(_amount > 0, "Vous ne pouvez pas staker 0 token");
+        if(_amount > 0) revert CanStakeZeroToken();
         totalStaked += _amount;
         stakingToken.transferFrom(msg.sender, address(this), _amount);
         stakingBalance[msg.sender] += _amount;
@@ -48,19 +53,15 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @notice Permet à un utilisateur de retirer (unstake) ses tokens et les récompenses accumulées du contrat.
     /// @dev Transfère les tokens du contrat au staker, calcule les récompenses, ajuste le solde de staking,  met à jour les états de staking et soustrait le montant du total staké.
     /// @param _amount Le montant de tokens à retirer.
-    function unstake(uint256 _amount) external nonReentrant {
-        require(isStaking[msg.sender], "You have no tokens staked");
-        require(
-            _amount <= stakingBalance[msg.sender],
-            "Cannot withdraw more than you have staked"
-        );
+    function Unstake(uint256 _amount) external nonReentrant {
+        // require(isStaking[msg.sender], "Vous n'avez pas de token a unstake");
+        if(!isStaking[msg.sender]) revert YouDontHaveTokenToUnstake();
+        // require(_amount <= stakingBalance[msg.sender],"Vous ne pouvez pas retirer retirer plus que ce que vous avez stake");
+        if(_amount <= stakingBalance[msg.sender]) revert CannotwithdrawMorThanYouHaveStake();
         totalStaked -= _amount;
-        uint256 reward = calculateReward(msg.sender);
-        require(
-            stakingToken.balanceOf(address(this)) >= _amount + reward,
-            "Contract does not have enough tokens for rewards"
-        );
-
+        uint256 reward = CalculateReward(msg.sender);
+        // require(stakingToken.balanceOf(address(this)) >= _amount + reward,"Pas assez de recompenses dans le contrat");
+        if(stakingToken.balanceOf(address(this)) >= _amount + reward) revert NotEnoughFundInContract();
         stakingBalance[msg.sender] -= _amount;
         if (stakingBalance[msg.sender] == 0) {
             isStaking[msg.sender] = false;
@@ -74,10 +75,10 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @notice Permet au propriétaire de modifier le taux d'intérêt quotidien pour le calcul des récompenses.
     /// @dev Cette fonction est restreinte au propriétaire du contrat.
     /// @param newRate Le nouveau taux d'intérêt quotidien, exprimé en pourcentage avec une précision de deux décimales (par exemple, 100 pour 1%).
-    function setDailyInterestRate(uint256 newRate) public onlyOwner {
+    function SetDailyInterestRate(uint256 newRate) public onlyOwner {
         _dailyInterestRate = newRate;
     }
-    function dailyInterestRate() public view returns (uint256) {
+    function DailyInterestRate() public view returns (uint256) {
         return _dailyInterestRate;
     }
 
@@ -85,7 +86,7 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @dev Cette fonction retourne le montant des récompenses calculé sans affecter le solde de l'utilisateur.
     /// @param gamer L'adresse de l'utilisateur pour lequel calculer les récompenses.
     /// @return reward Le montant des récompenses accumulées pour l'utilisateur.
-    function calculateReward(address gamer) internal view returns (uint256) {
+    function CalculateReward(address gamer) internal view returns (uint256) {
         uint256 stakedAmount = stakingBalance[gamer];
         if (stakedAmount == 0 || block.timestamp <= _stakeTimes[gamer]) {
             return 0;

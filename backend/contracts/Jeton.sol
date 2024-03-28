@@ -32,12 +32,7 @@ contract Jeton is ERC20, Ownable  {
      * @param to L'adresse destinataire des tokens mintés.
      * @param amount La quantité de tokens à mint.
      */
-    function mint(address to, uint256 amount) external  onlyOwner  {
+    function Mint(address to, uint256 amount) external  onlyOwner  {
         _mint(to, amount);
     }
-
-    //     function maxSupply() public view returns (uint256) {
-    //     return _maxSupply;
-    // }
-
 }
