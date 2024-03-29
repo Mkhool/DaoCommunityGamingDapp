@@ -327,8 +327,13 @@ describe("CommunityPlaysDAO", function () {
             await jeton.connect(addr1).approve(stakingContractAddress, stakeAmount);
             await stakingContract.connect(addr1).Stake(stakeAmount);
             // Le propriétaire bannit le joueur
-            await expect(daoContract.connect(owner).BanGamer(addr1.address))
-                .to.emit(daoContract, "GamerBanned") 
+            await expect(daoContract.connect(addr1).BanGamer(owner.address)).to.be.revertedWithCustomError(
+                DeployedVoting,
+                "OwnableUnauthorizedAccount",
+            ).withArgs(
+                otherAccount.address
+            )
+                
         });
     });
 });
