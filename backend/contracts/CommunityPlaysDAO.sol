@@ -384,17 +384,4 @@ error EmptyProposal();
          emit GamerBanned(_address);
     }
 
-// * receive function
-    receive() external payable {}
-
-    // * fallback function
-    fallback() external payable {}
-
-    function supportsInterface(bytes4 interfaceID) external pure returns (bool) {
-        return interfaceID == type(IERC20).interfaceId; // If your token is ERC-20
-    }
-
-    function decimals() public pure returns (uint8) {
-        return 18;
-    }
 }

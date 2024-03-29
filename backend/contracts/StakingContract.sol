@@ -41,7 +41,7 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @param _amount Le montant de tokens à staker.
     function Stake(uint256 _amount) external nonReentrant {
         // require(_amount > 0, "Vous ne pouvez pas staker 0 token");
-        if(_amount <= 0) revert CanStakeZeroToken();
+        if (_amount <= 0) revert CanStakeZeroToken();
         totalStaked += _amount;
         stakingToken.transferFrom(msg.sender, address(this), _amount);
         stakingBalance[msg.sender] += _amount;
@@ -55,13 +55,15 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @param _amount Le montant de tokens à retirer.
     function Unstake(uint256 _amount) external nonReentrant {
         // require(isStaking[msg.sender], "Vous n'avez pas de token a unstake");
-        if(!isStaking[msg.sender]) revert YouDontHaveTokenToUnstake();
+        if (!isStaking[msg.sender]) revert YouDontHaveTokenToUnstake();
         // require(_amount <= stakingBalance[msg.sender],"Vous ne pouvez pas retirer retirer plus que ce que vous avez stake");
-        if(_amount > stakingBalance[msg.sender]) revert CannotwithdrawMorThanYouHaveStake();
+        if (_amount > stakingBalance[msg.sender])
+            revert CannotwithdrawMorThanYouHaveStake();
         totalStaked -= _amount;
         uint256 reward = CalculateReward(msg.sender);
         // require(stakingToken.balanceOf(address(this)) >= _amount + reward,"Pas assez de recompenses dans le contrat");
-        if(stakingToken.balanceOf(address(this)) < _amount + reward) revert NotEnoughFundInContract();
+        if (stakingToken.balanceOf(address(this)) < _amount + reward)
+            revert NotEnoughFundInContract();
         stakingBalance[msg.sender] -= _amount;
         if (stakingBalance[msg.sender] == 0) {
             isStaking[msg.sender] = false;
@@ -102,4 +104,7 @@ contract StakingContract is ReentrancyGuard, Ownable {
             stakedTimeInSeconds) / precision;
         return reward;
     }
+    fallback() external payable {}
+
+    receive() external payable {}
 }

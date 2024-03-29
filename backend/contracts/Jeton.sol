@@ -12,18 +12,17 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  * a le pouvoir de mint de nouveaux tokens.
  */
 
-contract Jeton is ERC20, Ownable  {
-
+contract Jeton is ERC20, Ownable {
     /// @notice Crée un token ERC20 nommé "JETON" avec le symbole "JET" et minte une offre initiale.
     /**
      * @dev À la création du contrat, minte `1000000 * (10**decimals())` tokens au `msg.sender`.
      * Définit `msg.sender` comme le propriétaire du contrat.
      */
     constructor() ERC20("JETON", "JET") Ownable(msg.sender) {
-        _mint(msg.sender, 1000000 * 10**uint(decimals())); 
+        _mint(msg.sender, 1000000 * 10 ** uint(decimals()));
     }
 
-/// @notice Minte des tokens `JETON` à une adresse spécifiée.
+    /// @notice Minte des tokens `JETON` à une adresse spécifiée.
     /**
      * @dev Mint une quantité spécifiée de tokens `JETON` à l'adresse `to`.
      * Cette fonction est restreinte au propriétaire du contrat.
@@ -32,7 +31,20 @@ contract Jeton is ERC20, Ownable  {
      * @param to L'adresse destinataire des tokens mintés.
      * @param amount La quantité de tokens à mint.
      */
-    function Mint(address to, uint256 amount) external  onlyOwner  {
+    function Mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
     }
+
+function decimals() public pure override returns (uint8) {
+    return 18;
+}
+
+function symbol() public pure override returns (string memory) {
+    return "JET";
+}
+
+function name() public pure override returns (string memory) {
+    return "JETON";
+}
+
 }
