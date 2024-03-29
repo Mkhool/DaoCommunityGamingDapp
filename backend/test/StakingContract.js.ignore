@@ -114,7 +114,9 @@ describe("StakingContract", function () {
             await stakingContract.connect(owner).Stake(stakeAmount);
 
             // Unstaking des jetons
-            await stakingContract.connect(owner).Unstake(stakeAmount);
+            await expect(stakingContract.connect(owner).Unstake(stakeAmount))
+            .to.emit(stakingContract, 'Unstaked')
+            .withArgs(owner.address, stakeAmount); 
         });
 
         it("Should receive correct amount rewards when unstaking", async function () {

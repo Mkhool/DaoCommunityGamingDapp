@@ -41,6 +41,7 @@ contract CommunityPlaysDAO is Ownable {
     uint256 public quorumPercentage = 50;
     GameStatus public gameStatus = GameStatus.NotStarted;
 
+event GamerBanned(address indexed gamer);
     event GameStatusChanged(GameStatus previousStatus, GameStatus newStatus);
     event GameSessionStarted(uint256 indexed sessionId, uint256 gameId);
     event GameSessionEnded(uint256 indexed sessionId);
@@ -55,6 +56,7 @@ contract CommunityPlaysDAO is Ownable {
         uint256 cycle,
         string direction
     );
+    event GameProposed(uint256 proposalId, string gameName);
     event GameProposalAccepted(uint256 indexed gameId);
 
     modifier onlyStakingGamer() {
@@ -69,6 +71,7 @@ modifier inGameStatus(GameStatus expectedStatus) {
     require(gameStatus == expectedStatus, "Transition d'etat non autorisee");
     _;
 }
+
     // énumération des différents états possibles d'un jeu
     enum GameStatus {
         NotStarted, // Le jeu n'a pas encore démarré
@@ -107,6 +110,8 @@ modifier inGameStatus(GameStatus expectedStatus) {
         uint256 currentSessionId; // ID de la session de jeu actuelle
     }
 
+error EmptyProposal();
+
     // Initialiser le contrat avec des paramètres de base
     constructor(
         address _tokenAddress,
@@ -119,10 +124,14 @@ modifier inGameStatus(GameStatus expectedStatus) {
     ///Propositions et Votes
     // Proposition par la communauté
     function ProposeGame(string memory _gameName) public onlyStakingGamer {
-        require(
-            keccak256(abi.encode(_gameName)) != keccak256(abi.encode("")),
-            "Proposal can not be empty"
-        );
+        // require(
+        //     keccak256(abi.encode(_gameName)) != keccak256(abi.encode("")),
+        //     "Proposal can not be empty"
+        // );
+        // if(keccak256(abi.encode(_gameName)) != keccak256(abi.encode(""))) revert EmptyProposal();
+        if (bytes(_gameName).length == 0) {
+        revert EmptyProposal();
+    }
         uint256 quorum = CalculateQuorum();
         gameProposals[nextGameId] = GameProposal({
             id: nextGameId,
@@ -133,6 +142,7 @@ modifier inGameStatus(GameStatus expectedStatus) {
         });
 
         nextGameId++;
+        emit GameProposed(nextGameId, _gameName);
     }
 
     // Voter pour un jeu en fonction de son poids de staking
@@ -371,5 +381,6 @@ modifier inGameStatus(GameStatus expectedStatus) {
     /// Gestion Administrative
     function BanGamer(address _address) external onlyOwner {
         delete Gamers[_address];
+         emit GamerBanned(_address);
     }
 }
