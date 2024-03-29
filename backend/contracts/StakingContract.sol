@@ -104,7 +104,18 @@ contract StakingContract is ReentrancyGuard, Ownable {
             stakedTimeInSeconds) / precision;
         return reward;
     }
-    fallback() external payable {}
+//     fallback() external payable {}
 
-    receive() external payable {}
+//     receive() external payable {}
+//     function decimals() public pure  returns (uint8) {
+//     return 18;
+// }
+
+// function symbol() public pure  returns (string memory) {
+//     return "JET";
+// }
+
+// function name() public pure  returns (string memory) {
+//     return "JETON";
+// }
 }

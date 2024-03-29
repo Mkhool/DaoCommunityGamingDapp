@@ -35,16 +35,16 @@ contract Jeton is ERC20, Ownable {
         _mint(to, amount);
     }
 
-function decimals() public pure override returns (uint8) {
-    return 18;
-}
+// function decimals() public pure override returns (uint8) {
+//     return 18;
+// }
 
-function symbol() public pure override returns (string memory) {
-    return "JET";
-}
+// function symbol() public pure override returns (string memory) {
+//     return "JET";
+// }
 
-function name() public pure override returns (string memory) {
-    return "JETON";
-}
+// function name() public pure override returns (string memory) {
+//     return "JETON";
+// }
 
 }
