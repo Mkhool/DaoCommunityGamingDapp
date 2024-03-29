@@ -23,12 +23,12 @@ import {
     Divider,
     Tag,
 } from '@chakra-ui/react';
-import { StarIcon, TimeIcon, AtSignIcon, BellIcon } from '@chakra-ui/icons';
+
 
 const Profil = () => {
   return (
-    <VStack spacing={2} align="stretch" p={1} borderRadius="md" boxShadow='base' bg="rgba(0, 0, 0, 0.9)">
-      <Avatar align="stretch" size="xl" name="Medhi" src="/image/pp.jpg" />
+    <VStack spacing={2} align="stretch" p={1} borderRadius="md" boxShadow='base' bg="rgba(15, 15, 15)">
+      <Avatar align="stretch" size="l" src="/image/pp.jpg" />
       <Text fontSize="l" color="purple">Medhi</Text>
       <Progress value={65} size="sm" colorScheme="purple" />
       <Text fontSize="xs" color="white">65% exp</Text>

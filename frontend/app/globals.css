@@ -5,17 +5,10 @@
     "Roboto Mono", "Oxygen Mono", "Ubuntu Monospace", "Source Code Pro",
     "Fira Mono", "Droid Sans Mono", "Courier New", monospace;
 
-    --background-start-rgb: 0, 0, 0; /* Noir */
-    --background-end-rgb: 63, 0, 63; /* Violet foncé */
-    --foreground-rgb: 255, 255, 255; /* Blanc */
-    --primary-glow: conic-gradient(
-      from 180deg at 50% 50%,
-      rgba(255, 255, 255, 0.6) 0deg, /* Blanc légèrement transparent */
-      rgba(255, 255, 255, 0) 360deg /* Transparent */
-    );
-    --secondary-glow: radial-gradient(
-      rgba(255, 255, 255, 0.8), /* Blanc légèrement transparent */
-      rgba(255, 255, 255, 0) /* Transparent */
-  );
+/* Couleurs de fond */
+--background-start-rgb:15, 15, 30; 
+--background-end-rgb: 15, 15, 45; 
+
+
 }
 

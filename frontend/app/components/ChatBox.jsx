@@ -22,7 +22,7 @@ const ChatBox = () => {
 
     return (
 <Flex direction="row" width="100%">
-
+{/* 
       <Flex direction="column" ml={850} mt="-500" width="300px" bg="rgba(0, 0, 0, 0.6)" p={4} h="500px" borderRadius='lg'>
         <VStack spacing={2} width="100%" flexGrow={1} overflowY="auto">
           {messages.map((msg, index) => (
@@ -49,7 +49,7 @@ const ChatBox = () => {
             Envoyer
           </Button>
         </Flex>
-      </Flex>
+      </Flex> */}
     </Flex>
   );
 };

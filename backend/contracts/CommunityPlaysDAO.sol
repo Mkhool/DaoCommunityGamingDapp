@@ -22,7 +22,7 @@ interface IStakingContract {
     function SetDailyInterestRate(uint256 newRate) external;
     function DailyInterestRate() external view returns (uint256);
     function CalculateReward(address gamer) external view returns (uint256);
-    function StakingBalance(address user) external view returns (uint256);
+    function stakingBalance(address user) external view returns (uint256);
     function totalStaked() external view returns (uint256);
 }
 
@@ -61,7 +61,7 @@ event GamerBanned(address indexed gamer);
 
     modifier onlyStakingGamer() {
         require(
-            stakingContract.StakingBalance(msg.sender) > 0,
+            stakingContract.stakingBalance(msg.sender) > 0,
             "Must have tokens staked to participate"
         );
         _;
@@ -124,11 +124,6 @@ error EmptyProposal();
     ///Propositions et Votes
     // Proposition par la communauté
     function ProposeGame(string memory _gameName) public onlyStakingGamer {
-        // require(
-        //     keccak256(abi.encode(_gameName)) != keccak256(abi.encode("")),
-        //     "Proposal can not be empty"
-        // );
-        // if(keccak256(abi.encode(_gameName)) != keccak256(abi.encode(""))) revert EmptyProposal();
         if (bytes(_gameName).length == 0) {
         revert EmptyProposal();
     }
@@ -141,17 +136,15 @@ error EmptyProposal();
             quorum: quorum
         });
 
-        nextGameId++;
         emit GameProposed(nextGameId, _gameName);
+        nextGameId++;
     }
 
     // Voter pour un jeu en fonction de son poids de staking
     function VoteForGame(uint256 _gameId) public onlyStakingGamer {
         require(gameProposals[_gameId].id != 0, "Game proposal does not exist");
-        uint256 stakedAmount = stakingContract.StakingBalance(msg.sender);
-        require(stakedAmount > 0, "You must have tokens staked to vote");
-
-        // Utiliser le solde staké comme poids de vote
+        uint256 stakedAmount = stakingContract.stakingBalance(msg.sender);
+            // Utiliser le solde staké comme poids de vote
         gameProposals[_gameId].voteCount += stakedAmount;
 
         // Vérifier si le quorum est atteint en fonction des votes pondérés
@@ -342,7 +335,7 @@ error EmptyProposal();
     function DetermineRankByStake(
         address _player
     ) public view returns (string memory) {
-        uint256 stakedAmount = stakingContract.StakingBalance(_player);
+        uint256 stakedAmount = stakingContract.stakingBalance(_player);
         if (stakedAmount >= 500 * 10 ** 18) return "Diamant";
         if (stakedAmount >= 400 * 10 ** 18) return "Platine";
         if (stakedAmount >= 300 * 10 ** 18) return "Or";
