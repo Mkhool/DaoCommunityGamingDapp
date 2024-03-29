@@ -342,7 +342,7 @@ error EmptyProposal();
     function DetermineRankByStake(
         address _player
     ) public view returns (string memory) {
-        uint256 stakedAmount = stakingContract.StakingBalance(_player); // Assurez-vous d'avoir accès à cette fonction dans IStakingContract
+        uint256 stakedAmount = stakingContract.StakingBalance(_player);
         if (stakedAmount >= 500 * 10 ** 18) return "Diamant";
         if (stakedAmount >= 400 * 10 ** 18) return "Platine";
         if (stakedAmount >= 300 * 10 ** 18) return "Or";
@@ -382,5 +382,19 @@ error EmptyProposal();
     function BanGamer(address _address) external onlyOwner {
         delete Gamers[_address];
          emit GamerBanned(_address);
+    }
+
+// * receive function
+    receive() external payable {}
+
+    // * fallback function
+    fallback() external payable {}
+
+    function supportsInterface(bytes4 interfaceID) external pure returns (bool) {
+        return interfaceID == type(IERC20).interfaceId; // If your token is ERC-20
+    }
+
+    function decimals() public pure returns (uint8) {
+        return 18;
     }
 }

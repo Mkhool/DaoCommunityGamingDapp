@@ -25,8 +25,13 @@ contract TestCommunityPlaysDAO is CommunityPlaysDAO {
     ) external onlyOwner {
         experience[gamer] += experienceToAdd;
     }
-    
+
     function resetExperienceForTesting(address gamer) public {
-    experience[gamer] = 0;
+        experience[gamer] = 0;
+    }
+function testCalculateQuorum() public view returns (uint256) {
+    uint256 totalStaked = stakingContract.totalStaked();
+    uint256 quorum = (totalStaked * quorumPercentage) / 100;
+    return quorum;
 }
 }
