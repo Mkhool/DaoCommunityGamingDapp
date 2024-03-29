@@ -86,7 +86,7 @@ describe("CommunityPlaysDAO", function () {
     });
 
 
-    describe("TestCommunityPlaysDAO Levels", function () {
+    describe("Levels and Ranks", function () {
 
         it("Should set the owner's level based on experience", async function () {
             const { testDaoContract, owner } = await loadFixture(deployTESTContractFixture);
@@ -118,12 +118,14 @@ describe("CommunityPlaysDAO", function () {
         
             before(async function () {
                 ({ jeton, daoContract, stakingContract, stakingContractAddress, owner, addr1 } = await loadFixture(deployContractFixture));
+                const initialStakingContractSupply = ethers.parseUnits("1000", 18);
+                await jeton.connect(owner).transfer(stakingContractAddress, initialStakingContractSupply);
             });
         
             afterEach(async function () {
                 // Réinitialiser l'état de staking en retirant tous les jetons stakés pour owner
                 const stakedAmount = await stakingContract.stakingBalance(owner.address);
-                if (stakedAmount.gt(0)) {
+                if (stakedAmount > 0) {
                     await stakingContract.connect(owner).Unstake(stakedAmount);
                 }
             });
@@ -152,10 +154,14 @@ describe("CommunityPlaysDAO", function () {
                     expect(calculatedRank).to.equal(rank);
                 });
             });
+            it("Should assign aucun rank if no staking token", async function () {
+                const rank = await daoContract.connect(owner).DetermineRankByStake(owner.address);
+                expect(rank).to.equal("Aucun rang");
+            });
         });
     });
 
-    describe("CommunityPlaysDAO Administrative Functions", function () {
+    describe("Administrative Functions", function () {
         beforeEach(async function () {
             const { jeton, stakingContract, stakingContractAddress, owner, addr1 } = await loadFixture(deployContractFixture);
             const sendAmount = ethers.parseUnits("1", 18);
@@ -209,6 +215,9 @@ describe("CommunityPlaysDAO", function () {
             // Fonctionne car owner est le propriétaire
             await expect(daoContract.connect(owner).SetQuorumPercentage(newQuorumPercentage))
                 .to.not.be.reverted;
+        });
+        it("Should not allow random account to set the quorum percentage", async function () {
+            const newQuorumPercentage = 60;
 
             // Doit échouer car addr1 n'est pas le propriétaire
             await expect(daoContract.connect(addr1).SetQuorumPercentage(newQuorumPercentage))
@@ -240,13 +249,25 @@ describe("CommunityPlaysDAO", function () {
     describe("CommunityPlaysDAO Game Status", function () {
 
         beforeEach(async function () {
-            const { jeton, stakingContract, stakingContractAddress, daoContract, owner } = await loadFixture(deployStakingOwnerFixture);
+            const { jeton, stakingContract, stakingContractAddress, daoContract, owner, addr1 } = await loadFixture(deployStakingOwnerFixture);
         });
 
         it("Should allow starting a game session when status is NotStarted", async function () {
             await daoContract.connect(owner).ProposeGame("Valid Game")
             await expect(daoContract.connect(owner).StartGameSession(1))
                 .to.not.be.reverted;
+        });
+
+        it("Should not allow starting a game session when game id does not exist", async function () {
+            await daoContract.connect(owner).ProposeGame("Valid Game")
+            expect(daoContract.connect(owner).StartGameSession(5))
+            .to.be.revertedWith("The game does not exist.");
+        });
+
+        it("Should not allow starting a game session when status is NotStarted and you are not Owner", async function () {
+            await daoContract.connect(owner).ProposeGame("Valid Game")
+            await expect(daoContract.connect(addr1).StartGameSession(1))
+                .to.be.reverted;
         });
 
         it("Should not allow starting a game session when status is not NotStarted", async function () {
@@ -257,6 +278,17 @@ describe("CommunityPlaysDAO", function () {
             // Tentative de démarrer une autre session de jeu, ce qui devrait échouer
             await expect(daoContract.connect(owner).StartGameSession(2))
                 .to.be.revertedWith("Transition d'etat non autorisee");
+        });
+        it("Should allow Ending a game session when status is Started", async function () {
+            await daoContract.connect(owner).ProposeGame("Valid Game")
+            await daoContract.connect(owner).StartGameSession(1)
+            await expect(daoContract.connect(owner).EndGameSession(1))
+            .to.not.be.reverted;
+        });
+        it("Should allow Ending a game session when status is NotStarted", async function () {
+            await daoContract.connect(owner).ProposeGame("Valid Game")
+            await expect(daoContract.connect(owner).EndGameSession(1))
+            .to.be.revertedWith("Transition d'etat non autorisee");
         });
     });
     describe("Proposal functionality", function () {
