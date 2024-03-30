@@ -5,8 +5,9 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-/// @title Un contrat de Staking pour le token ERC20 Jeton
 /**
+ * @title Un contrat de Staking pour le token ERC20 Jeton
+ * @author Khoule Medhi
  * @dev Ce contrat permet aux utilisateurs de staker des tokens JETON, gagner des récompenses basées sur un taux d'intérêt quotidien,
  * et retirer leurs tokens plus les récompenses accumulées. Le propriétaire du contrat peut ajuster le taux d'intérêt.
  */
@@ -14,11 +15,11 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract StakingContract is ReentrancyGuard, Ownable {
     IERC20 public stakingToken;
 
-    mapping(address => uint256) public stakingBalance;
     mapping(address => bool) public isStaking;
+    mapping(address => uint256) public stakingBalance;
     mapping(address => uint256) private _stakeTimes;
 
-    uint256 private _dailyInterestRate;
+    uint16 private _dailyInterestRate;
     uint256 public totalStaked;
 
     event Staked(address indexed gamer, uint256 amount);
@@ -40,7 +41,6 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @dev Transfère les tokens du staker au contrat, met à jour les soldes, les états de staking et ajoute le montant au total staké
     /// @param _amount Le montant de tokens à staker.
     function Stake(uint256 _amount) external nonReentrant {
-        // require(_amount > 0, "Vous ne pouvez pas staker 0 token");
         if (_amount <= 0) revert CanStakeZeroToken();
         totalStaked += _amount;
         stakingToken.transferFrom(msg.sender, address(this), _amount);
@@ -54,14 +54,11 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @dev Transfère les tokens du contrat au staker, calcule les récompenses, ajuste le solde de staking,  met à jour les états de staking et soustrait le montant du total staké.
     /// @param _amount Le montant de tokens à retirer.
     function Unstake(uint256 _amount) external nonReentrant {
-        // require(isStaking[msg.sender], "Vous n'avez pas de token a unstake");
         if (!isStaking[msg.sender]) revert YouDontHaveTokenToUnstake();
-        // require(_amount <= stakingBalance[msg.sender],"Vous ne pouvez pas retirer retirer plus que ce que vous avez stake");
         if (_amount > stakingBalance[msg.sender])
             revert CannotwithdrawMorThanYouHaveStake();
         totalStaked -= _amount;
         uint256 reward = CalculateReward(msg.sender);
-        // require(stakingToken.balanceOf(address(this)) >= _amount + reward,"Pas assez de recompenses dans le contrat");
         if (stakingToken.balanceOf(address(this)) < _amount + reward)
             revert NotEnoughFundInContract();
         stakingBalance[msg.sender] -= _amount;
@@ -77,10 +74,10 @@ contract StakingContract is ReentrancyGuard, Ownable {
     /// @notice Permet au propriétaire de modifier le taux d'intérêt quotidien pour le calcul des récompenses.
     /// @dev Cette fonction est restreinte au propriétaire du contrat.
     /// @param newRate Le nouveau taux d'intérêt quotidien, exprimé en pourcentage avec une précision de deux décimales (par exemple, 100 pour 1%).
-    function SetDailyInterestRate(uint256 newRate) public onlyOwner {
+    function SetDailyInterestRate(uint16 newRate) public onlyOwner {
         _dailyInterestRate = newRate;
     }
-    function DailyInterestRate() public view returns (uint256) {
+    function DailyInterestRate() public view returns (uint16) {
         return _dailyInterestRate;
     }
 
@@ -104,18 +101,4 @@ contract StakingContract is ReentrancyGuard, Ownable {
             stakedTimeInSeconds) / precision;
         return reward;
     }
-//     fallback() external payable {}
-
-//     receive() external payable {}
-//     function decimals() public pure  returns (uint8) {
-//     return 18;
-// }
-
-// function symbol() public pure  returns (string memory) {
-//     return "JET";
-// }
-
-// function name() public pure  returns (string memory) {
-//     return "JETON";
-// }
 }

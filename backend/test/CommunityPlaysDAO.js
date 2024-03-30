@@ -167,7 +167,7 @@ async function deployTESTInGameFixture() {
 };
 describe("CommunityPlaysDAO", function () {
 
-    // Tests relatifs au déploiement et à la configuration initiale
+    // :::::::::::::::::::: Deployment and Initial Configuration :::::::::::::::::::::::::: //
     describe("Deployment and Initial Configuration", function () {
         it("Should set the right owner", async function () {
             const { daoContract, owner } = await loadFixture(deployContractFixture);
@@ -186,10 +186,10 @@ describe("CommunityPlaysDAO", function () {
         });
     });
 
-
+// :::::::::::::::::::: Levels and Ranks :::::::::::::::::::::::::: //
     describe("Levels and Ranks", function () {
 
-        it("Should set the owner's level based on experience", async function () {
+        it("Should set the right level based on experience", async function () {
             const { testDaoContract, owner } = await loadFixture(deployTESTContractFixture);
 
             const levels = [
@@ -261,7 +261,7 @@ describe("CommunityPlaysDAO", function () {
             });
         });
     });
-
+// :::::::::::::::::::: Administrative Functions :::::::::::::::::::::::::: //
     describe("Administrative Functions", function () {
         beforeEach(async function () {
             const { jeton, stakingContract, stakingContractAddress, owner, addr1 } = await loadFixture(deployContractFixture);
@@ -289,7 +289,7 @@ describe("CommunityPlaysDAO", function () {
             )
         });
     });
-
+// :::::::::::::::::::: Quorum Functionality :::::::::::::::::::::::::: //
     describe("Quorum Functionality", function () {
 
         it("should correctly calculate the quorum", async function () {
@@ -314,8 +314,6 @@ describe("CommunityPlaysDAO", function () {
         it("Should only allow the owner to set the quorum percentage", async function () {
             const newQuorumPercentage = 60;
             // Fonctionne car owner est le propriétaire
-            // await expect(daoContract.connect(owner).SetQuorumPercentage(newQuorumPercentage))
-            //     .to.not.be.reverted;
             await daoContract.connect(owner).SetQuorumPercentage(newQuorumPercentage);
 
         });
@@ -341,15 +339,8 @@ describe("CommunityPlaysDAO", function () {
             await expect(daoContract.connect(owner).SetQuorumPercentage(tooHighQuorumPercentage))
                 .to.be.revertedWith("Quorum percentage must be between 1 and 100");
         });
-
-        it("Should correctly update the quorum percentage when set by the owner", async function () {
-            const newQuorumPercentage = 50;
-            await daoContract.connect(owner).SetQuorumPercentage(newQuorumPercentage);
-            const currentQuorumPercentage = await daoContract.quorumPercentage();
-            expect(currentQuorumPercentage).to.equal(newQuorumPercentage);
-        });
     });
-
+// :::::::::::::::::::: Proposal functionality :::::::::::::::::::::::::: //
     describe("Proposal functionality", function () {
         it("Should allow a staking gamer to propose a game", async function () {
             const { daoContract, owner } = await loadFixture(deployStakingOwnerFixture);
@@ -359,16 +350,22 @@ describe("CommunityPlaysDAO", function () {
                 .withArgs(2, "Valid Game");
         });
 
-
         it("Should allow a staking gamer to vote for a game", async function () {
             const { daoContract, owner } = await loadFixture(deployStakingOwnerFixture);
 
-            await expect(daoContract.connect(owner).VoteForGame(1)).to.be.not.reverted;
+            await daoContract.connect(owner).VoteForGame(1);
         });
+
         it("Should emit a game if quorum have been reach", async function () {
             const { daoContract, owner } = await loadFixture(deployStakingOwnerFixture);
 
             await expect(daoContract.connect(owner).VoteForGame(1)).to.emit(daoContract, "GameProposalAccepted").withArgs(1);
+        });
+ 
+        it("Should allow to get a proposal", async function () {
+            const { daoContract, owner } = await loadFixture(deployStakingOwnerFixture);
+            
+            await daoContract.connect(owner).GetProposal(1)
         });
 
         it("Should not emit a game if quorum have not been reach", async function () {
@@ -378,31 +375,48 @@ describe("CommunityPlaysDAO", function () {
             await jeton.connect(owner).transfer(addr1.address, sendAmount);
             await jeton.connect(addr1).approve(stakingContractAddress, stakeAmount);
             await stakingContract.connect(addr1).Stake(stakeAmount);
-            await expect(daoContract.connect(addr1).VoteForGame(1)).to.be.not.reverted;
+            await daoContract.connect(addr1).VoteForGame(1)
         });
-
-        it("Should allow to get a proposal", async function () {
+        
+        it("Should not allow to get a proposal Id of 0", async function () {
             const { daoContract, owner } = await loadFixture(deployStakingOwnerFixture);
 
-            await expect(daoContract.connect(owner).GetProposal(1)).to.be.not.reverted;
+            await expect(daoContract.connect(owner).GetProposal(0)).to.be.revertedWithCustomError(
+                daoContract,
+                "ProposalIdOutOfBounds",
+            ).withArgs(
+                0, 2
+            )
         });
 
         it("Should not allow to get a proposal that does exist ", async function () {
             const { daoContract, owner } = await loadFixture(deployStakingOwnerFixture);
 
-            await expect(daoContract.connect(owner).GetProposal(5)).to.be.revertedWith("Proposal ID is out of bounds.");
+            await expect(daoContract.connect(owner).GetProposal(3)).to.be.revertedWithCustomError(
+                daoContract,
+                "ProposalIdOutOfBounds",
+            ).withArgs(
+                3, 2
+            )
         });
 
         it("Should not allow a non staking gamer to vote for a game", async function () {
             const { daoContract, owner } = await loadFixture(deployContractFixture);
 
-            await expect(daoContract.connect(owner).VoteForGame(1)).to.be.revertedWith("Must have tokens staked to participate");
+            await expect(daoContract.connect(owner).VoteForGame(1)).to.be.revertedWithCustomError(
+                daoContract,
+                "MustHaveTokensStakedToParticipate",
+            )
         });
 
         it("Should not allow a staking gamer to vote for a game that does not exist", async function () {
             const { daoContract, owner } = await loadFixture(deployStakingOwnerFixture);
 
-            await expect(daoContract.connect(owner).VoteForGame(3)).to.be.revertedWith("Game proposal does not exist");
+            await expect(daoContract.connect(owner).VoteForGame(3))
+                .to.be.revertedWithCustomError(
+                    daoContract,
+                    "GameProposalDoesNotExist",
+                )
         });
 
         it("Should not allow a staking gamer to propose an empty proposal", async function () {
@@ -419,12 +433,15 @@ describe("CommunityPlaysDAO", function () {
             const { daoContract, addr1 } = await loadFixture(deployContractFixture);
 
             // Essayer de proposer un jeu sans avoir de tokens stakés
-            await expect(daoContract.connect(addr1).ProposeGame("Valid Game"))
-                .to.be.reverted;
+            await expect(daoContract.connect(addr1).ProposeGame("Valid Game")).to.be.revertedWithCustomError(
+                daoContract,
+                "MustHaveTokensStakedToParticipate",
+            )
+
         });
 
         it("Should return my level as Niveau 1", async function () {
-            const { jeton, daoContract, daoContractAddress, stakingContract, stakingContractAddress, owner, addr1 } = await loadFixture(deployContractFixture);
+            const { jeton, daoContract, stakingContract, stakingContractAddress, owner } = await loadFixture(deployContractFixture);
 
             // Simulate staking
             const stakeAmount = ethers.parseUnits("100", 18); // Make sure to use the correct variable name if it's `stakingContractAddress` instead of `stakingContractAddress`
@@ -437,7 +454,7 @@ describe("CommunityPlaysDAO", function () {
         });
 
     });
-
+// :::::::::::::::::::: Game Status and / Gameplay :::::::::::::::::::::::::: //
     describe("Game Status and in game function", function () {
 
         beforeEach(async function () {
@@ -446,79 +463,113 @@ describe("CommunityPlaysDAO", function () {
 
         it("Should allow starting a game session when status is NotStarted", async function () {
             await daoContract.connect(owner).ProposeGame("Valid Game")
-            await expect(daoContract.connect(owner).StartGameSession(1))
-                .to.not.be.reverted;
-        });
+            await daoContract.connect(owner).StartGameSession(1)
 
-        it("Should not allow starting a game session when game id does not exist", async function () {
-            await daoContract.connect(owner).ProposeGame("Valid Game")
-            expect(daoContract.connect(owner).StartGameSession(5))
-                .to.be.revertedWith("The game does not exist.");
-        });
-
-        it("Should not allow starting a game session when status is NotStarted and you are not Owner", async function () {
-            await daoContract.connect(owner).ProposeGame("Valid Game")
-            await expect(daoContract.connect(addr1).StartGameSession(1))
-                .to.be.reverted;
-        });
-
-        it("Should not allow starting a game session when status is not NotStarted", async function () {
-            // Modifier l'état du jeu pour qu'il ne soit pas NotStarted
-            // Par exemple, si vous avez une fonction pour démarrer le jeu, l'utiliser ici
-            await daoContract.connect(owner).StartGameSession(1); // Démarrez une session pour changer l'état
-
-            // Tentative de démarrer une autre session de jeu, ce qui devrait échouer
-            await expect(daoContract.connect(owner).StartGameSession(2))
-                .to.be.revertedWith("Transition d'etat non autorisee");
         });
 
         it("Should allow Ending a game session when status is Started", async function () {
             await daoContract.connect(owner).ProposeGame("Valid Game")
             await daoContract.connect(owner).StartGameSession(1)
-            await expect(daoContract.connect(owner).EndGameSession(1))
-                .to.not.be.reverted;
+            await daoContract.connect(owner).EndGameSession(1)
+
         });
 
         it("Should allow Ending a game session when status is NotStarted", async function () {
             await daoContract.connect(owner).ProposeGame("Valid Game")
             await expect(daoContract.connect(owner).EndGameSession(1))
-                .to.be.revertedWith("Transition d'etat non autorisee");
+                .to.be.revertedWithCustomError(
+                    daoContract,
+                    "UnauthorizedStateTransition",
+                ).withArgs(
+                    1, 0
+                )
         });
 
         it("Should allow player to participe to a game", async function () {
             await daoContract.connect(owner).ProposeGame("Valid Game")
             await daoContract.connect(owner).StartGameSession(1)
-            await expect(daoContract.connect(owner).ParticipateInGame(1))
-                .to.not.be.reverted;
+            await daoContract.connect(owner).ParticipateInGame(1)
+
+        });
+        
+                it("Should allow player to participe to a game that is not active", async function () {
+                    await daoContract.connect(owner).ProposeGame("Valid Game")
+                    await daoContract.connect(owner).StartGameSession(1)
+                    await expect(daoContract.connect(owner).ParticipateInGame(999))
+                        .to.be.revertedWithCustomError(
+                            daoContract,
+                            "SessionNotActive",
+                        ).withArgs(
+                            999
+                        )
+                });
+        
+        it("Should not allow starting a game session when game id does not exist", async function () {
+            await daoContract.connect(owner).ProposeGame("Valid Game")
+            expect(daoContract.connect(owner).StartGameSession(5))
+                .to.be.revertedWithCustomError(
+                    daoContract,
+                    "GameDoesNotExist",
+                ).withArgs(
+                    5
+                )
         });
 
-        it("Should allow player to participe to a game that is not active", async function () {
+        it("Should not allow starting a game session when status is NotStarted and you are not Owner", async function () {
             await daoContract.connect(owner).ProposeGame("Valid Game")
-            await daoContract.connect(owner).StartGameSession(1)
-            await expect(daoContract.connect(owner).ParticipateInGame(999))
-                .to.be.revertedWith("This session is not active.");
+            await expect(daoContract.connect(addr1).StartGameSession(1)).to.be.revertedWithCustomError(
+                daoContract,
+                "OwnableUnauthorizedAccount",
+            ).withArgs(
+                addr1.address
+            )
+
+        });
+
+        it("Should not allow starting a game session when status is not NotStarted", async function () {
+            // Modifier l'état du jeu pour qu'il ne soit pas NotStarted
+
+            await daoContract.connect(owner).StartGameSession(1); // Démarrez une session pour changer l'état
+
+            // Tentative de démarrer une autre session de jeu, ce qui devrait échouer
+            await expect(daoContract.connect(owner).StartGameSession(2))
+                .to.be.revertedWithCustomError(
+                    daoContract,
+                    "UnauthorizedStateTransition",
+                ).withArgs(
+                    0, 1
+                )
         });
 
         it("Should not allow non player to participe to a game", async function () {
             await daoContract.connect(owner).ProposeGame("Valid Game")
             await daoContract.connect(owner).StartGameSession(1)
-            await expect(daoContract.connect(addr1).ParticipateInGame(999))
-                .to.be.revertedWith("Must have tokens staked to participate");
+            await expect(daoContract.connect(addr1).ParticipateInGame(999)).to.be.revertedWithCustomError(
+                daoContract,
+                "MustHaveTokensStakedToParticipate",
+            )
         });
 
 
         it("Should not allow player to make choice when in game if not started", async function () {
             await daoContract.connect(owner).ProposeGame("Valid Game")
             await expect(daoContract.connect(owner).MakeChoice(1, "haut"))
-                .to.be.revertedWith("Transition d'etat non autorisee");
+                .to.be.revertedWithCustomError(
+                    daoContract,
+                    "UnauthorizedStateTransition",
+                ).withArgs(
+                    1, 0
+                )
         });
 
         it("Should not allow non player to make choice when in game", async function () {
             await daoContract.connect(owner).ProposeGame("Valid Game")
             await daoContract.connect(owner).StartGameSession(1)
             await daoContract.connect(owner).ParticipateInGame(1)
-            await expect(daoContract.connect(addr1).MakeChoice(1, "haut"))
-                .to.be.revertedWith("Must have tokens staked to participate");
+            await expect(daoContract.connect(addr1).MakeChoice(1, "haut")).to.be.revertedWithCustomError(
+                daoContract,
+                "MustHaveTokensStakedToParticipate",
+            );
         });
 
         it("Should not allow Ending a game session if you are not the owner", async function () {
@@ -533,44 +584,37 @@ describe("CommunityPlaysDAO", function () {
                 )
         });
 
-
+        // :::::::::::::::::::: Test InGame :::::::::::::::::::::::::: //
         describe("Test InGame", function () {
-            
+
             it("Should add a player to the game session if they are not already in it when making a choice", async function () {
                 const { testDaoContract, owner, addr4 } = await loadFixture(deployTESTInGameFixture);
                 let isInSessionBefore = await testDaoContract.testIsGamerInSession(addr4.address, 1);
                 expect(isInSessionBefore).to.be.false;
-            
+
                 // `addr2` fait un choix dans la session de jeu
                 await testDaoContract.connect(addr4).MakeChoice(1, "haut");
-            
+
                 //  `addr2` est bien dans la session après avoir fait un choix
                 let isInSessionAfter = await testDaoContract.testIsGamerInSession(addr4.address, 1);
                 expect(isInSessionAfter).to.be.true;
             });
 
             beforeEach(async function () {
-                
-                const { jeton, daoContract, daoContractAddress, stakingContract, stakingContractAddress, owner, addr1, addr2, addr3} = await loadFixture(deployInGameFixture);
+
+                const { jeton, daoContract, daoContractAddress, stakingContract, stakingContractAddress, owner, addr1, addr2, addr3 } = await loadFixture(deployInGameFixture);
             });
 
             it("Should allow player to make choice when in game", async function () {
-                await expect(daoContract.connect(owner).MakeChoice(1, "haut"))
-                    .to.not.be.reverted;
-            });
-           
-            it("Should update player's experience after ending the game session", async function () {
-
                 await daoContract.connect(owner).MakeChoice(1, "haut")
-                await expect(daoContract.connect(owner).MakeChoice(1, "haut"))
-                    .to.be.revertedWith("Already participated in the current cycle");
+                
             });
-
+            
             it("Should give player experience rien the game is ended", async function () {
                 await daoContract.connect(owner).MakeChoice(1, "haut")
                 await daoContract.connect(addr2).MakeChoice(1, "haut")
                 await daoContract.connect(addr3).MakeChoice(1, "haut")
-               
+
                 // Capturer l'expérience de addr2 avant de terminer la session de jeu
                 const experienceBefore = await daoContract.experience(addr2.address);
                 // Terminer la session de jeu
@@ -581,6 +625,19 @@ describe("CommunityPlaysDAO", function () {
                 expect(experienceAfter > experienceBefore);
 
             });
+            it("Should not play more than one per cycle", async function () {
+
+                await daoContract.connect(owner).MakeChoice(1, "haut")
+                await expect(daoContract.connect(owner).MakeChoice(1, "haut"))
+                    .to.be.revertedWithCustomError(
+                        daoContract,
+                        "AlreadyParticipatedInCurrentCycle",
+                    ).withArgs(
+                        owner.address
+                        , 1
+                    )
+            });
+
 
         });
 

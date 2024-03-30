@@ -4,8 +4,9 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-/// @title JETON - Un contrat de token ERC20 de base
 /**
+ * @title JETON - Un contrat de token ERC20 de base
+ * @author Khoule Medhi
  * @dev Ce contrat implémente le token Jeton ERC20 standard avec une fonction de minting.
  * Le token est destiné à être utilisé pour CommunityPlaysDAO, il sera une récompense distribué aux joueurs,
  * servira pour le staking, et d'autres applications. Le propriétaire du contrat
@@ -34,17 +35,4 @@ contract Jeton is ERC20, Ownable {
     function Mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
     }
-
-// function decimals() public pure override returns (uint8) {
-//     return 18;
-// }
-
-// function symbol() public pure override returns (string memory) {
-//     return "JET";
-// }
-
-// function name() public pure override returns (string memory) {
-//     return "JETON";
-// }
-
 }

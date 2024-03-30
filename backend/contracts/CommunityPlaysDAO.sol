@@ -8,7 +8,7 @@ import "./StakingContract.sol";
 /**
  * @title Dao gaming
  * @author Khoule Medhi
- * @notice smart contract for Dao gaming
+ * @notice Contrat intelligent pour un système de DAO dédié au gaming. Permet la création de sessions de jeu, la participation des utilisateurs, et la gestion des propositions de jeu.
  */
 
 interface IJeton {
@@ -16,40 +16,61 @@ interface IJeton {
 }
 
 interface IStakingContract {
+    function DailyInterestRate() external view returns (uint16);
+    function SetDailyInterestRate(uint16 newRate) external;
     function Mint(address to, uint256 amount) external;
     function Stake(uint256 amount) external;
     function Unstake(uint256 amount) external;
-    function SetDailyInterestRate(uint256 newRate) external;
-    function DailyInterestRate() external view returns (uint256);
     function CalculateReward(address gamer) external view returns (uint256);
     function stakingBalance(address user) external view returns (uint256);
     function totalStaked() external view returns (uint256);
 }
 
 contract CommunityPlaysDAO is Ownable {
-    //L’instance ERC20Token et de staking à déployer
     IJeton public jetonContract;
     IStakingContract public stakingContract;
+
+    uint8 public quorumPercentage = 50;
+    uint32 private nextGameId = 1;
+    uint256 public currentSessionId;
+
+    struct GameSession {
+        uint256 id;
+        uint256 gameId;
+        bool isActive;
+        address[] gamerInSession;
+        mapping(string => uint256) choicesCount;
+        mapping(uint256 => string) winningDirectionPerCycle;
+        mapping(address => mapping(uint256 => string)) playerChoicesPerCycle;
+        mapping(address => uint256) lastCycleParticipated;
+        uint256 currentCycle;
+    }
+
+    struct GameProposal {
+        uint256 id;
+        string name;
+        uint256 voteCount;
+        bool isAccepted;
+        uint256 quorum;
+    }
+
+    struct Gamer {
+        uint256 experienceLevel;
+        bool isActive;
+        uint256 currentSessionId;
+    }
+
+    GameStatus public gameStatus = GameStatus.NotStarted;
 
     mapping(uint256 => GameSession) public gameSessions;
     mapping(uint256 => GameProposal) public gameProposals;
     mapping(address => Gamer) public Gamers;
     mapping(address => uint256) public experience;
 
-    uint256 public currentSessionId;
-    uint256 private nextGameId = 1;
-    uint256 public quorumPercentage = 50;
-    GameStatus public gameStatus = GameStatus.NotStarted;
-
-event GamerBanned(address indexed gamer);
+    event GamerBanned(address indexed gamer);
     event GameStatusChanged(GameStatus previousStatus, GameStatus newStatus);
     event GameSessionStarted(uint256 indexed sessionId, uint256 gameId);
     event GameSessionEnded(uint256 indexed sessionId);
-    event GameChoiceSubmitted(
-        uint256 indexed sessionId,
-        address indexed voter,
-        string direction
-    );
     event GamerJoinedSession(address indexed gamer, uint256 indexed sessionId);
     event ChoiceMade(
         uint256 indexed sessionId,
@@ -60,59 +81,45 @@ event GamerBanned(address indexed gamer);
     event GameProposalAccepted(uint256 indexed gameId);
 
     modifier onlyStakingGamer() {
-        require(
-            stakingContract.stakingBalance(msg.sender) > 0,
-            "Must have tokens staked to participate"
-        );
+        if (stakingContract.stakingBalance(msg.sender) <= 0) {
+            revert MustHaveTokensStakedToParticipate();
+        }
         _;
     }
 
-modifier inGameStatus(GameStatus expectedStatus) {
-    require(gameStatus == expectedStatus, "Transition d'etat non autorisee");
-    _;
-}
+    modifier inGameStatus(GameStatus expectedStatus) {
+        if (gameStatus != expectedStatus) {
+            revert UnauthorizedStateTransition(expectedStatus, gameStatus);
+        }
+        _;
+    }
 
-    // énumération des différents états possibles d'un jeu
     enum GameStatus {
-        NotStarted, // Le jeu n'a pas encore démarré
-        Started, // Le jeu est en cours
-        Finished, // Le jeu est terminé
-        RewardTime // Le moment des récompenses
+        NotStarted,
+        Started,
+        Finished
     }
 
-    // Structure de données pour représenter une session de jeu
-    struct GameSession {
-        uint256 id;
-        uint256 gameId;
-        bool isActive;
-        address[] gamerInSession;
-        mapping(string => uint256) choicesCount; // Nombre de choix pour chaque direction
-        mapping(uint256 => string) winningDirectionPerCycle; // Direction gagnante par cycle
-        mapping(address => mapping(uint256 => string)) playerChoicesPerCycle; // Choix des joueurs par cycle
-        mapping(address => uint256) lastCycleParticipated; // Dernier cycle de vote auquel chaque joueur a participé
-        uint256 currentCycle; // Identifiant du cycle actuel de vote
-    }
+    error EmptyProposal();
+    error GameProposalDoesNotExist();
+    error MustHaveTokensStakedToParticipate();
+    error SessionNotActive(uint256 sessionId);
+    error ProposalIdOutOfBounds(uint256 proposalId, uint256 nextGameId);
+    error GameDoesNotExist(uint256 gameId);
+    error UnauthorizedStateTransition(
+        GameStatus expectedStatus,
+        GameStatus currentStatus
+    );
+    error AlreadyParticipatedInCurrentCycle(
+        address gamer,
+        uint256 currentCycle
+    );
 
-    // Structure de données pour représenter un jeu proposé
-    struct GameProposal {
-        uint256 id;
-        string name;
-        uint256 voteCount;
-        bool isAccepted;
-        uint256 quorum;
-    }
-
-    // Structure pour représenter un utilisateur et son engagement
-    struct Gamer {
-        // uint256 stakeAmount; // Montant du token staké
-        uint256 experienceLevel; // Niveau d'expérience
-        bool isActive; // indique si le joueur est actif dans une session
-        uint256 currentSessionId; // ID de la session de jeu actuelle
-    }
-
-error EmptyProposal();
-
-    // Initialiser le contrat avec des paramètres de base
+    /**
+     * @notice Initialise le contrat avec l'adresse du jeton et du contrat de staking.
+     * @param _tokenAddress Adresse du contrat du jeton ERC20.
+     * @param _stakingContractAddress Adresse du contrat de staking.
+     */
     constructor(
         address _tokenAddress,
         address _stakingContractAddress
@@ -121,12 +128,15 @@ error EmptyProposal();
         stakingContract = IStakingContract(_stakingContractAddress);
     }
 
-    ///Propositions et Votes
-    // Proposition par la communauté
+    /**
+     * @notice Permet à un utilisateur de proposer un jeu.
+     * @dev Seuls les utilisateurs ayant sktatés des jetons peuvent proposer un jeu. Émet un événement `GameProposed`.
+     * @param _gameName Nom du jeu proposé.
+     */
     function ProposeGame(string memory _gameName) public onlyStakingGamer {
         if (bytes(_gameName).length == 0) {
-        revert EmptyProposal();
-    }
+            revert EmptyProposal();
+        }
         uint256 quorum = CalculateQuorum();
         gameProposals[nextGameId] = GameProposal({
             id: nextGameId,
@@ -140,28 +150,36 @@ error EmptyProposal();
         nextGameId++;
     }
 
-    // Voter pour un jeu en fonction de son poids de staking
+    /**
+     * @notice Permet à un utilisateur de voter pour une proposition de jeu.
+     * @dev Le vote est pondéré par le montant misé par l'utilisateur. Émet un événement `GameProposalAccepted` si le quorum est atteint.
+     * @param _gameId Identifiant de la proposition de jeu.
+     */
     function VoteForGame(uint256 _gameId) public onlyStakingGamer {
-        require(gameProposals[_gameId].id != 0, "Game proposal does not exist");
+        if (gameProposals[_gameId].id == 0) {
+            revert GameProposalDoesNotExist();
+        }
         uint256 stakedAmount = stakingContract.stakingBalance(msg.sender);
-            // Utiliser le solde staké comme poids de vote
         gameProposals[_gameId].voteCount += stakedAmount;
 
-        // Vérifier si le quorum est atteint en fonction des votes pondérés
         if (gameProposals[_gameId].voteCount >= gameProposals[_gameId].quorum) {
             gameProposals[_gameId].isAccepted = true;
             emit GameProposalAccepted(_gameId);
         }
     }
 
-    // Retourne les détails d'une proposition de jeu par son ID
+    /**
+     * @notice Renvoie les détails d'une proposition de jeu spécifique.
+     * @dev Revert avec une `ProposalIdOutOfBounds` si l'ID de la proposition est invalide.
+     * @param proposalId Identifiant de la proposition de jeu.
+     * @return Détails de la proposition de jeu.
+     */
     function GetProposal(
         uint256 proposalId
     ) public view returns (uint256, string memory, uint256, bool, uint256) {
-        require(
-            proposalId > 0 && proposalId < nextGameId,
-            "Proposal ID is out of bounds."
-        );
+        if (proposalId <= 0 || proposalId >= nextGameId) {
+            revert ProposalIdOutOfBounds(proposalId, nextGameId);
+        }
 
         GameProposal storage proposal = gameProposals[proposalId];
         return (
@@ -173,14 +191,23 @@ error EmptyProposal();
         );
     }
 
-    ///Gestion du Quorum
+    /**
+     * @notice Calcule le quorum nécessaire pour accepter une proposition de jeu.
+     * @dev Le quorum est basé sur un pourcentage du total skaté.
+     * @return quorum calculé.
+     */
     function CalculateQuorum() private view returns (uint256) {
         uint256 totalStaked = stakingContract.totalStaked();
         uint256 quorum = (totalStaked * quorumPercentage) / 100;
         return quorum;
     }
 
-    function SetQuorumPercentage(uint256 newQuorumPercentage) public onlyOwner {
+    /**
+     * @notice Définit un nouveau pourcentage de quorum.
+     * @dev Seul le propriétaire du contrat peut modifier le pourcentage de quorum.
+     * @param newQuorumPercentage Nouveau pourcentage pour le quorum.
+     */
+    function SetQuorumPercentage(uint8 newQuorumPercentage) public onlyOwner {
         require(
             newQuorumPercentage > 0 && newQuorumPercentage <= 100,
             "Quorum percentage must be between 1 and 100"
@@ -188,10 +215,17 @@ error EmptyProposal();
         quorumPercentage = newQuorumPercentage;
     }
 
-    ///Gestion des Sessions de Jeu
-    // Fonction pour démarrer une nouvelle session de jeu avec un jeu spécifique
-    function StartGameSession(uint256 gameId) public onlyOwner inGameStatus(GameStatus.NotStarted) { //// external ?
-        require(gameProposals[gameId].id != 0, "The game does not exist.");
+    /**
+     * @notice Démarre une nouvelle session de jeu pour un jeu spécifique.
+     * @dev Revert avec une `GameDoesNotExist` si le jeu spécifié n'existe pas. Change le statut du jeu à `Started`.
+     * @param gameId Identifiant du jeu pour lequel démarrer une session.
+     */
+    function StartGameSession(
+        uint256 gameId
+    ) public onlyOwner inGameStatus(GameStatus.NotStarted) {
+        if (gameProposals[gameId].id == 0) {
+            revert GameDoesNotExist(gameId);
+        }
         currentSessionId++; // Incrémenter l'ID pour une nouvelle session
 
         GameSession storage session = gameSessions[currentSessionId];
@@ -204,9 +238,16 @@ error EmptyProposal();
         emit GameSessionStarted(currentSessionId, gameId);
     }
 
-    // Fonction pour terminer une session de jeu spécifique et distribuer les récompenses
-    function EndGameSession(uint256 _sessionId) external onlyOwner inGameStatus(GameStatus.Started) {
-        // require(gameSessions[_sessionId].isActive, "Session not active.");
+    /**
+     * @notice Termine une session de jeu en cours et distribue les récompenses aux participants.
+     * @dev Doit être appelée par le propriétaire du contrat. La session doit être dans l'état `Started`.
+     * Calcule les récompenses en fonction des choix corrects des participants et met à jour leur expérience.
+     * Change l'état du jeu à `Finished`.
+     * @param _sessionId Identifiant de la session de jeu à terminer.
+     */
+    function EndGameSession(
+        uint256 _sessionId
+    ) external onlyOwner inGameStatus(GameStatus.Started) {
         GameSession storage session = gameSessions[_sessionId];
         session.isActive = false;
 
@@ -238,6 +279,13 @@ error EmptyProposal();
         emit GameSessionEnded(_sessionId);
     }
 
+    /**
+     * @notice Compte le nombre total de choix corrects faits par un joueur dans une session de jeu donnée.
+     * @dev Utilisée dans `EndGameSession` pour calculer les récompenses des participants en fonction de leur performance.
+     * @param _sessionId Identifiant de la session de jeu.
+     * @param _gamer Adresse du joueur dont on compte les choix corrects.
+     * @return nombre de choix corrects effectués par le joueur dans la session.
+     */
     function CountCorrectChoices(
         uint256 _sessionId,
         address _gamer
@@ -264,40 +312,57 @@ error EmptyProposal();
         return correctChoices;
     }
 
+    /**
+     * @notice Réinitialise les comptes de choix pour chaque direction pour un nouveau cycle de vote dans une session de jeu.
+     * @dev Appelée à la fin de chaque cycle de vote pour préparer la session pour le cycle suivant.
+     * @param _sessionId Identifiant de la session de jeu à réinitialiser.
+     */
     function ResetSessionChoices(uint256 _sessionId) private {
         GameSession storage session = gameSessions[_sessionId];
 
-        // Réinitialiser les comptes de choix pour chaque direction pour le nouveau cycle
         session.choicesCount["haut"] = 0;
         session.choicesCount["bas"] = 0;
         session.choicesCount["gauche"] = 0;
         session.choicesCount["droite"] = 0;
     }
 
-    ///Participation et Choix des Joueurs
-    // Fonction pour participer à une partie
+    /**
+     * @notice Permet à un joueur de participer à une session de jeu active.
+     * @dev Le joueur doit avoir des jetons stakés pour participer. La session doit être active.
+     * Ajoute le joueur à la liste des participants de la session.
+     * @param sessionId Identifiant de la session de jeu.
+     */
     function ParticipateInGame(uint256 sessionId) external onlyStakingGamer {
-        require(
-            gameSessions[sessionId].isActive,
-            "This session is not active."
-        );
+        if (!gameSessions[sessionId].isActive) {
+            revert SessionNotActive(sessionId);
+        }
         gameSessions[sessionId].gamerInSession.push(msg.sender);
 
         emit GamerJoinedSession(msg.sender, sessionId);
     }
 
+    /**
+     * @notice Permet à un joueur de faire un choix dans une session de jeu active.
+     * @dev Le joueur ne peut pas participer plus d'une fois par cycle de vote.
+     * Enregistre le choix du joueur et met à jour les comptes de choix pour la session.
+     * Peut potentiellement changer la direction gagnante du cycle actuel.
+     * @param _sessionId Identifiant de la session de jeu.
+     * @param _direction Choix du joueur pour le cycle de vote actuel.
+     */
     function MakeChoice(
         uint256 _sessionId,
         string memory _direction
-    ) external onlyStakingGamer inGameStatus(GameStatus.Started){
+    ) external onlyStakingGamer inGameStatus(GameStatus.Started) {
         GameSession storage session = gameSessions[_sessionId];
         if (!IsGamerInSession(msg.sender, _sessionId)) {
             session.gamerInSession.push(msg.sender);
         }
-        require(
-            session.lastCycleParticipated[msg.sender] < session.currentCycle,
-            "Already participated in the current cycle"
-        );
+        if (session.lastCycleParticipated[msg.sender] >= session.currentCycle) {
+            revert AlreadyParticipatedInCurrentCycle(
+                msg.sender,
+                session.currentCycle
+            );
+        }
 
         session.playerChoicesPerCycle[msg.sender][
             session.currentCycle
@@ -315,7 +380,13 @@ error EmptyProposal();
         }
     }
 
-    // Fonction pour vérifier si un joueur participe déjà à la session
+    /**
+     * @notice Vérifie si un joueur participe déjà à la session de jeu spécifiée.
+     * @dev Utilisé pour empêcher un joueur de participer plusieurs fois au même cycle de vote.
+     * @param _gamer Adresse du joueur.
+     * @param _sessionId Identifiant de la session de jeu.
+     * @return bool Vrai si le joueur participe déjà, faux sinon.
+     */
     function IsGamerInSession(
         address _gamer,
         uint256 _sessionId
@@ -329,8 +400,12 @@ error EmptyProposal();
         return false;
     }
 
-    ///Expérience et Rang
-    // Fonction pour déterminer le rang du joueur basé sur le montant staké
+    /**
+     * @notice Détermine le rang d'un joueur basé sur le montant des jetons qu'il a misés.
+     * @dev Les rangs sont attribués selon différents seuils de montant misé.
+     * @param _player L'adresse du joueur dont on veut déterminer le rang.
+     * @return Le rang du joueur sous forme de chaîne de caractères.
+     */
     function DetermineRankByStake(
         address _player
     ) public view returns (string memory) {
@@ -343,7 +418,12 @@ error EmptyProposal();
         return "Aucun rang";
     }
 
-    // Fonction pour déterminer le niveau du joueur basé sur son expérience
+    /**
+     * @notice Détermine le niveau d'expérience d'un joueur en fonction de son expérience accumulée.
+     * @dev L'expérience est accumulée par la participation à des sessions de jeu et par d'autres actions au sein de la DAO.
+     * @param _player L'adresse du joueur dont on veut déterminer le niveau.
+     * @return level du niveau d'expérience du joueur, représenté par une chaîne de caractères.
+     */
     function DetermineLevelByExperience(
         address _player
     ) public view returns (string memory level) {
@@ -370,10 +450,14 @@ error EmptyProposal();
             level = "Niveau 1"; // Moins de 1000 points d'expérience correspond au niveau le plus bas
         }
     }
-    /// Gestion Administrative
+
+    /**
+     * @notice Exclut un joueur de la DAO, le privant de la possibilité de participer à des sessions de jeu et à des votes.
+     * @dev Seul le propriétaire du contrat peut bannir un joueur. Cette action est irréversible.
+     * @param _address L'adresse du joueur à bannir.
+     */
     function BanGamer(address _address) external onlyOwner {
         delete Gamers[_address];
-         emit GamerBanned(_address);
+        emit GamerBanned(_address);
     }
-
 }
