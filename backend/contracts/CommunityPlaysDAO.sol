@@ -206,7 +206,7 @@ error EmptyProposal();
 
     // Fonction pour terminer une session de jeu spécifique et distribuer les récompenses
     function EndGameSession(uint256 _sessionId) external onlyOwner inGameStatus(GameStatus.Started) {
-        require(gameSessions[_sessionId].isActive, "Session not active.");
+        // require(gameSessions[_sessionId].isActive, "Session not active.");
         GameSession storage session = gameSessions[_sessionId];
         session.isActive = false;
 
@@ -289,8 +289,7 @@ error EmptyProposal();
     function MakeChoice(
         uint256 _sessionId,
         string memory _direction
-    ) external onlyStakingGamer {
-        require(gameSessions[_sessionId].isActive, "Session not active");
+    ) external onlyStakingGamer inGameStatus(GameStatus.Started){
         GameSession storage session = gameSessions[_sessionId];
         if (!IsGamerInSession(msg.sender, _sessionId)) {
             session.gamerInSession.push(msg.sender);

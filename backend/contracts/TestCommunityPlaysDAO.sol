@@ -29,9 +29,23 @@ contract TestCommunityPlaysDAO is CommunityPlaysDAO {
     function resetExperienceForTesting(address gamer) public {
         experience[gamer] = 0;
     }
-function testCalculateQuorum() public view returns (uint256) {
-    uint256 totalStaked = stakingContract.totalStaked();
-    uint256 quorum = (totalStaked * quorumPercentage) / 100;
-    return quorum;
-}
+    function testCalculateQuorum() public view returns (uint256) {
+        uint256 totalStaked = stakingContract.totalStaked();
+        uint256 quorum = (totalStaked * quorumPercentage) / 100;
+        return quorum;
+    }
+ 
+    
+    function testIsGamerInSession(
+        address _gamer,
+        uint256 _sessionId
+    ) public view returns (bool) {
+        address[] memory gamers = gameSessions[_sessionId].gamerInSession;
+        for (uint256 i = 0; i < gamers.length; i++) {
+            if (gamers[i] == _gamer) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

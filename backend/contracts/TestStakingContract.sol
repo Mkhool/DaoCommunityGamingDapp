@@ -3,7 +3,9 @@ pragma solidity ^0.8.20;
 
 import "./StakingContract.sol";
 
-/** contrat test pour les fonctions de StakingContract qui sont en internal */
+/** contrat test pour les fonctions de StakingContract qui sont en internal
+ et la réhentrance des fonction stake et unskate
+ */
 contract TestStakingContract is StakingContract {
     constructor(address _stakingToken) StakingContract(_stakingToken) {
     }
