@@ -4,7 +4,7 @@ require("hardhat-docgen");
 module.exports = {
   solidity: "0.8.20",
   docgen:{
-    path: "./docs",
+    path: "./docgen",
     clear: true,
     runOnCompile:true
   }
