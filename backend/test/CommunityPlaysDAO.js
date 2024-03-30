@@ -1,5 +1,5 @@
 const { assert, expect } = require("chai");
-const { ethers, waffle } = require('hardhat');
+const { ethers } = require('hardhat');
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
 
 
@@ -255,7 +255,7 @@ describe("CommunityPlaysDAO", function () {
                     expect(calculatedRank).to.equal(rank);
                 });
             });
-            it("Should assign aucun rank if no staking token", async function () {
+            it("Should assign aucun rank if no token stake", async function () {
                 const rank = await daoContract.connect(owner).DetermineRankByStake(owner.address);
                 expect(rank).to.equal("Aucun rang");
             });
@@ -314,8 +314,10 @@ describe("CommunityPlaysDAO", function () {
         it("Should only allow the owner to set the quorum percentage", async function () {
             const newQuorumPercentage = 60;
             // Fonctionne car owner est le propriétaire
-            await expect(daoContract.connect(owner).SetQuorumPercentage(newQuorumPercentage))
-                .to.not.be.reverted;
+            // await expect(daoContract.connect(owner).SetQuorumPercentage(newQuorumPercentage))
+            //     .to.not.be.reverted;
+            await daoContract.connect(owner).SetQuorumPercentage(newQuorumPercentage);
+
         });
         it("Should not allow random account to set the quorum percentage", async function () {
             const newQuorumPercentage = 60;

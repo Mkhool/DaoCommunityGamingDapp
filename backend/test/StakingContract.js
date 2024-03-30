@@ -1,4 +1,4 @@
-const { assert, expect } = require("chai");
+const { expect } = require("chai");
 const { ethers } = require('hardhat');
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
 
@@ -230,7 +230,7 @@ describe("StakingContract", function () {
     describe("Rewards Calculation & Interest Rate Management", function () {
         it("Should allow owner to change the daily interest rate", async function () {
             const { stakingContract, owner } = await loadFixture(deployContractFixture);
-            const newInterestRate = 200; // Exemple de nouveau taux d'intérêt de 2%
+            const newInterestRate = 200; // Exemple de nouveau taux d'intérêt
 
             // Tentative de modification du taux par le propriétaire doit réussir
             await expect(stakingContract.connect(owner).SetDailyInterestRate(newInterestRate))
@@ -243,7 +243,7 @@ describe("StakingContract", function () {
 
         it("Should not allow other account than owner to change the daily interest rate", async function () {
             const { addr1 } = await loadFixture(deployContractFixture);
-            const newInterestRate = 200; // Exemple de nouveau taux d'intérêt de 2%
+            const newInterestRate = 200; 
             // Tentative de modification du taux par un autre compte doit échouer
             await expect(stakingContract.connect(addr1).SetDailyInterestRate(newInterestRate))
                 .to.be.reverted;
