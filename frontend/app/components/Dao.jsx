@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { Box, Button, Input, Text, useToast, VStack , Tag } from '@chakra-ui/react';
 import { useWriteContract } from 'wagmi';
 import { DaoContractAddress, DaoContractAbi } from '@/constants';
-import Events from './Events';
+import Level from './DailyInterestRateComponent';
+import ProposeGame from './ProposeGame';
 
 function DaoPage({ address, onSuccessAddProposal }) {
 
@@ -83,9 +84,9 @@ function DaoPage({ address, onSuccessAddProposal }) {
   // }, [address])
 
   return (
-<Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100vh" width="100vw">
+ <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100vh" width="100vw">
   <VStack spacing={4}>
-    <Tag>Add a new proposal</Tag>
+    {/* <Tag>Add a new proposal</Tag>
     <Input
       placeholder="Describe your proposal"
       value={proposalDescription}
@@ -95,10 +96,11 @@ function DaoPage({ address, onSuccessAddProposal }) {
       onClick={handleProposalSubmission}
       isLoading={isProposalAdding}
     >
-      Add Proposal
-    </Button>
-  </VStack>
-  <Events/>
+      Propose Game
+    </Button> */}
+   
+  </VStack> 
+  <ProposeGame/>
 </Box>
   );
 }

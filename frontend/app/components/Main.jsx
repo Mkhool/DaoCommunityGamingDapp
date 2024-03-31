@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Spinner } from '@chakra-ui/react';
 import { useReadContract, useAccount } from 'wagmi';
-import { contractAddress, contractAbi } from '@/constants';
+import { DaoContractAddress, DaoContractAbi } from '@/constants';
 import { publicClient } from '@/network/client'
 
 import { parseAbiItem } from 'viem'
@@ -21,38 +21,38 @@ const Main = () => {
     const [userRights, setUserRights] = useState('loading');
 
     // Récupère le statut actuel du workflow
-    const { data: getWorkflowStatus, refetch: refetchWorkflowStatus } = useReadContract({
-        address: contractAddress,
-        abi: contractAbi,
-        functionName: 'workflowStatus',
+    const { data: getGameStatus, refetch: refetchGameStatus } = useReadContract({
+        address: DaoContractAddress,
+        abi: DaoContractAbi,
+        functionName: 'GameStatus',
         watch: true,
     });
 
     // Utilisation de useReadContract pour vérifier si l'utilisateur courant est l'owner du contrat
     const { data: isOwnerData } = useReadContract({
-        address: contractAddress,
-        abi: contractAbi,
+        address: DaoContractAddress,
+        abi: DaoContractAbi,
         functionName: 'owner',
 
     });
 
     const getEvents = async () => {
         const AddVoterEvents = await publicClient.getLogs({
-            address: contractAddress,
+            address: DaoContractAddress,
             event: parseAbiItem('event VoterRegistered(address voterAddress)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
         })
 
         const WorkflowStatusChangeEvent = await publicClient.getLogs({
-            address: contractAddress,
+            address: DaoContractAddress,
             event: parseAbiItem('event WorkflowStatusChange(uint8 previousStatus, uint8 newStatus)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
         })
 
         const ProposalRegisteredEvent = await publicClient.getLogs({
-            address: contractAddress,
+            address: DaoContractAddress,
             event: parseAbiItem('event ProposalRegistered(uint256 proposalId)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
@@ -60,7 +60,7 @@ const Main = () => {
         })
 
         const VotedEvent = await publicClient.getLogs({
-            address: contractAddress,
+            address: DaoContractAddress,
             event: parseAbiItem('event Voted(address voter, uint256 proposalId)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
@@ -136,7 +136,7 @@ const Main = () => {
     const getProposals = async () => {
         const tmpVoteOptions = []
         const proposalRegisteredEvent = await publicClient.getLogs({
-            address: contractAddress,
+            address: DaoContractAddress,
             event: parseAbiItem('event ProposalRegistered(uint256 proposalId)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
@@ -159,8 +159,8 @@ const Main = () => {
     //////////////////////////////// ACCESS ///////////////////////////////////////////////
 
     const { data: getVoter } = useReadContract({
-        address: contractAddress,
-        abi: contractAbi,
+        address: DaoContractAddress,
+        abi: DaoContractAbi,
         functionName: 'GetVoter',
         account: address,
         args: [address],
@@ -181,7 +181,7 @@ const Main = () => {
 
     const setNextPhase = function () {
         getEvents();
-        refetchWorkflowStatus();
+        refetchGameStatus();
     }
 
     switch (userRights) {
@@ -193,7 +193,7 @@ const Main = () => {
             );
         case 'admin':
             return <AdminAccess
-                workflowStatus={getWorkflowStatus}
+                GameStatus={getGameStatus}
                 onSuccessfulNextPhase={setNextPhase}
                 setRefreshEvents={getEvents}
                 address={address}
@@ -201,7 +201,7 @@ const Main = () => {
             />;
         case 'voter':
             return <VoterAccess
-                workflowStatus={getWorkflowStatus}
+                GameStatus={getGameStatus}
                 address={address}
                 options={voteOptions}
                 events={events}
@@ -210,7 +210,7 @@ const Main = () => {
             />;
         case 'unregistered':
             return <UnregisteredUser
-                workflowStatus={getWorkflowStatus}
+                GameStatus={getGameStatus}
                 address={address}
             />;
         case null:

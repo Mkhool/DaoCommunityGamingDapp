@@ -20,10 +20,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { Box, Spinner } from '@chakra-ui/react';
-import { useReadContract, useAccount } from 'wagmi';
+import { useReadContract, useAccount, serialize } from 'wagmi';
 import { DaoContractAddress, DaoContractAbi } from '@/constants';
 import { publicClient } from '@/network/client'
-
+import { ethers } from 'ethers';
 import { parseAbiItem } from 'viem'
 
 // // VIEW ACCESS
@@ -53,7 +53,7 @@ const Events = () => {
     const { address, isConnecting } = useAccount();
     const [events, setEvents] = useState([]);
  
-    // Récupère le statut actuel du workflow
+    // Récupère le statut actuel 
     const { data: getGameStatus, refetch: refetchGameStatus } = useReadContract({
         address: DaoContractAddress,
         abi: DaoContractAbi,
@@ -61,13 +61,6 @@ const Events = () => {
         watch: true,
     });
 
-    // // Utilisation de useReadContract pour vérifier si l'utilisateur courant est l'owner du contrat
-    // const { data: isOwnerData } = useReadContract({
-    //     address: DaoContractAddress,
-    //     abi: DaoContractAbi,
-    //     functionName: 'owner',
-
-    // });
 
     const getEvents = async () => {
         const GameSessionStarted = await publicClient.getLogs({
@@ -128,9 +121,10 @@ const Events = () => {
                     break;
 
                 case 'GameProposed':
+                    const proposal = event.args.proposalId
                     eventData.type = 'ProposeGame';
-                    eventData.nextGameId = event.args.nextGameId;
-                    eventData.description = `Proposal ID: ${eventData._gameName} registered`;
+                    eventData.nextGameId = "1"
+                    eventData.description = `Proposal ID: ${proposal}, Game Name: ${event.args.gameName} registered.`;
                     eventData.hash = shortenHash(event.transactionHash);
                     break;
 
@@ -162,6 +156,7 @@ const Events = () => {
     }, [address])
   
 
+
     return (
         <>
             <Flex justifyContent="center" alignItems="center" p="2rem">
@@ -185,7 +180,7 @@ const Events = () => {
                                 {events.map((event, index) => (
                                     <Tr key={index}>
                                         <Td>
-                                            <Badge colorScheme={event.type === 'AddProposal' ? 'green' : event.type === 'Vote' ? 'blue' : event.type === 'AddVoter' ? 'blue' : event.type === 'StatusChange' ? 'purple' : 'red'}>
+                                            <Badge colorScheme={event.type === 'ProposeGame' ? 'green' : event.type === 'Vote' ? 'blue' : event.type === 'AddVoter' ? 'blue' : event.type === 'StatusChange' ? 'purple' : 'red'}>
                                                 {event.type}
                                             </Badge>
                                         </Td>
