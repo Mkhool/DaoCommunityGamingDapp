@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "./CommunityPlaysDAO.sol";
+import "./UnityQuest.sol";
 
-contract TestCommunityPlaysDAO is CommunityPlaysDAO {
+contract TestUnityQuest is UnityQuest {
     constructor(
         address _tokenAddress,
         address _stakingContractAddress
-    ) CommunityPlaysDAO(_tokenAddress, _stakingContractAddress) {}
+    ) UnityQuest(_tokenAddress, _stakingContractAddress) {}
 
-    // Exposer l'adresse du contrat Jeton
-    function getJetonContractAddress() public view returns (address) {
-        return address(jetonContract);
+    // Exposer l'adresse du contrat Quest
+    function getQuestContractAddress() public view returns (address) {
+        return address(questContract);
     }
 
     // Exposer l'adresse du contrat StakingContract

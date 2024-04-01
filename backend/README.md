@@ -77,17 +77,17 @@ npm install pino-pretty npm install encoding
 
 ###Propositions de Jeux :###
 Inscription des Joueurs pour grace au staking :
-Les joueurs doivent d'abord déposer des jetons dans le contrat de staking pour devenir des participants actifs.
+Les joueurs doivent d'abord déposer des quests dans le contrat de staking pour devenir des participants actifs.
 
 Proposition d'un Nouveau Jeu :
-Les joueurs ayant déposé des jetons peuvent proposer de nouveaux jeux en appelant la fonction proposeGame, en indiquant le nom du jeu proposé.
+Les joueurs ayant déposé des quests peuvent proposer de nouveaux jeux en appelant la fonction proposeGame, en indiquant le nom du jeu proposé.
 
 Vote pour les Jeux Proposés :
 Les joueurs actifs votent pour leur jeu préféré parmi les propositions enregistrées en appelant la fonction voteForGame, en utilisant l'ID de la proposition comme argument.
-Le vote est pondéré par la quantité de jetons que chaque joueur a misée.
+Le vote est pondéré par la quantité de quests que chaque joueur a misée.
 
 Quorum et Acceptation des Propositions :
-Une proposition est acceptée si elle atteint le quorum défini, basé sur le pourcentage total de jetons misés. Le système vérifie automatiquement si une proposition a atteint le quorum nécessaire pour être acceptée après chaque vote.
+Une proposition est acceptée si elle atteint le quorum défini, basé sur le pourcentage total de quests misés. Le système vérifie automatiquement si une proposition a atteint le quorum nécessaire pour être acceptée après chaque vote.
 
 ###Participation à un Jeu :###
 

@@ -6,9 +6,9 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
- * @title Un contrat de Staking pour le token ERC20 Jeton
+ * @title Un contrat de Staking pour le token ERC20 Quest
  * @author Khoule Medhi
- * @dev Ce contrat permet aux utilisateurs de staker des tokens JETON, gagner des récompenses basées sur un taux d'intérêt quotidien,
+ * @dev Ce contrat permet aux utilisateurs de staker des tokens QUEST, gagner des récompenses basées sur un taux d'intérêt quotidien,
  * et retirer leurs tokens plus les récompenses accumulées. Le propriétaire du contrat peut ajuster le taux d'intérêt.
  */
 

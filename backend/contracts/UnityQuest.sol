@@ -2,16 +2,16 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "./Jeton.sol";
+import "./Quest.sol";
 import "./StakingContract.sol";
 
 /**
- * @title Dao gaming
+ * @title  UnityQuest
  * @author Khoule Medhi
  * @notice Contrat intelligent pour un système de DAO dédié au gaming. Permet la création de sessions de jeu, la participation des utilisateurs, et la gestion des propositions de jeu.
  */
 
-interface IJeton {
+interface IQuest {
     function Mint(address to, uint256 amount) external;
 }
 
@@ -26,8 +26,8 @@ interface IStakingContract {
     function totalStaked() external view returns (uint256);
 }
 
-contract CommunityPlaysDAO is Ownable {
-    IJeton public jetonContract;
+contract UnityQuest is Ownable {
+    IQuest public questContract;
     IStakingContract public stakingContract;
 
     uint8 public quorumPercentage = 50;
@@ -116,21 +116,21 @@ contract CommunityPlaysDAO is Ownable {
     );
 
     /**
-     * @notice Initialise le contrat avec l'adresse du jeton et du contrat de staking.
-     * @param _tokenAddress Adresse du contrat du jeton ERC20.
+     * @notice Initialise le contrat avec l'adresse du quest et du contrat de staking.
+     * @param _tokenAddress Adresse du contrat du quest ERC20.
      * @param _stakingContractAddress Adresse du contrat de staking.
      */
     constructor(
         address _tokenAddress,
         address _stakingContractAddress
     ) Ownable(msg.sender) {
-        jetonContract = IJeton(_tokenAddress);
+        questContract = IQuest(_tokenAddress);
         stakingContract = IStakingContract(_stakingContractAddress);
     }
 
     /**
      * @notice Permet à un utilisateur de proposer un jeu.
-     * @dev Seuls les utilisateurs ayant sktatés des jetons peuvent proposer un jeu. Émet un événement `GameProposed`.
+     * @dev Seuls les utilisateurs ayant sktatés des quests peuvent proposer un jeu. Émet un événement `GameProposed`.
      * @param _gameName Nom du jeu proposé.
      */
     function ProposeGame(string memory _gameName) public onlyStakingGamer {
@@ -328,7 +328,7 @@ contract CommunityPlaysDAO is Ownable {
 
     /**
      * @notice Permet à un joueur de participer à une session de jeu active.
-     * @dev Le joueur doit avoir des jetons stakés pour participer. La session doit être active.
+     * @dev Le joueur doit avoir des quests stakés pour participer. La session doit être active.
      * Ajoute le joueur à la liste des participants de la session.
      * @param sessionId Identifiant de la session de jeu.
      */
@@ -401,7 +401,7 @@ contract CommunityPlaysDAO is Ownable {
     }
 
     /**
-     * @notice Détermine le rang d'un joueur basé sur le montant des jetons qu'il a misés.
+     * @notice Détermine le rang d'un joueur basé sur le montant des quests qu'il a misés.
      * @dev Les rangs sont attribués selon différents seuils de montant misé.
      * @param _player L'adresse du joueur dont on veut déterminer le rang.
      * @return Le rang du joueur sous forme de chaîne de caractères.

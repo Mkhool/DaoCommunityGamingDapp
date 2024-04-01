@@ -4,35 +4,35 @@ const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
 
 
 async function deployContractFixture() {
-    // Déployer le contract Jeton
+    // Déployer le contract Quest
     [owner, addr1] = await ethers.getSigners();
-    const JetonFactory = await ethers.getContractFactory("Jeton");
-    jeton = await JetonFactory.deploy();
-    await jeton.waitForDeployment();
-    const jetonAdress = await jeton.getAddress();
+    const QuestFactory = await ethers.getContractFactory("Quest");
+    quest = await QuestFactory.deploy();
+    await quest.waitForDeployment();
+    const questAdress = await quest.getAddress();
 
-    // Déployer StakingContract avec l'adresse de Jeton 
+    // Déployer StakingContract avec l'adresse de Quest 
     const StakingContractFactory = await ethers.getContractFactory("StakingContract");
-    stakingContract = await StakingContractFactory.deploy(jetonAdress);
+    stakingContract = await StakingContractFactory.deploy(questAdress);
     const stakingContractAdress = await stakingContract.getAddress();
 
-    return { jeton, stakingContract, stakingContractAdress, owner, addr1 };
+    return { quest, stakingContract, stakingContractAdress, owner, addr1 };
 };
 
 async function deployContractFixtureForInternalFunction() {
-    // Déployer le contract Jeton
+    // Déployer le contract Quest
     [owner, addr1] = await ethers.getSigners();
-    const JetonFactory = await ethers.getContractFactory("Jeton");
-    jeton = await JetonFactory.deploy();
-    await jeton.waitForDeployment();
-    const jetonAdress = await jeton.getAddress();
+    const QuestFactory = await ethers.getContractFactory("Quest");
+    quest = await QuestFactory.deploy();
+    await quest.waitForDeployment();
+    const questAdress = await quest.getAddress();
 
-    // Déployer TestStakingContract avec l'adresse de Jeton 
+    // Déployer TestStakingContract avec l'adresse de Quest 
     const TestStakingContractFactory = await ethers.getContractFactory("TestStakingContract");
-    TestStakingContract = await TestStakingContractFactory.deploy(jetonAdress);
+    TestStakingContract = await TestStakingContractFactory.deploy(questAdress);
     const TestStakingContractAdress = await TestStakingContract.getAddress();
 
-    return { jeton, TestStakingContract, TestStakingContractAdress, owner, addr1 };
+    return { quest, TestStakingContract, TestStakingContractAdress, owner, addr1 };
 };
 
 describe("StakingContract", function () {
@@ -49,16 +49,16 @@ describe("StakingContract", function () {
     describe("Staking", function () {
 
         it("Should allow staking", async function () {
-            const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
             const stakeAmount = ethers.parseUnits("100", 18);
 
-            // Mint des jetons pour le propriétaire pour tester le staking
-            await jeton.Mint(owner.address, stakeAmount);
+            // Mint des quests pour le propriétaire pour tester le staking
+            await quest.Mint(owner.address, stakeAmount);
 
-            // Approbation du contrat de staking pour dépenser les jetons du propriétaire
-            await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
+            // Approbation du contrat de staking pour dépenser les quests du propriétaire
+            await quest.connect(owner).approve(stakingContractAdress, stakeAmount);
 
-            // Staking des jetons
+            // Staking des quests
             await stakingContract.connect(owner).Stake(stakeAmount);
 
             // Vérifier le solde de staking
@@ -76,11 +76,11 @@ describe("StakingContract", function () {
         });
 
         it("Should return 0 reward immediately after staking", async function () {
-            const { jeton, TestStakingContract, owner, TestStakingContractAdress } = await loadFixture(deployContractFixtureForInternalFunction);
+            const { quest, TestStakingContract, owner, TestStakingContractAdress } = await loadFixture(deployContractFixtureForInternalFunction);
             const stakeAmount = ethers.parseUnits("100", 18);
 
             // Approbation et staking
-            await jeton.connect(owner).approve(TestStakingContractAdress, stakeAmount);
+            await quest.connect(owner).approve(TestStakingContractAdress, stakeAmount);
             await TestStakingContract.connect(owner).Stake(stakeAmount);
 
             // Calculer immédiatement la récompense après le staking
@@ -102,25 +102,25 @@ describe("StakingContract", function () {
     describe("Unstaking", function () {
 
         it("Should allow unstaking", async function () {
-            const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
             const stakeAmount = ethers.parseUnits("100", 18);
             const initialStakingContractSupply = ethers.parseUnits("500000", 18);
 
             // Le propriétaire transfère des tokens au contrat de staking pour les récompenses futures
-            await jeton.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
+            await quest.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
 
             // Approbation et staking
-            await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
+            await quest.connect(owner).approve(stakingContractAdress, stakeAmount);
             await stakingContract.connect(owner).Stake(stakeAmount);
 
-            // Unstaking des jetons
+            // Unstaking des quests
             await expect(stakingContract.connect(owner).Unstake(stakeAmount))
             .to.emit(stakingContract, 'Unstaked')
             .withArgs(owner.address, stakeAmount); 
         });
 
         it("Should receive correct amount rewards when unstaking", async function () {
-            const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
             const stakeAmount = ethers.parseUnits("100", 18);
             const initialStakingContractSupply = ethers.parseUnits("500000", 18);
 
@@ -128,26 +128,26 @@ describe("StakingContract", function () {
             const initialMintAmount = ethers.parseUnits("500000", 18);
 
             // Transfert des tokens au contrat de staking pour les récompenses futures
-            await jeton.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
+            await quest.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
 
             // Approbation et staking
-            await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
+            await quest.connect(owner).approve(stakingContractAdress, stakeAmount);
             await stakingContract.connect(owner).Stake(stakeAmount);
 
             // Simuler le passage du temps pour accumuler des récompenses
             await ethers.provider.send("evm_increaseTime", [86400]); // 1 jour
             await ethers.provider.send("evm_mine", []);
 
-            // Unstake des jetons
+            // Unstake des quests
             await stakingContract.connect(owner).Unstake(stakeAmount);
 
-            // Vérification du solde de jetons après unstaking, incluant les récompenses
-            const finalBalance = await jeton.balanceOf(owner.address);
+            // Vérification du solde de quests après unstaking, incluant les récompenses
+            const finalBalance = await quest.balanceOf(owner.address);
             const expectedRewards = stakeAmount; // Avec un taux d'intérêt de 100% par jour
             const expectedFinalBalance = initialMintAmount + expectedRewards; // Montant initial + récompenses
 
             // Définir une tolérance pour tenir compte des petites différences dans le calcul des récompenses
-            const tolerance = ethers.parseUnits("0.002", 18); // Tolérance de 0.002 jetons
+            const tolerance = ethers.parseUnits("0.002", 18); // Tolérance de 0.002 quests
 
             // Convertir en bigint pour la comparaison
             const finalBalanceBigInt = BigInt(finalBalance.toString());
@@ -164,14 +164,14 @@ describe("StakingContract", function () {
         });
 
         it("Should not allow unstaking if contract balance is insufficient", async function () {
-            const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
             const stakeAmount = ethers.parseUnits("100", 18);
 
             // Approbation et staking
-            await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
+            await quest.connect(owner).approve(stakingContractAdress, stakeAmount);
             await stakingContract.connect(owner).Stake(stakeAmount);
 
-            // Unstaking des jetons
+            // Unstaking des quests
             await expect(stakingContract.connect(owner).Unstake(stakeAmount)).to.be.revertedWithCustomError(
                 stakingContract,
                 "NotEnoughFundInContract"
@@ -179,12 +179,12 @@ describe("StakingContract", function () {
         });
 
         it("Should not allow unstake more than you have staked", async function () {
-            const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
             const approveAmount = ethers.parseUnits("120", 18);
             const stakeAmount = ethers.parseUnits("100", 18);
             const moreThanAmount = ethers.parseUnits("110", 18);
             // Approbation et staking
-            await jeton.connect(owner).approve(stakingContractAdress, approveAmount);
+            await quest.connect(owner).approve(stakingContractAdress, approveAmount);
             await stakingContract.connect(owner).Stake(stakeAmount);
             await expect(stakingContract.connect(owner).Unstake(moreThanAmount)).to.be.revertedWithCustomError(
                 stakingContract,
@@ -210,11 +210,11 @@ describe("StakingContract", function () {
             )
         });
         it("should keep isStaking as true when staking balance is not zero after unstaking", async function() {
-            const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
             const initialStakingContractSupply = ethers.parseUnits("500000", 18);
-            await jeton.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
+            await quest.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
             const stakeAmount = ethers.parseUnits("100", 18);
-            await jeton.approve(stakingContractAdress, stakeAmount);
+            await quest.approve(stakingContractAdress, stakeAmount);
             await stakingContract.Stake(stakeAmount);
         
             // Unstake d'un montant inférieur à celui staké
@@ -252,39 +252,39 @@ describe("StakingContract", function () {
 
     describe("Event", function () {
         it("should emit the skate", async function () {
-            const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
             const stakeAmount = ethers.parseUnits("100", 18);
-            await jeton.Mint(owner.address, stakeAmount);
-            await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
+            await quest.Mint(owner.address, stakeAmount);
+            await quest.connect(owner).approve(stakingContractAdress, stakeAmount);
 
-            const allowance = await jeton.allowance(owner.address, stakingContractAdress);
+            const allowance = await quest.allowance(owner.address, stakingContractAdress);
             expect(allowance).to.be.at.least(stakeAmount);
 
-            // Staking des jetons et attente de l'événement Staked
+            // Staking des quests et attente de l'événement Staked
             await expect(stakingContract.connect(owner).Stake(stakeAmount))
                 .to.emit(stakingContract, "Staked")
                 .withArgs(owner.address, stakeAmount);
         })
 
         it("should emit the Unstaked event on unstaking", async function () {
-            const { jeton, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
+            const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
             const stakeAmount = ethers.parseUnits("100", 18);
             const initialStakingContractSupply = ethers.parseUnits("500000", 18);
             // Le propriétaire transfère des tokens au contrat de staking pour les récompenses futures
-            await jeton.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
+            await quest.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
 
-            // Mint et approbation pour permettre au contrat de staking de retirer les jetons
-            await jeton.Mint(owner.address, stakeAmount);
-            await jeton.connect(owner).approve(stakingContractAdress, stakeAmount);
+            // Mint et approbation pour permettre au contrat de staking de retirer les quests
+            await quest.Mint(owner.address, stakeAmount);
+            await quest.connect(owner).approve(stakingContractAdress, stakeAmount);
 
-            // Staking des jetons
+            // Staking des quests
             await stakingContract.connect(owner).Stake(stakeAmount);
 
-            // S'assurer que les jetons sont stakés avant de tenter de les unstake
+            // S'assurer que les quests sont stakés avant de tenter de les unstake
             const initialStakeBalance = await stakingContract.stakingBalance(owner.address);
             expect(initialStakeBalance).to.equal(stakeAmount);
 
-            // Unstaking des jetons et attente de l'événement Unstaked
+            // Unstaking des quests et attente de l'événement Unstaked
             await expect(stakingContract.connect(owner).Unstake(stakeAmount))
                 .to.emit(stakingContract, "Unstaked")
                 .withArgs(owner.address, stakeAmount);
