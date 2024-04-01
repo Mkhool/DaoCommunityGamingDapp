@@ -1,6 +1,6 @@
 'use client'
 
-import DaoPage from "../components/Dao";
+import Page from "../components/";
 import NavBar from "../components/NavBar";
 
 
@@ -8,7 +8,7 @@ const Page = () => {
   return (
     <div>
       <NavBar/>
- <DaoPage/>
+ <Page/>
     </div>
   );
 };

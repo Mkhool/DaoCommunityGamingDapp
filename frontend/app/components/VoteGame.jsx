@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react';
 import { Box, Button, Input, Text, useToast, VStack , Tag } from '@chakra-ui/react';
 import { useWriteContract, useWatchContractEvent } from 'wagmi';
-import { DaoContractAddress, DaoContractAbi } from '@/constants';
+import { ContractAddress, ContractAbi } from '@/constants';
 
 
 function VoteGame({ address, onSuccessAddProposal, Events }) {
 
  useWatchContractEvent({
-    address: DaoContractAddress, // L'adresse de votre contrat
-    abi: DaoContractAbi, // L'ABI de votre contrat
+    address: ContractAddress, // L'adresse de votre contrat
+    abi: ContractAbi, // L'ABI de votre contrat
     eventName: 'GameProposalAccepted', // Le nom de l'événement à écouter
     onLogs(logs) {
       console.log('New logs!', logs)
@@ -18,8 +18,8 @@ function VoteGame({ address, onSuccessAddProposal, Events }) {
   });
 
   useWatchContractEvent({
-    address: DaoContractAddress, // L'adresse de votre contrat
-    abi: DaoContractAbi, // L'ABI de votre contrat
+    address: ContractAddress, // L'adresse de votre contrat
+    abi: ContractAbi, // L'ABI de votre contrat
     eventName: 'GameProposalAccepted', // Le nom de l'événement à écouter
     onLogs(logs) {
       console.log('New logs!', logs)
@@ -66,8 +66,8 @@ function VoteGame({ address, onSuccessAddProposal, Events }) {
       return;
     }
     VoteForGame({
-      address: DaoContractAddress,
-      abi: DaoContractAbi,
+      address: ContractAddress,
+      abi: ContractAbi,
       functionName: "VoteForGame",
       account: address,
       args: [voteFrorGame ]
@@ -77,7 +77,7 @@ function VoteGame({ address, onSuccessAddProposal, Events }) {
   };
 
   return (
-<Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100vh" width="100vw">
+<Box>
   <VStack spacing={4}>
     
     <Input
@@ -85,7 +85,7 @@ function VoteGame({ address, onSuccessAddProposal, Events }) {
       value={voteFrorGame }
       onChange={(e) => serVoteFrorGame(e.target.value)}
     />
-    <Button
+    <Button colorScheme='whiteAlpha'
       onClick={handleVoteSubmission}
       isLoading={isVoteAdding}
     >

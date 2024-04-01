@@ -1,5 +1,5 @@
-export const JetonContractAddress="0x5FbDB2315678afecb367f032d93F642f64180aa3";
-export const JetonContractAbi=[
+export const QuestContractAddress="0x5FbDB2315678afecb367f032d93F642f64180aa3";
+export const QuestContractAbi= [
   {
     "inputs": [],
     "stateMutability": "nonpayable",
@@ -409,284 +409,11 @@ export const JetonContractAbi=[
 
 export const StakingContractAddress="0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 export const StakingContractAbi=[
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "_stakingToken",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
-    },
-    {
-      "inputs": [],
-      "name": "CanStakeZeroToken",
-      "type": "error"
-    },
-    {
-      "inputs": [],
-      "name": "CannotwithdrawMorThanYouHaveStake",
-      "type": "error"
-    },
-    {
-      "inputs": [],
-      "name": "NotEnoughFundInContract",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "owner",
-          "type": "address"
-        }
-      ],
-      "name": "OwnableInvalidOwner",
-      "type": "error"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "account",
-          "type": "address"
-        }
-      ],
-      "name": "OwnableUnauthorizedAccount",
-      "type": "error"
-    },
-    {
-      "inputs": [],
-      "name": "ReentrancyGuardReentrantCall",
-      "type": "error"
-    },
-    {
-      "inputs": [],
-      "name": "YouDontHaveTokenToUnstake",
-      "type": "error"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "previousOwner",
-          "type": "address"
-        },
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
-      ],
-      "name": "OwnershipTransferred",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "gamer",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "Staked",
-      "type": "event"
-    },
-    {
-      "anonymous": false,
-      "inputs": [
-        {
-          "indexed": true,
-          "internalType": "address",
-          "name": "gamer",
-          "type": "address"
-        },
-        {
-          "indexed": false,
-          "internalType": "uint256",
-          "name": "amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "Unstaked",
-      "type": "event"
-    },
-    {
-      "inputs": [],
-      "name": "DailyInterestRate",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "newRate",
-          "type": "uint256"
-        }
-      ],
-      "name": "SetDailyInterestRate",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "Stake",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "uint256",
-          "name": "_amount",
-          "type": "uint256"
-        }
-      ],
-      "name": "Unstake",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "isStaking",
-      "outputs": [
-        {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "owner",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "renounceOwnership",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "name": "stakingBalance",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "stakingToken",
-      "outputs": [
-        {
-          "internalType": "contract IERC20",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
-      "name": "totalStaked",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "newOwner",
-          "type": "address"
-        }
-      ],
-      "name": "transferOwnership",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    }
-  ];
-
-export const DaoContractAddress="0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-export const DaoContractAbi= [
   {
     "inputs": [
       {
         "internalType": "address",
-        "name": "_tokenAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_stakingContractAddress",
+        "name": "_stakingToken",
         "type": "address"
       }
     ],
@@ -695,7 +422,17 @@ export const DaoContractAbi= [
   },
   {
     "inputs": [],
-    "name": "EmptyProposal",
+    "name": "CanStakeZeroToken",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "CannotwithdrawMorThanYouHaveStake",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NotEnoughFundInContract",
     "type": "error"
   },
   {
@@ -721,6 +458,349 @@ export const DaoContractAbi= [
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "YouDontHaveTokenToUnstake",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "gamer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Staked",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "gamer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Unstaked",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "DailyInterestRate",
+    "outputs": [
+      {
+        "internalType": "uint16",
+        "name": "",
+        "type": "uint16"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "newRate",
+        "type": "uint16"
+      }
+    ],
+    "name": "SetDailyInterestRate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Stake",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "Unstake",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "isStaking",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "stakingBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stakingToken",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalStaked",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+];
+
+export const ContractAddress="0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+export const ContractAbi= [
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_tokenAddress",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_stakingContractAddress",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "gamer",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "currentCycle",
+        "type": "uint256"
+      }
+    ],
+    "name": "AlreadyParticipatedInCurrentCycle",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "EmptyProposal",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "gameId",
+        "type": "uint256"
+      }
+    ],
+    "name": "GameDoesNotExist",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "GameProposalDoesNotExist",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "MustHaveTokensStakedToParticipate",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "proposalId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "nextGameId",
+        "type": "uint256"
+      }
+    ],
+    "name": "ProposalIdOutOfBounds",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "sessionId",
+        "type": "uint256"
+      }
+    ],
+    "name": "SessionNotActive",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "enum UnityQuest.GameStatus",
+        "name": "expectedStatus",
+        "type": "uint8"
+      },
+      {
+        "internalType": "enum UnityQuest.GameStatus",
+        "name": "currentStatus",
+        "type": "uint8"
+      }
+    ],
+    "name": "UnauthorizedStateTransition",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -743,31 +823,6 @@ export const DaoContractAbi= [
       }
     ],
     "name": "ChoiceMade",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "uint256",
-        "name": "sessionId",
-        "type": "uint256"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "voter",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "string",
-        "name": "direction",
-        "type": "string"
-      }
-    ],
-    "name": "GameChoiceSubmitted",
     "type": "event"
   },
   {
@@ -839,13 +894,13 @@ export const DaoContractAbi= [
     "inputs": [
       {
         "indexed": false,
-        "internalType": "enum CommunityPlaysDAO.GameStatus",
+        "internalType": "enum UnityQuest.GameStatus",
         "name": "previousStatus",
         "type": "uint8"
       },
       {
         "indexed": false,
-        "internalType": "enum CommunityPlaysDAO.GameStatus",
+        "internalType": "enum UnityQuest.GameStatus",
         "name": "newStatus",
         "type": "uint8"
       }
@@ -1083,9 +1138,9 @@ export const DaoContractAbi= [
   {
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "uint8",
         "name": "newQuorumPercentage",
-        "type": "uint256"
+        "type": "uint8"
       }
     ],
     "name": "SetQuorumPercentage",
@@ -1229,22 +1284,9 @@ export const DaoContractAbi= [
     "name": "gameStatus",
     "outputs": [
       {
-        "internalType": "enum CommunityPlaysDAO.GameStatus",
+        "internalType": "enum UnityQuest.GameStatus",
         "name": "",
         "type": "uint8"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "jetonContract",
-    "outputs": [
-      {
-        "internalType": "contract IJeton",
-        "name": "",
-        "type": "address"
       }
     ],
     "stateMutability": "view",
@@ -1265,12 +1307,25 @@ export const DaoContractAbi= [
   },
   {
     "inputs": [],
+    "name": "questContract",
+    "outputs": [
+      {
+        "internalType": "contract IQuest",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "quorumPercentage",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "uint8",
         "name": "",
-        "type": "uint256"
+        "type": "uint8"
       }
     ],
     "stateMutability": "view",

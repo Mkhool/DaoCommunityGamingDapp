@@ -21,7 +21,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Spinner } from '@chakra-ui/react';
 import { useReadContract, useAccount, serialize } from 'wagmi';
-import { DaoContractAddress, DaoContractAbi } from '@/constants';
+import { ContractAddress, ContractAbi } from '@/constants';
 import { publicClient } from '@/network/client'
 import { ethers } from 'ethers';
 import { parseAbiItem } from 'viem'
@@ -55,8 +55,8 @@ const Events = () => {
  
     // Récupère le statut actuel 
     const { data: getGameStatus, refetch: refetchGameStatus } = useReadContract({
-        address: DaoContractAddress,
-        abi: DaoContractAbi,
+        address: ContractAddress,
+        abi: ContractAbi,
         functionName: 'GameStatus',
         watch: true,
     });
@@ -64,21 +64,21 @@ const Events = () => {
 
     const getEvents = async () => {
         const GameSessionStarted = await publicClient.getLogs({
-            address: DaoContractAddress,
+            address: ContractAddress,
             event: parseAbiItem('event GameSessionStarted(uint256 indexed sessionId, uint256 gameId)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
         })
 
         const GameSessionEnded = await publicClient.getLogs({
-            address: DaoContractAddress,
+            address: ContractAddress,
             event: parseAbiItem('event GameSessionEnded(uint256 indexed sessionId)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
         })
 
         const GameProposed = await publicClient.getLogs({
-            address: DaoContractAddress,
+            address: ContractAddress,
             event: parseAbiItem('event GameProposed(uint256 nextGameId, string gameName)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
@@ -86,7 +86,7 @@ const Events = () => {
         })
 
         const GameProposalAccepted = await publicClient.getLogs({
-            address: DaoContractAddress,
+            address: ContractAddress,
             event: parseAbiItem('event GameProposalAccepted(uint256 indexed gameId)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
@@ -160,7 +160,7 @@ const Events = () => {
     return (
         <>
             <Flex justifyContent="center" alignItems="center" p="2rem">
-                <Heading as='h2' size='xl' mt="1rem">
+                <Heading as='h2' size='xl' mt="1rem" color ="#BFA181">
                     Events
                 </Heading>
             </Flex>
@@ -180,11 +180,11 @@ const Events = () => {
                                 {events.map((event, index) => (
                                     <Tr key={index}>
                                         <Td>
-                                            <Badge colorScheme={event.type === 'ProposeGame' ? 'green' : event.type === 'Vote' ? 'blue' : event.type === 'AddVoter' ? 'blue' : event.type === 'StatusChange' ? 'purple' : 'red'}>
+                                            <Badge colorScheme={event.type === 'ProposeGame' ? 'green' : event.type === 'VoteForGame' ? 'blue' : event.type === 'AddVoter' ? 'blue' : event.type === 'StatusChange' ? 'purple' : 'red'}>
                                                 {event.type}
                                             </Badge>
                                         </Td>
-                                        <Td fontSize="xs" >
+                                        <Td fontSize="xs" color="#BFA181">
                                             {event.address ? `Address: ${event.address}` : ''}
                                             {event.proposalId ? ` Proposal ID: ${event.proposalId}` : ''}
                                             {event.newStatus !== undefined ? `New Status: ${getStatusDescription(event.newStatus)}` : ''}

@@ -34,7 +34,7 @@ function NavBar() {
         </Box>
         <SidebarLink href="/dashboard" label="Dashboard" icon={<FaHome />} />
         <SidebarLink href="/game" label="Game" icon={<FaGamepad />} />
-        <SidebarLink href="/dao" label="DAO" icon={<FaUsers />} />
+        <SidebarLink href="/Dao" label="DAO" icon={<FaUsers />} />
         <SidebarLink href="/Admin" label="Admin" icon={<FaCog />} />
       </VStack>
     </Box>

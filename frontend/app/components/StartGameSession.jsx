@@ -5,37 +5,47 @@ import { Box, Button, Input, Text, useToast, VStack , Tag } from '@chakra-ui/rea
 import { useWriteContract, useWatchContractEvent } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
 
-function ProposeGame({ address, onSuccessAddProposal, Events }) {
+
+function StartGameSession({ address, Events }) {
 
  useWatchContractEvent({
     address: ContractAddress, // L'adresse de votre contrat
     abi: ContractAbi, // L'ABI de votre contrat
-    eventName: 'GameProposed', // Le nom de l'événement à écouter
+    eventName: 'GameSessionStarted', // Le nom de l'événement à écouter
     onLogs(logs) {
       console.log('New logs!', logs)
     },
   });
 
-  const [proposalDescription, setProposalDescription] = useState('');
+  useWatchContractEvent({
+    address: ContractAddress, // L'adresse de votre contrat
+    abi: ContractAbi, // L'ABI de votre contrat
+    eventName: 'GameStatusChanged', // Le nom de l'événement à écouter
+    onLogs(logs) {
+      console.log('New logs!', logs)
+    },
+  });
+  
+  const [gameSession , SetgameSession] = useState('');
 
   const toast = useToast();
 
-  // Écrire une nouvelle proposition
-  const { writeContract: ProposeGame, isLoading: isProposalAdding } = useWriteContract({
+  // Voter
+  const { writeContract: StartGameSession, isLoading: isGameStart } = useWriteContract({
     mutation: {
       onSuccess() {
         toast({
-          title: "Game proposal has been sent.",
+          title: "Game Started",
           status: "success",
           duration: 9000,
           isClosable: true,
         });
-        setProposalDescription('');
-        onSuccessAddProposal();
+        SetgameSession('');
+     
       },
       onError(error) {
         toast({
-          title: "Failed to propose a Game.",
+          title: "Failed to start the game",
           description: error.shortMessage,
           status: "error",
           duration: 9000,
@@ -45,45 +55,41 @@ function ProposeGame({ address, onSuccessAddProposal, Events }) {
     }
   });
 
-  const handleProposalSubmission = () => {
-    if (!proposalDescription.trim()) {
+  const handleGameSession = () => {
+    if (!gameSession .trim()) {
       toast({
-        title: 'Description cannot be empty.',
+        title: 'Choice cannot be empty.',
         status: 'error',
         duration: 5000,
         isClosable: true,
       });
       return;
     }
-    ProposeGame({
+    StartGameSession({
       address: ContractAddress,
       abi: ContractAbi,
-      functionName: "ProposeGame",
+      functionName: "StartGameSession",
       account: address,
-      args: [proposalDescription]
+      args: [gameSession ]
       
     });
 
   };
 
-  useEffect(() =>{
-
-  }, [Events])
-
   return (
 <Box>
   <VStack spacing={4}>
-   
+    
     <Input
-      placeholder="Describe your game proposal"
-      value={proposalDescription}
-      onChange={(e) => setProposalDescription(e.target.value)}
+      placeholder="Select an Id"
+      value={gameSession }
+      onChange={(e) => SetgameSession(e.target.value)}
     />
     <Button colorScheme='whiteAlpha'
-      onClick={handleProposalSubmission}
-      isLoading={isProposalAdding}
+      onClick={handleGameSession}
+      isLoading={isGameStart}
     >
-      Propose a game
+      Start a Game Session
     </Button>
   </VStack>
  
@@ -91,4 +97,4 @@ function ProposeGame({ address, onSuccessAddProposal, Events }) {
   );
 }
 
-export default ProposeGame;
+export default StartGameSession;

@@ -4,15 +4,15 @@ import { useState, useEffect } from 'react';
 import { Button, Spinner, useToast, btnText, Box, Input } from '@chakra-ui/react'
 import { useWriteContract, useReadContract } from 'wagmi'
 
-import { currentPhaseNextPhase, DaoContractAbi, DaoContractAddress, gameStatuses } from '@/constants'
+import { currentPhaseNextPhase, ContractAbi, ContractAddress, gameStatuses } from '@/constants'
 
 const NextPhaseButton = ({GameStatus, onSuccessfulNextPhase}) => {
     const [sessionId, setSessionId] = useState('') 
   const toast = useToast();
 
   const { data: getGameStatus, refetch: refetchGameStatus } = useReadContract({
-    address: DaoContractAddress,
-    abi: DaoContractAbi,
+    address: ContractAddress,
+    abi: ContractAbi,
     functionName: 'GameStatus',
     watch: true,
 });
@@ -42,8 +42,8 @@ const NextPhaseButton = ({GameStatus, onSuccessfulNextPhase}) => {
 
   const handleSetNextPhase = async() => {
     setNextPhase({
-          address: DaoContractAddress,
-          abi: DaoContractAbi,
+          address: ContractAddress,
+          abi: ContractAbi,
           functionName: currentPhaseNextPhase[GameStatus].function,
           args: [sessionId]
       })

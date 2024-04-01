@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Spinner } from '@chakra-ui/react';
 import { useReadContract, useAccount } from 'wagmi';
-import { DaoContractAddress, DaoContractAbi } from '@/constants';
+import { ContractAddress, ContractAbi } from '@/constants';
 import { publicClient } from '@/network/client'
 
 import { parseAbiItem } from 'viem'
@@ -22,37 +22,37 @@ const Main = () => {
 
     // Récupère le statut actuel du workflow
     const { data: getGameStatus, refetch: refetchGameStatus } = useReadContract({
-        address: DaoContractAddress,
-        abi: DaoContractAbi,
+        address: ContractAddress,
+        abi: ContractAbi,
         functionName: 'GameStatus',
         watch: true,
     });
 
     // Utilisation de useReadContract pour vérifier si l'utilisateur courant est l'owner du contrat
     const { data: isOwnerData } = useReadContract({
-        address: DaoContractAddress,
-        abi: DaoContractAbi,
+        address: ContractAddress,
+        abi: ContractAbi,
         functionName: 'owner',
 
     });
 
     const getEvents = async () => {
         const AddVoterEvents = await publicClient.getLogs({
-            address: DaoContractAddress,
+            address: ContractAddress,
             event: parseAbiItem('event VoterRegistered(address voterAddress)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
         })
 
         const WorkflowStatusChangeEvent = await publicClient.getLogs({
-            address: DaoContractAddress,
+            address: ContractAddress,
             event: parseAbiItem('event WorkflowStatusChange(uint8 previousStatus, uint8 newStatus)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
         })
 
         const ProposalRegisteredEvent = await publicClient.getLogs({
-            address: DaoContractAddress,
+            address: ContractAddress,
             event: parseAbiItem('event ProposalRegistered(uint256 proposalId)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
@@ -60,7 +60,7 @@ const Main = () => {
         })
 
         const VotedEvent = await publicClient.getLogs({
-            address: DaoContractAddress,
+            address: ContractAddress,
             event: parseAbiItem('event Voted(address voter, uint256 proposalId)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
@@ -136,7 +136,7 @@ const Main = () => {
     const getProposals = async () => {
         const tmpVoteOptions = []
         const proposalRegisteredEvent = await publicClient.getLogs({
-            address: DaoContractAddress,
+            address: ContractAddress,
             event: parseAbiItem('event ProposalRegistered(uint256 proposalId)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
@@ -159,8 +159,8 @@ const Main = () => {
     //////////////////////////////// ACCESS ///////////////////////////////////////////////
 
     const { data: getVoter } = useReadContract({
-        address: DaoContractAddress,
-        abi: DaoContractAbi,
+        address: ContractAddress,
+        abi: ContractAbi,
         functionName: 'GetVoter',
         account: address,
         args: [address],

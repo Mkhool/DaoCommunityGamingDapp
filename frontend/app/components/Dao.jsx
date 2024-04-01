@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { Box, Button, Input, Text, useToast, VStack , Tag } from '@chakra-ui/react';
 import { useWriteContract } from 'wagmi';
-import { DaoContractAddress, DaoContractAbi } from '@/constants';
+import { ContractAddress, ContractAbi } from '@/constants';
 import Level from './DailyInterestRateComponent';
 import ProposeGame from './ProposeGame';
 
-function DaoPage({ address, onSuccessAddProposal }) {
+function Page({ address, onSuccessAddProposal }) {
 
   const [proposalDescription, setProposalDescription] = useState('');
 
@@ -49,8 +49,8 @@ function DaoPage({ address, onSuccessAddProposal }) {
       return;
     }
     addProposal({
-      address: DaoContractAddress,
-      abi: DaoContractAbi,
+      address: ContractAddress,
+      abi: ContractAbi,
       functionName: "ProposeGame",
       account: address,
       args: [proposalDescription]
@@ -63,7 +63,7 @@ function DaoPage({ address, onSuccessAddProposal }) {
   // const getProposals = async () => {
   //   const tmpVoteOptions = []
   //   const proposalRegisteredEvent = await publicClient.getLogs({
-  //     address: DaoContractAddress,
+  //     address: ContractAddress,
   //     event: parseAbiItem('event ProposalRegistered(uint256 proposalId)'),
   //     fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
   //     toBlock: 'latest'
@@ -105,7 +105,7 @@ function DaoPage({ address, onSuccessAddProposal }) {
   );
 }
 
-export default DaoPage;
+export default Page;
 
 
 //     <Box pl="150px" pt="100px" width="calc(100vw - 150px)">
@@ -142,5 +142,5 @@ export default DaoPage;
 //   );
 // }
 
-// export default DaoPage;
+// export default Page;
 

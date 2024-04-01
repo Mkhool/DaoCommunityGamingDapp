@@ -1,10 +1,9 @@
+'use client'
 import React, { useEffect } from 'react'
 import Events from "../components/Events";
-import { DaoContractAddress, DaoContractAbi } from '@/constants';
+
 import NavBar from './NavBar';
-import { useReadContracts } from 'wagmi'
-import WorkflowStepper from './WorkflowStepper';
-import NextPhaseButton from './NextPhaseButton';
+
 import {
     Box,
     Grid,
@@ -26,12 +25,13 @@ import {
 import { StarIcon, TimeIcon, AtSignIcon, BellIcon } from '@chakra-ui/icons';
 import ProposeGame from './ProposeGame';
 import VoteGame from './VoteGame';
-
+import StartGameSession from './StartGameSession';
+import EndGameSession from './EndGameSession';
 const Admin = () => {
 
-    // GetBalanceJeton({
-    //     address: DaoContractAddress,
-    //     abi: DaoContractAbi,
+    // GetBalanceQuest({
+    //     address: ContractAddress,
+    //     abi: ContractAbi,
     //     functionName: "balanceOf",
     //     account: address,
     //     args: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266']
@@ -54,8 +54,6 @@ useEffect(() =>{
                             {/* Profil et Progression*/}
                             <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl' >
                                 <VStack spacing={4} align="stretch">
-                                    <ProposeGame/>
-                                    <VoteGame/>
                                 </VStack>
                             </GridItem> 
 
@@ -97,12 +95,13 @@ useEffect(() =>{
 
                             {/* Leaderboard */}
                             <GridItem colSpan={12} p={4} borderRadius="md" boxShadow='xl'>
-                                <VStack spacing={4}>
-                                    <Text fontSize="2xl" color="#7855de">Leaderboard</Text>
+                                <VStack spacing={3}>
+                                    <Text fontSize="2xl" color="#7855de">Administration</Text>
                                     <HStack divider={<Divider orientation="vertical" />} spacing={4}>
-                                        <Tag colorScheme="purple" borderRadius="full">LOL: 1500 LP</Tag>
-                                        <Tag colorScheme="purple" borderRadius="full">WoW: 1280 XP</Tag>
-                                        <Tag colorScheme="purple" borderRadius="full">Twitch: 999 Points</Tag>
+                                    <ProposeGame/>
+                                    <VoteGame/>
+                                    <StartGameSession/>
+                                    <EndGameSession/>
                                     </HStack>
                                 </VStack>
                             </GridItem>
