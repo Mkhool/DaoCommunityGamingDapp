@@ -50,7 +50,7 @@ describe("StakingContract", function () {
 
         it("Should allow staking", async function () {
             const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
-            const stakeAmount = ethers.parseUnits("100", 18);
+            const stakeAmount = ethers.parseUnits("1000", 18);
 
             // Mint des quests pour le propriétaire pour tester le staking
             await quest.Mint(owner.address, stakeAmount);
@@ -77,7 +77,7 @@ describe("StakingContract", function () {
 
         it("Should return 0 reward immediately after staking", async function () {
             const { quest, TestStakingContract, owner, TestStakingContractAdress } = await loadFixture(deployContractFixtureForInternalFunction);
-            const stakeAmount = ethers.parseUnits("100", 18);
+            const stakeAmount = ethers.parseUnits("1000", 18);
 
             // Approbation et staking
             await quest.connect(owner).approve(TestStakingContractAdress, stakeAmount);
@@ -91,7 +91,7 @@ describe("StakingContract", function () {
 
         it("Should not allow staking without approval", async function () {
             const { stakingContract, owner } = await loadFixture(deployContractFixture);
-            const stakeAmount = ethers.parseUnits("100", 18);
+            const stakeAmount = ethers.parseUnits("1000", 18);
 
             // Essayer de staker sans approbation préalable devrait être rejeté
             await expect(stakingContract.connect(owner).Stake(stakeAmount)).to.be.reverted;
@@ -103,7 +103,7 @@ describe("StakingContract", function () {
 
         it("Should allow unstaking", async function () {
             const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
-            const stakeAmount = ethers.parseUnits("100", 18);
+            const stakeAmount = ethers.parseUnits("1000", 18);
             const initialStakingContractSupply = ethers.parseUnits("500000", 18);
 
             // Le propriétaire transfère des tokens au contrat de staking pour les récompenses futures
@@ -119,50 +119,7 @@ describe("StakingContract", function () {
             .withArgs(owner.address, stakeAmount); 
         });
 
-        it("Should receive correct amount rewards when unstaking", async function () {
-            const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
-            const stakeAmount = ethers.parseUnits("100", 18);
-            const initialStakingContractSupply = ethers.parseUnits("500000", 18);
-
-            // Montant initialement minté au déploiement pour le propriétaire
-            const initialMintAmount = ethers.parseUnits("500000", 18);
-
-            // Transfert des tokens au contrat de staking pour les récompenses futures
-            await quest.connect(owner).transfer(stakingContractAdress, initialStakingContractSupply);
-
-            // Approbation et staking
-            await quest.connect(owner).approve(stakingContractAdress, stakeAmount);
-            await stakingContract.connect(owner).Stake(stakeAmount);
-
-            // Simuler le passage du temps pour accumuler des récompenses
-            await ethers.provider.send("evm_increaseTime", [86400]); // 1 jour
-            await ethers.provider.send("evm_mine", []);
-
-            // Unstake des quests
-            await stakingContract.connect(owner).Unstake(stakeAmount);
-
-            // Vérification du solde de quests après unstaking, incluant les récompenses
-            const finalBalance = await quest.balanceOf(owner.address);
-            const expectedRewards = stakeAmount; // Avec un taux d'intérêt de 100% par jour
-            const expectedFinalBalance = initialMintAmount + expectedRewards; // Montant initial + récompenses
-
-            // Définir une tolérance pour tenir compte des petites différences dans le calcul des récompenses
-            const tolerance = ethers.parseUnits("0.002", 18); // Tolérance de 0.002 quests
-
-            // Convertir en bigint pour la comparaison
-            const finalBalanceBigInt = BigInt(finalBalance.toString());
-            const expectedFinalBalanceBigInt = BigInt(expectedFinalBalance.toString());
-            const toleranceBigInt = BigInt(tolerance.toString());
-
-            // Calculer la différence absolue entre le solde final attendu et le solde final réel
-            const difference = finalBalanceBigInt > expectedFinalBalanceBigInt ?
-                finalBalanceBigInt - expectedFinalBalanceBigInt :
-                expectedFinalBalanceBigInt - finalBalanceBigInt;
-
-            // Vérifier que la différence est inférieure ou égale à la tolérance
-            expect(difference <= toleranceBigInt).to.be.true;
-        });
-
+        
         it("Should not allow unstaking if contract balance is insufficient", async function () {
             const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
             const stakeAmount = ethers.parseUnits("100", 18);

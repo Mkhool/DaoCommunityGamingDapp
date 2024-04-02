@@ -32,14 +32,17 @@ contract StakingContract is ReentrancyGuard, Ownable {
 
     /// @notice Constructeur pour initialiser le contrat avec le token de staking spécifique et un taux d'intérêt initial.
     /// @param _stakingToken L'adresse du token ERC20 à utiliser pour le staking.
+
     constructor(address _stakingToken) Ownable(msg.sender) {
         stakingToken = IERC20(_stakingToken);
         _dailyInterestRate = 100; // taux fortement exagérés pour les besoins de la soutenance, il ne reflete pas un scénario d'utilisation réelle
     }
 
+
     /// @notice Permet à un utilisateur de déposer (staker) des tokens dans le contrat pour commencer à accumuler des récompenses.
     /// @dev Transfère les tokens du staker au contrat, met à jour les soldes, les états de staking et ajoute le montant au total staké
     /// @param _amount Le montant de tokens à staker.
+
     function Stake(uint256 _amount) external nonReentrant {
         if (_amount <= 0) revert CanStakeZeroToken();
         totalStaked += _amount;
@@ -50,9 +53,11 @@ contract StakingContract is ReentrancyGuard, Ownable {
         emit Staked(msg.sender, _amount);
     }
 
+
     /// @notice Permet à un utilisateur de retirer (unstake) ses tokens et les récompenses accumulées du contrat.
     /// @dev Transfère les tokens du contrat au staker, calcule les récompenses, ajuste le solde de staking,  met à jour les états de staking et soustrait le montant du total staké.
     /// @param _amount Le montant de tokens à retirer.
+
     function Unstake(uint256 _amount) external nonReentrant {
         if (!isStaking[msg.sender]) revert YouDontHaveTokenToUnstake();
         if (_amount > stakingBalance[msg.sender])
@@ -71,20 +76,31 @@ contract StakingContract is ReentrancyGuard, Ownable {
         emit Unstaked(msg.sender, _amount);
     }
 
+
     /// @notice Permet au propriétaire de modifier le taux d'intérêt quotidien pour le calcul des récompenses.
     /// @dev Cette fonction est restreinte au propriétaire du contrat.
     /// @param newRate Le nouveau taux d'intérêt quotidien, exprimé en pourcentage avec une précision de deux décimales (par exemple, 100 pour 1%).
+    
     function SetDailyInterestRate(uint16 newRate) public onlyOwner {
         _dailyInterestRate = newRate;
+
     }
+   
+
+    /// @notice Renvoie le taux d'intérêt quotidien actuel pour le staking
+    /// @dev Le taux d'intérêt est exprimé en pourcentage avec une précision de deux décimales
+    /// @return  taux d'intérêt quotidien actuel
+    
     function DailyInterestRate() public view returns (uint16) {
         return _dailyInterestRate;
     }
+
 
     /// @notice Calcule la récompense accumulée pour un utilisateur en fonction de son montant en staking et du temps écoulé.
     /// @dev Cette fonction retourne le montant des récompenses calculé sans affecter le solde de l'utilisateur.
     /// @param gamer L'adresse de l'utilisateur pour lequel calculer les récompenses.
     /// @return reward Le montant des récompenses accumulées pour l'utilisateur.
+  
     function CalculateReward(address gamer) internal view returns (uint256) {
         uint256 stakedAmount = stakingBalance[gamer];
         if (stakedAmount == 0 || block.timestamp <= _stakeTimes[gamer]) {

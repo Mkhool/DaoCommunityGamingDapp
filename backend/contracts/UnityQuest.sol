@@ -8,11 +8,15 @@ import "./StakingContract.sol";
 /**
  * @title  UnityQuest
  * @author Khoule Medhi
- * @notice Contrat intelligent pour un système de DAO dédié au gaming. Permet la création de sessions de jeu, la participation des utilisateurs, et la gestion des propositions de jeu.
+ * @notice Contrat intelligent pour un système de DAO dédié au gaming. Permet la création de sessions de jeu, 
+ * la participation des a des sessions de jeu et etre récompensé pour cela, 
+ * ainsi que la gestion des propositions de jeu a travers une DAO
  */
 
 interface IQuest {
     function Mint(address to, uint256 amount) external;
+    function BuyTokens() external;
+    function Withdraw() external;
 }
 
 interface IStakingContract {
@@ -30,14 +34,17 @@ contract UnityQuest is Ownable {
     IQuest public questContract;
     IStakingContract public stakingContract;
 
-    uint8 public quorumPercentage = 50;
+    uint8 public quorumPercentage = 20;
     uint32 private nextGameId = 1;
     uint256 public currentSessionId;
+    uint256 public voteDuration = 20;
+    uint256 public minimumStakeAmount = 1000 * 10 ** 18;
 
     struct GameSession {
         uint256 id;
         uint256 gameId;
         bool isActive;
+        uint256 startVoteTime;
         address[] gamerInSession;
         mapping(string => uint256) choicesCount;
         mapping(uint256 => string) winningDirectionPerCycle;
@@ -63,6 +70,7 @@ contract UnityQuest is Ownable {
     GameStatus public gameStatus = GameStatus.NotStarted;
 
     mapping(uint256 => GameSession) public gameSessions;
+    mapping(uint256 => uint256) public startVoteTime;
     mapping(uint256 => GameProposal) public gameProposals;
     mapping(address => Gamer) public Gamers;
     mapping(address => uint256) public experience;
@@ -80,16 +88,16 @@ contract UnityQuest is Ownable {
     event GameProposed(uint256 proposalId, string gameName);
     event GameProposalAccepted(uint256 indexed gameId);
 
-    modifier onlyStakingGamer() {
-        if (stakingContract.stakingBalance(msg.sender) <= 0) {
-            revert MustHaveTokensStakedToParticipate();
-        }
-        _;
-    }
-
     modifier inGameStatus(GameStatus expectedStatus) {
         if (gameStatus != expectedStatus) {
             revert UnauthorizedStateTransition(expectedStatus, gameStatus);
+        }
+        _;
+    }
+    modifier onlyStakingGamer() {
+        uint256 stakedAmount = stakingContract.stakingBalance(msg.sender);
+        if (stakedAmount < minimumStakeAmount) {
+            revert InsufficientStake(stakedAmount, minimumStakeAmount);
         }
         _;
     }
@@ -102,10 +110,12 @@ contract UnityQuest is Ownable {
 
     error EmptyProposal();
     error GameProposalDoesNotExist();
-    error MustHaveTokensStakedToParticipate();
+    error InsufficientStake(uint256 stakedAmount, uint256 requiredMinimumStake);
     error SessionNotActive(uint256 sessionId);
     error ProposalIdOutOfBounds(uint256 proposalId, uint256 nextGameId);
     error GameDoesNotExist(uint256 gameId);
+    error InvalidChoice(string direction);
+
     error UnauthorizedStateTransition(
         GameStatus expectedStatus,
         GameStatus currentStatus
@@ -152,7 +162,7 @@ contract UnityQuest is Ownable {
 
     /**
      * @notice Permet à un utilisateur de voter pour une proposition de jeu.
-     * @dev Le vote est pondéré par le montant misé par l'utilisateur. Émet un événement `GameProposalAccepted` si le quorum est atteint.
+     * @dev Le vote est pondéré par le montant skaté par l'utilisateur. Émet un événement `GameProposalAccepted` si le quorum est atteint.
      * @param _gameId Identifiant de la proposition de jeu.
      */
     function VoteForGame(uint256 _gameId) public onlyStakingGamer {
@@ -226,13 +236,13 @@ contract UnityQuest is Ownable {
         if (gameProposals[gameId].id == 0) {
             revert GameDoesNotExist(gameId);
         }
-        currentSessionId++; // Incrémenter l'ID pour une nouvelle session
+        currentSessionId++;
 
         GameSession storage session = gameSessions[currentSessionId];
         session.id = currentSessionId;
         session.isActive = true;
-        session.gameId = gameId; // Stocker l'ID du jeu dans la session
-        session.currentCycle = 1; // Initialiser le cycle de vote à 1
+        session.gameId = gameId;
+        session.currentCycle = 1;
         gameStatus = GameStatus.Started;
         emit GameStatusChanged(GameStatus.NotStarted, GameStatus.Started);
         emit GameSessionStarted(currentSessionId, gameId);
@@ -254,7 +264,6 @@ contract UnityQuest is Ownable {
         uint256 baseExperienceReward = 10; // Récompense de base pour la participation
         uint256 bonusExperience = 100; // Bonus pour avoir choisi la direction majoritaire
 
-        // Distribuer les récompenses
         for (uint256 i = 0; i < session.gamerInSession.length; i++) {
             address gamerAddress = session.gamerInSession[i];
             uint256 totalCorrectChoices = CountCorrectChoices(
@@ -262,15 +271,12 @@ contract UnityQuest is Ownable {
                 gamerAddress
             );
 
-            // Chaque joueur reçoit une récompense de base pour la participation
             uint256 totalReward = baseExperienceReward;
 
-            // Ajout d'un bonus basé sur les choix corrects
             if (totalCorrectChoices > 0) {
                 totalReward += bonusExperience * totalCorrectChoices;
             }
 
-            // Ajouter l'expérience au joueur
             experience[gamerAddress] += totalReward;
         }
 
@@ -337,31 +343,53 @@ contract UnityQuest is Ownable {
             revert SessionNotActive(sessionId);
         }
         gameSessions[sessionId].gamerInSession.push(msg.sender);
-
         emit GamerJoinedSession(msg.sender, sessionId);
     }
 
-    /**
-     * @notice Permet à un joueur de faire un choix dans une session de jeu active.
-     * @dev Le joueur ne peut pas participer plus d'une fois par cycle de vote.
-     * Enregistre le choix du joueur et met à jour les comptes de choix pour la session.
-     * Peut potentiellement changer la direction gagnante du cycle actuel.
-     * @param _sessionId Identifiant de la session de jeu.
-     * @param _direction Choix du joueur pour le cycle de vote actuel.
+   /**
+     * @notice Permet à un joueur de faire un choix de direction prédéfini (haut, bas, gauche, droite) dans une session de jeu active.
+     * @dev 
+     * - Les joueurs peuvent voter une fois par cycle de vote. Un cycle de vote est déterminé par `voteDuration` et commence à `startVoteTime`.
+     * - `block.timestamp` est utilisé pour s'assurer que le vote est effectué dans le cycle de temps approprié.
+     * - Les votes sont comptabilisés par choix de direction, et chaque vote d'un joueur est stocké pour permettre la vérification de la participation au cycle courant.
+     * - À la fin de chaque cycle de vote, si le temps alloué au vote est écoulé (`block.timestamp >= session.startVoteTime + voteDuration`) ou si tous les participants ont voté, la direction ayant le plus de votes est choisie comme direction gagnante pour le cycle.
+     * - Si la majorité n'est pas atteinte ou en cas d'égalité, une direction prédéfinie est appliquée comme mécanisme de secours. Actuellement, cette direction de secours est fixée à "haut" par `DetermineWinningDirection`.
+     * - Après la détermination de la direction gagnante, la session est préparée pour le prochain cycle de vote: le compteur de cycle est incrémenté, les choix des joueurs sont réinitialisés, et `startVoteTime` est remis à zéro pour le nouveau cycle.
+     * La fonction révert avec `AlreadyParticipatedInCurrentCycle` si un joueur tente de voter plus d'une fois dans le même cycle.
+     * 
+     * @param _sessionId Identifiant de la session de jeu pour laquelle le joueur fait un choix. Ce doit être une session active.
+     * @param _direction Le choix de direction fait par le joueur. Doit être une des valeurs valides prédéfinies (actuellement non vérifié dans ce snippet).
      */
     function MakeChoice(
         uint256 _sessionId,
         string memory _direction
     ) external onlyStakingGamer inGameStatus(GameStatus.Started) {
+         if (
+        keccak256(abi.encodePacked(_direction)) != keccak256(abi.encodePacked("haut")) &&
+        keccak256(abi.encodePacked(_direction)) != keccak256(abi.encodePacked("bas")) &&
+        keccak256(abi.encodePacked(_direction)) != keccak256(abi.encodePacked("gauche")) &&
+        keccak256(abi.encodePacked(_direction)) != keccak256(abi.encodePacked("droite"))
+    ) {
+        revert InvalidChoice(_direction);
+    }
         GameSession storage session = gameSessions[_sessionId];
-        if (!IsGamerInSession(msg.sender, _sessionId)) {
-            session.gamerInSession.push(msg.sender);
+
+        if (session.startVoteTime == 0) {
+            session.startVoteTime = block.timestamp;
         }
-        if (session.lastCycleParticipated[msg.sender] >= session.currentCycle) {
+
+        if (
+            IsGamerInSession(msg.sender, _sessionId) &&
+            session.lastCycleParticipated[msg.sender] >= session.currentCycle
+        ) {
             revert AlreadyParticipatedInCurrentCycle(
                 msg.sender,
                 session.currentCycle
             );
+        }
+
+        if (!IsGamerInSession(msg.sender, _sessionId)) {
+            session.gamerInSession.push(msg.sender);
         }
 
         session.playerChoicesPerCycle[msg.sender][
@@ -371,13 +399,64 @@ contract UnityQuest is Ownable {
         session.lastCycleParticipated[msg.sender] = session.currentCycle;
 
         if (
-            session.choicesCount[_direction] > session.gamerInSession.length / 2
+            block.timestamp >= session.startVoteTime + voteDuration ||
+            session.gamerInSession.length == CountTotalVotes(session)
         ) {
-            session.winningDirectionPerCycle[session.currentCycle] = _direction;
-            emit ChoiceMade(_sessionId, session.currentCycle, _direction);
-            ResetSessionChoices(_sessionId);
-            session.currentCycle++;
+            string memory winningDirection = DetermineWinningDirection();
+            ApplyWinningDirection(_sessionId, winningDirection);
         }
+    }
+
+    /**
+     * @notice Compte le nombre total de votes exprimés dans le cycle courant de la session de jeu.
+     * @dev Utilise la liste des participants et vérifie ceux qui ont participé au cycle courant.
+     * @param session La session de jeu dont il faut compter les votes.
+     * @return totalVotes nombre total de votes exprimés dans le cycle courant.
+     */
+    function CountTotalVotes(
+        GameSession storage session
+    ) private view returns (uint256 totalVotes) {
+        totalVotes = 0;
+        for (uint i = 0; i < session.gamerInSession.length; i++) {
+            if (
+                session.lastCycleParticipated[session.gamerInSession[i]] ==
+                session.currentCycle
+            ) {
+                totalVotes++;
+            }
+        }
+        return totalVotes;
+    }
+
+      /**
+     * @notice Détermine la direction gagnante pour le cycle de vote actuel de manière déterministe.
+     * @dev Actuellement, cette fonction retourne toujours "haut" pour simplifier. À l'avenir, elle pourrait implémenter une logique plus complexe.
+     * @return direction gagnante déterminée.
+     */
+    function DetermineWinningDirection() private pure returns (string memory) {
+        return "haut";
+    }
+
+    /**
+     * @notice Applique la direction gagnante pour le cycle courant de la session de jeu et prépare le cycle suivant.
+     * @dev Cette fonction est appelée en interne pour finaliser le cycle de vote en cours.
+     * @param _sessionId L'identifiant de la session de jeu en cours.
+     * @param winningDirection La direction gagnante pour le cycle courant.
+     */
+
+    function ApplyWinningDirection(
+        uint256 _sessionId,
+        string memory winningDirection
+    ) private {
+        GameSession storage session = gameSessions[_sessionId];
+        session.winningDirectionPerCycle[
+            session.currentCycle
+        ] = winningDirection;
+        emit ChoiceMade(_sessionId, session.currentCycle, winningDirection);
+
+        session.startVoteTime = 0;
+        session.currentCycle++;
+        ResetSessionChoices(_sessionId);
     }
 
     /**
@@ -401,8 +480,8 @@ contract UnityQuest is Ownable {
     }
 
     /**
-     * @notice Détermine le rang d'un joueur basé sur le montant des quests qu'il a misés.
-     * @dev Les rangs sont attribués selon différents seuils de montant misé.
+     * @notice Détermine le rang d'un joueur basé sur le montant des quests qu'il a skatés.
+     * @dev Les rangs sont attribués selon différents seuils de montant skaté.
      * @param _player L'adresse du joueur dont on veut déterminer le rang.
      * @return Le rang du joueur sous forme de chaîne de caractères.
      */
@@ -459,5 +538,37 @@ contract UnityQuest is Ownable {
     function BanGamer(address _address) external onlyOwner {
         delete Gamers[_address];
         emit GamerBanned(_address);
+    }
+
+    /**
+     * @notice Permet au propriétaire du contrat de définir directement la direction gagnante pour une session de jeu.
+     * @dev Cette fonction est destinée à être utilisée par le propriétaire pour des ajustements ou interventions manuelles.
+     * Elle bypass les vérifications habituelles de participation et de vote.
+     * emet l'évenement ChoiceMade pour signaler que la direction a été définie avec succès et enregistrer l'action.
+     * @param _sessionId L'ID de la session de jeu concernée.
+     * @param _direction La direction que le propriétaire souhaite appliquer comme gagnante pour le cycle courant.
+     */
+    function SetChoiceAsOwner(
+        uint256 _sessionId,
+        string memory _direction
+    ) external onlyOwner {
+        GameSession storage session = gameSessions[_sessionId];
+
+        session.winningDirectionPerCycle[session.currentCycle] = _direction;
+        emit ChoiceMade(_sessionId, session.currentCycle, _direction);
+
+        ResetSessionChoices(_sessionId);
+        session.currentCycle++;
+    }
+
+    /**
+     * @notice Définit le montant minimal de tokens que les utilisateurs doivent staker pour participer à la DAO.
+     * @dev Cette fonction peut uniquement être appelée par le propriétaire du contrat.
+     * @param _minimumStakeAmount Le nouveau montant minimal de staking en wei.
+     */
+    function SetMinimumStakeAmount(
+        uint256 _minimumStakeAmount
+    ) public onlyOwner {
+        minimumStakeAmount = _minimumStakeAmount;
     }
 }
