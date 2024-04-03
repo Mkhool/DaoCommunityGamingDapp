@@ -7,14 +7,6 @@ import { ContractAddress, ContractAbi } from '@/constants';
 
 function OwnerChoice({ address, onSuccessMakechoice }) {
 
-  useWatchContractEvent({
-    address: ContractAddress, 
-    abi: ContractAbi, 
-    eventName: 'OwnerChoice', 
-    onLogs(logs) {
-      console.log('New logs!', logs)
-    },
-  });
 
   const [proposalDescription, setProposalDescription] = useState('');
   const [SessionId, setSessionId] = useState('');

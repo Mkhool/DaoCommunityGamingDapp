@@ -86,7 +86,7 @@ function Page({ address, onSuccessAddProposal }) {
   return (
  <Box display="flex" flexDirection="column" alignItems="center" justifyContent="center" height="100vh" width="100vw">
   <VStack spacing={4}>
-    {/* <Tag>Add a new proposal</Tag>
+    <Tag>Add a new proposal</Tag>
     <Input
       placeholder="Describe your proposal"
       value={proposalDescription}
@@ -97,7 +97,7 @@ function Page({ address, onSuccessAddProposal }) {
       isLoading={isProposalAdding}
     >
       Propose Game
-    </Button> */}
+    </Button>
    
   </VStack> 
   <ProposeGame/>

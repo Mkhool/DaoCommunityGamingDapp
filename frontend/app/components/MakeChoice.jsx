@@ -8,9 +8,9 @@ import { ContractAddress, ContractAbi } from '@/constants';
 function MakeChoice({ address, onSuccessMakechoice }) {
 
  useWatchContractEvent({
-    address: ContractAddress, // L'adresse de votre contrat
-    abi: ContractAbi, // L'ABI de votre contrat
-    eventName: 'ChoiceMade', // Le nom de l'événement à écouter
+    address: ContractAddress, 
+    abi: ContractAbi, 
+    eventName: 'ChoiceMade',
     onLogs(logs) {
       console.log('New logs!', logs)
     },
@@ -91,8 +91,6 @@ function MakeChoice({ address, onSuccessMakechoice }) {
     });
 
   };
-
-
 
   return (
 <Box>

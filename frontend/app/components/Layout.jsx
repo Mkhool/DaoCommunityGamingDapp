@@ -18,10 +18,8 @@ const Layout = ({ children }) => {
         p="2rem"
       >
         {children}
-      </Flex>
-      <Footer />
-    </Flex>
-  )
+      </Flex></Flex>
+      )
 }
 
-export default Layout
+      export default Layout
