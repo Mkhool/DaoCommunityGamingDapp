@@ -3,7 +3,7 @@ const hre = require("hardhat");
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
 
 async function main() {
-    const stakeAmount = ethers.parseUnits("100", 18);
+    const stakeAmount = ethers.parseUnits("10000", 18);
     const initialStakingContractSupply = ethers.parseUnits("999000", 18);
     // Supposons que deployContractFixture est votre fonction de déploiement
     const { quest, stakingContract, stakingContractAddress, owner } = await loadFixture(deployContractFixture);

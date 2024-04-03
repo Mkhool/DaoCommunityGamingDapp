@@ -301,7 +301,7 @@ describe("UnityQuest", function () {
 
 
             await expect(unityContract.connect(owner).SetChoiceAsOwner(1, "haut"))
-                .to.emit(unityContract, "ChoiceMade")
+                .to.emit(unityContract, "OwnerChoice")
                 .withArgs(1, 0, "haut");
         });
 

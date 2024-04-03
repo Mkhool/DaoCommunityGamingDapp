@@ -7,7 +7,14 @@ import { ContractAddress, ContractAbi } from '@/constants';
 
 function OwnerChoice({ address, onSuccessMakechoice }) {
 
-
+  useWatchContractEvent({
+    address: ContractAddress, 
+    abi: ContractAbi, 
+    eventName: 'OwnerChoice', 
+    onLogs(logs) {
+      console.log('New logs!', logs)
+    },
+  });
 
   const [proposalDescription, setProposalDescription] = useState('');
   const [SessionId, setSessionId] = useState('');
@@ -81,17 +88,8 @@ function OwnerChoice({ address, onSuccessMakechoice }) {
       args: [sessionIdNumber, proposalDescription]
       
     });
-
   };
 
-  useWatchContractEvent({
-    address: ContractAddress, // L'adresse de votre contrat
-    abi: ContractAbi, // L'ABI de votre contrat
-    eventName: 'SetChoiceAsOwner', // Le nom de l'événement à écouter
-    onLogs(logs) {
-      console.log('New logs!', logs)
-    },
-  });
 
 
   return (

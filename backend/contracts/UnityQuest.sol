@@ -8,8 +8,8 @@ import "./StakingContract.sol";
 /**
  * @title  UnityQuest
  * @author Khoule Medhi
- * @notice Contrat intelligent pour un système de DAO dédié au gaming. Permet la création de sessions de jeu, 
- * la participation des a des sessions de jeu et etre récompensé pour cela, 
+ * @notice Contrat intelligent pour un système de DAO dédié au gaming. Permet la création de sessions de jeu,
+ * la participation des a des sessions de jeu et etre récompensé pour cela,
  * ainsi que la gestion des propositions de jeu a travers une DAO
  */
 
@@ -85,6 +85,13 @@ contract UnityQuest is Ownable {
         uint256 cycle,
         string direction
     );
+
+    event OwnerChoice(
+        uint256 indexed sessionId,
+        uint256 cycle,
+        string direction
+    );
+
     event GameProposed(uint256 proposalId, string gameName);
     event GameProposalAccepted(uint256 indexed gameId);
 
@@ -346,9 +353,9 @@ contract UnityQuest is Ownable {
         emit GamerJoinedSession(msg.sender, sessionId);
     }
 
-   /**
+    /**
      * @notice Permet à un joueur de faire un choix de direction prédéfini (haut, bas, gauche, droite) dans une session de jeu active.
-     * @dev 
+     * @dev
      * - Les joueurs peuvent voter une fois par cycle de vote. Un cycle de vote est déterminé par `voteDuration` et commence à `startVoteTime`.
      * - `block.timestamp` est utilisé pour s'assurer que le vote est effectué dans le cycle de temps approprié.
      * - Les votes sont comptabilisés par choix de direction, et chaque vote d'un joueur est stocké pour permettre la vérification de la participation au cycle courant.
@@ -356,7 +363,7 @@ contract UnityQuest is Ownable {
      * - Si la majorité n'est pas atteinte ou en cas d'égalité, une direction prédéfinie est appliquée comme mécanisme de secours. Actuellement, cette direction de secours est fixée à "haut" par `DetermineWinningDirection`.
      * - Après la détermination de la direction gagnante, la session est préparée pour le prochain cycle de vote: le compteur de cycle est incrémenté, les choix des joueurs sont réinitialisés, et `startVoteTime` est remis à zéro pour le nouveau cycle.
      * La fonction révert avec `AlreadyParticipatedInCurrentCycle` si un joueur tente de voter plus d'une fois dans le même cycle.
-     * 
+     *
      * @param _sessionId Identifiant de la session de jeu pour laquelle le joueur fait un choix. Ce doit être une session active.
      * @param _direction Le choix de direction fait par le joueur. Doit être une des valeurs valides prédéfinies (actuellement non vérifié dans ce snippet).
      */
@@ -364,14 +371,18 @@ contract UnityQuest is Ownable {
         uint256 _sessionId,
         string memory _direction
     ) external onlyStakingGamer inGameStatus(GameStatus.Started) {
-         if (
-        keccak256(abi.encodePacked(_direction)) != keccak256(abi.encodePacked("haut")) &&
-        keccak256(abi.encodePacked(_direction)) != keccak256(abi.encodePacked("bas")) &&
-        keccak256(abi.encodePacked(_direction)) != keccak256(abi.encodePacked("gauche")) &&
-        keccak256(abi.encodePacked(_direction)) != keccak256(abi.encodePacked("droite"))
-    ) {
-        revert InvalidChoice(_direction);
-    }
+        if (
+            keccak256(abi.encodePacked(_direction)) !=
+            keccak256(abi.encodePacked("haut")) &&
+            keccak256(abi.encodePacked(_direction)) !=
+            keccak256(abi.encodePacked("bas")) &&
+            keccak256(abi.encodePacked(_direction)) !=
+            keccak256(abi.encodePacked("gauche")) &&
+            keccak256(abi.encodePacked(_direction)) !=
+            keccak256(abi.encodePacked("droite"))
+        ) {
+            revert InvalidChoice(_direction);
+        }
         GameSession storage session = gameSessions[_sessionId];
 
         if (session.startVoteTime == 0) {
@@ -428,7 +439,7 @@ contract UnityQuest is Ownable {
         return totalVotes;
     }
 
-      /**
+    /**
      * @notice Détermine la direction gagnante pour le cycle de vote actuel de manière déterministe.
      * @dev Actuellement, cette fonction retourne toujours "haut" pour simplifier. À l'avenir, elle pourrait implémenter une logique plus complexe.
      * @return direction gagnante déterminée.
@@ -555,7 +566,7 @@ contract UnityQuest is Ownable {
         GameSession storage session = gameSessions[_sessionId];
 
         session.winningDirectionPerCycle[session.currentCycle] = _direction;
-        emit ChoiceMade(_sessionId, session.currentCycle, _direction);
+        emit OwnerChoice(_sessionId, session.currentCycle, _direction);
 
         ResetSessionChoices(_sessionId);
         session.currentCycle++;

@@ -70,14 +70,15 @@ const Events = ({ }) => {
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
         })
+  
         const OwnerChoice = await publicClient.getLogs({
             address: ContractAddress,
-            event: parseAbiItem('event Owner(uint256 _sessionId, string _direction)'),
+            event: parseAbiItem('event OwnerChoice(uint256 _sessionId, string _direction)'),
             fromBlock: BigInt(process.env.NEXT_PUBLIC_EVENT_BLOCK_NUMBER),
             toBlock: 'latest'
         })
 
-
+        console.log(OwnerChoice);
         const combinedEvents = [...GameSessionEnded, ...GameProposed, ...GameSessionStarted, ...GameProposalAccepted, ...ChoiceMade, ...OwnerChoice].map(event => {
             let eventData = {
                 type: 'Unknown',
@@ -134,7 +135,7 @@ const Events = ({ }) => {
                     eventData.type = 'SetChoiceAsOwner';
                     // eventData.address = event.args.address;
                     // eventData._gameId = event.args._gameId;
-                    eventData.description = `Gamer ${eventData.SetChoiceAsOwner} voted for direction ${eventData._direction}`;
+                    eventData.description = `Owner set direction to ${event.args._direction}`;
                     eventData.hash = shortenHash(event.transactionHash);
                     break;
             }
