@@ -114,6 +114,11 @@ export const QuestContractAbi= [
     "type": "error"
   },
   {
+    "inputs": [],
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
@@ -183,6 +188,13 @@ export const QuestContractAbi= [
     "type": "event"
   },
   {
+    "inputs": [],
+    "name": "BuyTokens",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -196,6 +208,13 @@ export const QuestContractAbi= [
       }
     ],
     "name": "Mint",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "Withdraw",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -321,6 +340,19 @@ export const QuestContractAbi= [
         "internalType": "string",
         "name": "",
         "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "tokenPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -731,8 +763,30 @@ export const ContractAbi= [
     "type": "error"
   },
   {
-    "inputs": [],
-    "name": "MustHaveTokensStakedToParticipate",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "stakedAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "requiredMinimumStake",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientStake",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "direction",
+        "type": "string"
+      }
+    ],
+    "name": "InvalidChoice",
     "type": "error"
   },
   {
@@ -945,6 +999,31 @@ export const ContractAbi= [
     "inputs": [
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "sessionId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "cycle",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "direction",
+        "type": "string"
+      }
+    ],
+    "name": "OwnerChoice",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "address",
         "name": "previousOwner",
         "type": "address"
@@ -1138,6 +1217,37 @@ export const ContractAbi= [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_sessionId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_direction",
+        "type": "string"
+      }
+    ],
+    "name": "SetChoiceAsOwner",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_minimumStakeAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "SetMinimumStakeAmount",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "uint8",
         "name": "newQuorumPercentage",
         "type": "uint8"
@@ -1272,6 +1382,11 @@ export const ContractAbi= [
       },
       {
         "internalType": "uint256",
+        "name": "startVoteTime",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
         "name": "currentCycle",
         "type": "uint256"
       }
@@ -1287,6 +1402,19 @@ export const ContractAbi= [
         "internalType": "enum UnityQuest.GameStatus",
         "name": "",
         "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "minimumStakeAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -1354,6 +1482,25 @@ export const ContractAbi= [
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "startVoteTime",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "newOwner",
         "type": "address"
@@ -1362,6 +1509,19 @@ export const ContractAbi= [
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "voteDuration",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ];

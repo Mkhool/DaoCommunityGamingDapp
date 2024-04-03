@@ -30,7 +30,6 @@ function EndGameSession({ address, Events }) {
 
   const toast = useToast();
 
-  // Voter
   const { writeContract: EndGameSession, isLoading: isGameEnded } = useWriteContract({
     mutation: {
       onSuccess() {

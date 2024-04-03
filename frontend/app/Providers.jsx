@@ -21,7 +21,7 @@ const config = getDefaultConfig({
   appName: 'UnityQuest',
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
   chains: [hardhat], // change to hardhat if needed
-  ssr: true, // If your dApp uses server side rendering (SSR)
+  ssr: true, 
 });
 
 const theme = extendTheme({

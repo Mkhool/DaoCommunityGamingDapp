@@ -5,37 +5,39 @@ import { Box, Button, Input, Text, useToast, VStack , Tag } from '@chakra-ui/rea
 import { useWriteContract, useWatchContractEvent } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
 
-function ProposeGame({ address, onSuccessAddProposal, Events }) {
+function MakeChoice({ address, onSuccessMakechoice }) {
 
  useWatchContractEvent({
     address: ContractAddress, // L'adresse de votre contrat
     abi: ContractAbi, // L'ABI de votre contrat
-    eventName: 'GameProposed', // Le nom de l'événement à écouter
+    eventName: 'ChoiceMade', // Le nom de l'événement à écouter
     onLogs(logs) {
       console.log('New logs!', logs)
     },
   });
 
+
   const [proposalDescription, setProposalDescription] = useState('');
+  const [SessionId, setSessionId] = useState('');
 
   const toast = useToast();
 
   // Écrire une nouvelle proposition
-  const { writeContract: ProposeGame, isLoading: isProposalAdding } = useWriteContract({
+  const { writeContract: MakeChoice, isLoading: isProposalAdding } = useWriteContract({
     mutation: {
       onSuccess() {
         toast({
-          title: "Game proposal has been sent.",
+          title: "Direction has been sent.",
           status: "success",
           duration: 9000,
           isClosable: true,
         });
         setProposalDescription('');
-        onSuccessAddProposal();
+        onSuccessMakechoice();
       },
       onError(error) {
         toast({
-          title: "Failed to propose a Game.",
+          title: "Failed to send direction.",
           description: error.shortMessage,
           status: "error",
           duration: 9000,
@@ -46,6 +48,29 @@ function ProposeGame({ address, onSuccessAddProposal, Events }) {
   });
 
   const handleProposalSubmission = () => {
+    if (!proposalDescription.trim() ||!SessionId.trim()) {
+      toast({
+        title: 'Description cannot be empty.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const sessionIdNumber = parseInt(SessionId, 10);
+
+    if (isNaN(sessionIdNumber)) {
+      toast({
+        title: 'Invalid Session ID',
+        description: 'Session ID must be a number.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+  
     if (!proposalDescription.trim()) {
       toast({
         title: 'Description cannot be empty.',
@@ -55,12 +80,13 @@ function ProposeGame({ address, onSuccessAddProposal, Events }) {
       });
       return;
     }
-    ProposeGame({
+
+    MakeChoice({
       address: ContractAddress,
       abi: ContractAbi,
-      functionName: "ProposeGame",
+      functionName: "MakeChoice",
       account: address,
-      args: [proposalDescription]
+      args: [sessionIdNumber, proposalDescription]
       
     });
 
@@ -73,7 +99,12 @@ function ProposeGame({ address, onSuccessAddProposal, Events }) {
   <VStack spacing={4}>
    
     <Input
-      placeholder="Describe your game proposal"
+      placeholder="Session ID"
+      value={SessionId}
+      onChange={(e) => setSessionId(e.target.value)}
+    />
+        <Input
+      placeholder="Direction"
       value={proposalDescription}
       onChange={(e) => setProposalDescription(e.target.value)}
     />
@@ -81,7 +112,7 @@ function ProposeGame({ address, onSuccessAddProposal, Events }) {
       onClick={handleProposalSubmission}
       isLoading={isProposalAdding}
     >
-      Propose a game
+      Submit Choice
     </Button>
   </VStack>
  
@@ -89,4 +120,4 @@ function ProposeGame({ address, onSuccessAddProposal, Events }) {
   );
 }
 
-export default ProposeGame;
+export default MakeChoice;

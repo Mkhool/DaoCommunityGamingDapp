@@ -22,20 +22,19 @@ import {
     Tag 
 
 } from '@chakra-ui/react';
-import { StarIcon, TimeIcon, AtSignIcon, BellIcon } from '@chakra-ui/icons';
+import { TimeIcon, AtSignIcon  } from '@chakra-ui/icons';
 import ProposeGame from './ProposeGame';
 import VoteGame from './VoteGame';
 import StartGameSession from './StartGameSession';
 import EndGameSession from './EndGameSession';
+import MakeChoice from './MakeChoice';
+
+import OwnerChoice from './OwnerChoice';
+
+
 const Admin = () => {
 
-    // GetBalanceQuest({
-    //     address: ContractAddress,
-    //     abi: ContractAbi,
-    //     functionName: "balanceOf",
-    //     account: address,
-    //     args: ['0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266']
-    //   });
+
     
 useEffect(() =>{
 
@@ -45,8 +44,6 @@ useEffect(() =>{
     <>
                 <Box display="flex">
                  <NavBar />
-
-
                  <Box flex="1" ml="150px" maxWidth="calc(100vw - 150px - 2rem)">
       <Box p={35} color="white" minH="100vh">
         <Grid templateColumns="repeat(12, 1fr)" gap={6}>
@@ -54,6 +51,7 @@ useEffect(() =>{
                             {/* Profil et Progression*/}
                             <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl' >
                                 <VStack spacing={4} align="stretch">
+                                 
                                 </VStack>
                             </GridItem> 
 
@@ -101,6 +99,7 @@ useEffect(() =>{
                                     <ProposeGame/>
                                     <VoteGame/>
                                     <StartGameSession/>
+                                    <MakeChoice/>
                                     <EndGameSession/>
                                     </HStack>
                                 </VStack>
@@ -122,7 +121,7 @@ useEffect(() =>{
                             <GridItem colSpan={4}  p={4} borderRadius="md" boxShadow='xl'>
                                 <VStack spacing={4}>
                                     <Text fontSize="2xl" color="#7855de">Événements en Direct</Text>
-             
+             <OwnerChoice/>
                                 </VStack>
                             </GridItem>
                             <GridItem colSpan={4} p={4} borderRadius="md" boxShadow='xl'>

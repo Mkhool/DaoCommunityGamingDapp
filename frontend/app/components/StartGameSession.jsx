@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Button, Input, Text, useToast, VStack , Tag } from '@chakra-ui/react';
+import { Box, Button, Input, Text, useToast, VStack, Tag } from '@chakra-ui/react';
 import { useWriteContract, useWatchContractEvent } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
 
 
 function StartGameSession({ address, Events }) {
 
- useWatchContractEvent({
+  useWatchContractEvent({
     address: ContractAddress, // L'adresse de votre contrat
     abi: ContractAbi, // L'ABI de votre contrat
     eventName: 'GameSessionStarted', // Le nom de l'événement à écouter
@@ -25,8 +25,8 @@ function StartGameSession({ address, Events }) {
       console.log('New logs!', logs)
     },
   });
-  
-  const [gameSession , SetgameSession] = useState('');
+
+  const [gameSession, SetgameSession] = useState('');
 
   const toast = useToast();
 
@@ -41,7 +41,7 @@ function StartGameSession({ address, Events }) {
           isClosable: true,
         });
         SetgameSession('');
-     
+
       },
       onError(error) {
         toast({
@@ -56,7 +56,7 @@ function StartGameSession({ address, Events }) {
   });
 
   const handleGameSession = () => {
-    if (!gameSession .trim()) {
+    if (!gameSession.trim()) {
       toast({
         title: 'Choice cannot be empty.',
         status: 'error',
@@ -70,30 +70,30 @@ function StartGameSession({ address, Events }) {
       abi: ContractAbi,
       functionName: "StartGameSession",
       account: address,
-      args: [gameSession ]
-      
+      args: [gameSession]
+
     });
 
   };
 
   return (
-<Box>
-  <VStack spacing={4}>
-    
-    <Input
-      placeholder="Select an Id"
-      value={gameSession }
-      onChange={(e) => SetgameSession(e.target.value)}
-    />
-    <Button colorScheme='whiteAlpha'
-      onClick={handleGameSession}
-      isLoading={isGameStart}
-    >
-      Start a Game Session
-    </Button>
-  </VStack>
- 
-</Box>
+    <Box>
+      <VStack spacing={4}>
+
+        <Input
+          placeholder="Select an Id"
+          value={gameSession}
+          onChange={(e) => SetgameSession(e.target.value)}
+        />
+        <Button colorScheme='whiteAlpha'
+          onClick={handleGameSession}
+          isLoading={isGameStart}
+        >
+          Start a Game Session
+        </Button>
+      </VStack>
+
+    </Box>
   );
 }
 
