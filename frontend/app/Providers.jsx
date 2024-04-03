@@ -11,6 +11,7 @@ import {
 
 import { WagmiProvider } from 'wagmi';
 import {hardhat} from 'wagmi/chains';
+import {sepolia} from 'wagmi/chains';
 
 
 import {QueryClientProvider, QueryClient} from "@tanstack/react-query";
@@ -20,7 +21,7 @@ import './globals.css';
 const config = getDefaultConfig({
   appName: 'UnityQuest',
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
-  chains: [hardhat], // change to hardhat if needed
+  chains: [process.env.NEXT_PUBLIC_WALLET_CONNECT_CHAIN], // change to hardhat if needed
   ssr: true, 
 });
 

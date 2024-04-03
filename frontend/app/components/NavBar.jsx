@@ -17,7 +17,7 @@ const SidebarLink = ({ href, label, icon }) => {
       _hover={{ bg: 'purple.500', color: 'white' }} 
       iconSpacing={2}
       fontSize="sm"
-      onClick={() => router.push(href)} // Gestion de la navigation
+      onClick={() => router.push(href)}
       style={{ textDecoration: 'none' }}
     >
       {label}
