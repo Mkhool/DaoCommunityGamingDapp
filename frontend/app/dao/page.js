@@ -1,14 +1,13 @@
 'use client'
 
-import Page from "../components/";
 import NavBar from "../components/NavBar";
-
+import Dao from "../components/Dao";
 
 const Page = () => {
   return (
     <div>
       <NavBar/>
- <Page/>
+<Dao/>
     </div>
   );
 };

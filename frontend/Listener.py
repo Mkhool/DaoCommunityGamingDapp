@@ -843,31 +843,53 @@ async def serveur_websocket(websocket, path):
         # Supprime le client WebSocket de l'ensemble lorsqu'il se déconnecte
         connected_websockets.remove(websocket)
 
-async def send_movement_to_clients(direction):
+async def handle_event_choice_made(event):
+    # Traiter l'événement ChoiceMade
+    print("ChoiceMade event:", event)
+    # Extraire les données pertinentes de l'événement
+    direction = event['args']['direction']
+    # Convertir les données en chaîne de caractères JSON
+    message = json.dumps({'type': 'ChoiceMade', 'direction': direction})
+    # Envoyer le message à tous les clients WebSocket connectés
+    await send_message_to_clients(message)
+
+async def handle_event_owner_choice(event):
+    # Traiter l'événement OwnerChoice
+    print("OwnerChoice event:", event)
+    # Extraire les données pertinentes de l'événement
+    direction = event['args']['direction']
+    print("Direction:", direction)
+    # Convertir les données en chaîne de caractères JSON
+    message = json.dumps({'type': 'OwnerChoice', 'direction': direction})
+    # Envoyer le message à tous les clients WebSocket connectés
+    await send_message_to_clients(message)
+
+async def send_message_to_clients(message):
     if connected_websockets:  # Vérifie s'il y a des clients connectés
-        # Crée une liste de tâches pour l'envoi des mouvements à tous les clients connectés
-        tasks = [asyncio.create_task(ws.send(direction)) for ws in connected_websockets]
+        # Crée une liste de tâches pour l'envoi du message à tous les clients connectés
+        tasks = [asyncio.create_task(ws.send(message)) for ws in connected_websockets]
         # Attend que toutes les tâches soient complétées
         await asyncio.wait(tasks)
 
-def handle_event(event):
-    # Récupère la direction de l'évènement émit par la fonction ChoiceMade
-    direction = event['args']['direction']
-    print(direction)
-    # Envoie le mouvement aux clients WebSocket
-    asyncio.get_event_loop().create_task(send_movement_to_clients(direction))
-
 async def main():
-    event_filter = contract.events.ChoiceMade.create_filter(fromBlock='latest')
+    # Création de filtres pour chaque événement
+    event_filter_choice_made = contract.events.ChoiceMade.create_filter(fromBlock='latest')
+    event_filter_owner_choice = contract.events.OwnerChoice.create_filter(fromBlock='latest')
     
     # Lance le serveur WebSocket
     websocket_server = await websockets.serve(serveur_websocket, "localhost", 8765)
     print("Serveur WebSocket en écoute sur localhost:8765")
     
     while True:
-        for event in event_filter.get_new_entries():
-            handle_event(event)
-        await asyncio.sleep(2)
+        # Traiter les événements ChoiceMade
+        for event in event_filter_choice_made.get_new_entries():
+            await handle_event_choice_made(event)
+        
+        # Traiter les événements OwnerChoice
+        for event in event_filter_owner_choice.get_new_entries():
+            await handle_event_owner_choice(event)
 
+        # Attendre avant de vérifier à nouveau les nouveaux événements
+        await asyncio.sleep(2)
 if __name__ == '__main__':
     asyncio.run(main())

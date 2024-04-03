@@ -4,7 +4,6 @@ import { ConnectButton  } from '@rainbow-me/rainbowkit';
 import HomePageButton from './HomeButton';
 
 
-
 const Header = () => {
   return (
     <Box pos="fixed" top={0} left={0} h="10vh" w="100vw" bg="rgba(15, 15, 15, 0.95)">
