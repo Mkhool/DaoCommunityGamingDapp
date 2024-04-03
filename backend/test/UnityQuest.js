@@ -300,9 +300,9 @@ describe("UnityQuest", function () {
         it("Should allow the owner to make decision for a cycle", async function () {
 
 
-            await expect(unityContract.connect(owner).SetChoiceAsOwner(1, "haut"))
+            await expect(unityContract.connect(owner).SetChoiceAsOwner(1, "droite"))
                 .to.emit(unityContract, "OwnerChoice")
-                .withArgs(1, 0, "haut");
+                .withArgs(1, 0, "droite");
         });
 
         it("Should not allow other acount to make decision for a cycle", async function () {
@@ -646,7 +646,7 @@ describe("UnityQuest", function () {
             it("Should allow player to make choice when in game", async function () {
                 await unityContract.connect(owner).MakeChoice(1, "haut")
             });
-            
+                        
             it("Should give player experience when the game is ended", async function () {
                 await unityContract.connect(owner).MakeChoice(1, "haut")
                 await unityContract.connect(addr2).MakeChoice(1, "haut")
