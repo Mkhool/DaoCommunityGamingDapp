@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Flex } from '@chakra-ui/react';
+
 
 const Game = () => {
     useEffect(() => {
@@ -30,11 +30,11 @@ const Game = () => {
         <div
         id="game-container"
         style={{
-          width: '100%', // Ajustez selon votre mise en page
-          height: '100%', // Ajustez selon votre mise en page
+          width: '100%',
+          height: '100%', 
         }}
       >
-        {/* Le jeu sera attaché ici */}
+    
       </div>
      
     );
