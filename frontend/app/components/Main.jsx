@@ -1,14 +1,14 @@
 
 import Dashboard from './Dashboard';
 import NavBar from './NavBar';
-import NotConnected from './NotConnected';
+import NotConnected from '../DesignPage/NotConnected';
 import { QuestContractAddress, QuestContractAbi } from "@/constants";
 import { useAccount, useReadContract } from 'wagmi'
 import { publicClient } from '@/utils/client'
 import { parseAbiItem } from 'viem'
 import { useState, useEffect } from 'react'
-import BuyTokens from './BuyTokens';
-import Balance from './Staking'
+import BuyTokens from '../user/BuyTokens';
+import Balance from '../user/Staking'
 import Events from './Events'
 import { ContractAddress, ContractAbi } from '@/constants';
 

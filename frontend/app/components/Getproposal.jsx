@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 
-import Balance from './Staking'
+import Balance from '../user/Staking'
 import Events from './Events'
 
 import { useAccount, readContract  } from 'wagmi'

@@ -2,7 +2,7 @@
 
 import { Flex } from '@chakra-ui/react'
 import "../globals.css";
-import Header from './Header'
+import Header from '../DesignPage/Header'
 import Footer from './Footer'
 
 const Layout = ({ children }) => {

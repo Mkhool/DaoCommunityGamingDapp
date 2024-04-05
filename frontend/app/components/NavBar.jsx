@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation'; 
 import { Box, VStack, Button, Link, HStack, Text } from '@chakra-ui/react';
 import { FaHome, FaGamepad, FaUsers, FaCog } from 'react-icons/fa';
-import Profil from './Profil';
+import Profil from '../DesignPage/Profil';
 
 const SidebarLink = ({ href, label, icon }) => {
   const router = useRouter(); 

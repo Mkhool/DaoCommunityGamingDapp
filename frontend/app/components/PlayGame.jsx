@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box, Flex, Input, Button, Textarea, VStack, useToast } from '@chakra-ui/react';
 import { useWriteContract, useWatchContractEvent } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
-import OwnerChoice from './OwnerChoice';
+import OwnerChoice from '../Admin/OwnerChoice';
 
 export default function PlayGame({ address, onSuccessMakechoice }) {
 

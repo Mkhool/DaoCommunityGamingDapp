@@ -1,24 +1,23 @@
 'use client'
 import React, { useEffect } from 'react'
 import Events from './components/Events';
-import BuyTokens from './components/BuyTokens';
+import BuyTokens from './user/BuyTokens';
 import NavBar from './components/NavBar';
 
 import { TimeIcon, AtSignIcon  } from '@chakra-ui/icons';
-import ProposeGame from './components/ProposeGame';
+import ProposeGame from './user/ProposeGame';
 import VoteGame from './components/VoteGame';
-import StartGameSession from './components/StartGameSession';
-import EndGameSession from './components/EndGameSession';
+import StartGameSession from './Admin/StartGameSession';
+import EndGameSession from './Admin/EndGameSession';
 import MakeChoice from './components/MakeChoice';
-import ProposeGameTest from './components/ProposeGameTest';
-import OwnerChoice from './components/OwnerChoice';
-import VoteGameTest from './components/VoteGameTest';
+import OwnerChoice from './Admin/OwnerChoice';
+
 import { useAccount, useReadContract  } from "wagmi";
-import NotConnected from './components/NotConnected';
-import Balance2 from './components/Balance2';
-import Staking from './components/Staking';
-import TotalStaked from './components/TotalStaked';
-import DailyInterestRate from './components/DailyInterestRate';
+import NotConnected from './DesignPage/NotConnected';
+import Balance2 from './DaoComponents/Balance2';
+import Staking from './user/Staking';
+import TotalStaked from './DaoComponents/TotalStaked';
+import DailyInterestRate from './DaoComponents/DailyInterestRate';
 import {
     Box,
     Grid,
@@ -38,7 +37,7 @@ import {
 
 } from '@chakra-ui/react';
 
-import Rank from './components/Rank';
+import Rank from './DaoComponents/Rank';
 const Page = () => {
 
     const { address } = useAccount();
