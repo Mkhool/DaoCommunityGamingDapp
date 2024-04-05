@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect } from 'react'
 import Events from "../components/Events";
-
+import BuyTokens from './BuyTokens';
 import NavBar from './NavBar';
 
 import {
@@ -28,17 +28,12 @@ import VoteGame from './VoteGame';
 import StartGameSession from './StartGameSession';
 import EndGameSession from './EndGameSession';
 import MakeChoice from './MakeChoice';
-
+import ProposeGameTest from './ProposeGameTest';
 import OwnerChoice from './OwnerChoice';
-
+import VoteGameTest from './VoteGameTest';
 
 const Admin = () => {
 
-
-    
-useEffect(() =>{
-
-}, [Events])
 
   return (
     <>
@@ -51,7 +46,7 @@ useEffect(() =>{
                             {/* Profil et Progression*/}
                             <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl' >
                                 <VStack spacing={4} align="stretch">
-                                 
+                                 <BuyTokens/>
                                 </VStack>
                             </GridItem> 
 
@@ -77,7 +72,7 @@ useEffect(() =>{
                                     <List spacing={3}>
                                         <ListItem>
                                             <HStack>
-                                            
+                                           
 
                                             </HStack>
                                         </ListItem>
@@ -96,8 +91,8 @@ useEffect(() =>{
                                 <VStack spacing={3}>
                                     <Text fontSize="2xl" color="#7855de">Administration</Text>
                                     <HStack divider={<Divider orientation="vertical" />} spacing={4}>
-                                    <ProposeGame/>
-                                    <VoteGame/>
+                                    <ProposeGameTest />
+                                    <VoteGameTest/>
                                     <StartGameSession/>
                                     <MakeChoice/>
                                     <EndGameSession/>
@@ -120,13 +115,13 @@ useEffect(() =>{
                             {/* Événements en Direct */}
                             <GridItem colSpan={4}  p={4} borderRadius="md" boxShadow='xl'>
                                 <VStack spacing={4}>
-                                    <Text fontSize="2xl" color="#7855de">Événements en Direct</Text>
-             <OwnerChoice/>
+                                    <Text fontSize="2xl" color="#7855de"></Text>
+             
                                 </VStack>
                             </GridItem>
                             <GridItem colSpan={4} p={4} borderRadius="md" boxShadow='xl'>
                                 <VStack spacing={4}>
-                                    <Text fontSize="2xl" color="#7855de">Événements en Direct</Text>
+                                    <Text fontSize="2xl" color="#7855de"></Text>
                                     
                                 </VStack>
                             </GridItem>

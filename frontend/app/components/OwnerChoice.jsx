@@ -105,12 +105,12 @@ function OwnerChoice({ address, onSuccessMakechoice }) {
     <Box>
       <VStack spacing={4}>
 
-        <Input
+        <Input color="white"
           placeholder="Session ID"
           value={SessionId}
           onChange={(e) => setSessionId(e.target.value)}
         />
-        <Input
+        <Input color="white"
           placeholder="Direction"
           value={proposalDescription}
           onChange={(e) => setProposalDescription(e.target.value)}

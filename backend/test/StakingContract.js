@@ -122,7 +122,7 @@ describe("StakingContract", function () {
         
         it("Should not allow unstaking if contract balance is insufficient", async function () {
             const { quest, stakingContract, owner, stakingContractAdress } = await loadFixture(deployContractFixture);
-            const stakeAmount = ethers.parseUnits("100", 18);
+            const stakeAmount = ethers.parseUnits("1000000", 18);
 
             // Approbation et staking
             await quest.connect(owner).approve(stakingContractAdress, stakeAmount);

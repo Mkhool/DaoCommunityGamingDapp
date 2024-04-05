@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Box, Button, Input, Text, useToast, VStack , Tag } from '@chakra-ui/react';
-import { useWriteContract, useWatchContractEvent } from 'wagmi';
+import { useWriteContract, useWatchContractEvent, useWaitForTransactionReceipt } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
 
 function MakeChoice({ address, onSuccessMakechoice }) {
@@ -23,7 +23,7 @@ function MakeChoice({ address, onSuccessMakechoice }) {
   const toast = useToast();
 
   // Écrire une nouvelle proposition
-  const { writeContract: MakeChoice, isLoading: isProposalAdding } = useWriteContract({
+  const { writeContract: MakeChoice, isLoading: isProposalAdding, data: hash  } = useWriteContract({
     mutation: {
       onSuccess() {
         toast({
@@ -32,8 +32,8 @@ function MakeChoice({ address, onSuccessMakechoice }) {
           duration: 9000,
           isClosable: true,
         });
-        setProposalDescription('');
-        onSuccessMakechoice();
+
+       
       },
       onError(error) {
         toast({
@@ -92,6 +92,22 @@ function MakeChoice({ address, onSuccessMakechoice }) {
 
   };
 
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = 
+  useWaitForTransactionReceipt({ 
+    hash, 
+  }) 
+
+  useEffect(() => {
+      if(isConfirmed) {
+        
+          toast({
+              title: "Choice submitted",
+              status: "success",
+              duration: 3000,
+              isClosable: true,
+          });
+      }
+  }, [isConfirmed])
   return (
 <Box>
   <VStack spacing={4}>

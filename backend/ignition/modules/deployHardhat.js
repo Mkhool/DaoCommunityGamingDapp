@@ -1,10 +1,8 @@
 const hre = require("hardhat");
 
 async function main() {
-  [owner, addr1] = await ethers.getSigners();
-
-   // Déployer le contract Quest
-   [owner, addr1] = await ethers.getSigners();
+ // Déployer le contract Quest
+  
    const QuestFactory = await hre.ethers.getContractFactory("Quest");
    quest = await QuestFactory.deploy();
    await quest.waitForDeployment();
@@ -23,8 +21,6 @@ async function main() {
    questContract = await questContractFactory.deploy(questAdress, stakingContractAddress);
    const questContractAddress = await questContract.getAddress();
    console.log(`UnityQuest deployed to ${questContract.target}`);
-
-
 }
 
 main().catch((error) => {

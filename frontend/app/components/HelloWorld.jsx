@@ -57,7 +57,7 @@ function ConnectButtonUQ() {
             </AlertDialogHeader>
 
             <AlertDialogBody>
-             Vous êtes invité à embarquer pour un voyage épique à travers des mondes virtuels fascinants. Dans cette quête palpitante, l'unité et la collaboration sont de mise. Faites équipe avec des compagnons de jeu du monde entier pour surmonter les obstacles les plus redoutables et remporter des récompenses exclusives. Montrez votre persévérance, suivez votre intuition et soyez rapide pour remporter des trésors toujours plus grands.
+             Vous êtes invité à embarquer pour un voyage épique à travers des mondes virtuels fascinants. Dans cette quête palpitante, l'unité et la collaboration sont de mise. Faites équipe avec des compagnons de jeu du monde entier pour surmonter les obstacles les plus redoutables et remporter des récompenses exclusives. Montrez votre persévérance, suivez votre intuition pour remporter des trésors toujours plus grands.
             </AlertDialogBody>
 
             <AlertDialogFooter>

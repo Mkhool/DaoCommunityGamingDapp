@@ -1,4 +1,4 @@
-export const QuestContractAddress="process.env.NEXT_PUBLIC_QUEST_ERC20_ADDRESS";
+export const QuestContractAddress=process.env.NEXT_PUBLIC_QUEST_ERC20_ADDRESS;
 export const QuestContractAbi= [
   {
     "inputs": [],
@@ -439,7 +439,8 @@ export const QuestContractAbi= [
   }
 ];
 
-export const StakingContractAddress="process.env.NEXT_PUBLIC_STAKING_CONTRACT_ADDRESS";
+export const StakingContractAddress=process.env.NEXT_PUBLIC_STAKING_CONTRACT_ADDRESS;
+// export const StakingContractAddress=process.env.NEXT_PUBLIC_STAKING_CONTRACT_ADDRESS;
 export const StakingContractAbi=[
   {
     "inputs": [
@@ -612,6 +613,25 @@ export const StakingContractAbi=[
     "inputs": [
       {
         "internalType": "address",
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "getStakingBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -707,7 +727,7 @@ export const StakingContractAbi=[
   }
 ];
 
-export const ContractAddress="process.env.NEXT_PUBLIC_UNITY_QUEST_DAO_CONTRACT_ADDRESS";
+export const ContractAddress=process.env.NEXT_PUBLIC_UNITY_QUEST_DAO_CONTRACT_ADDRESS;
 export const ContractAbi= [
   {
     "inputs": [

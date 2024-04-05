@@ -21,7 +21,7 @@ import {
 } from '@chakra-ui/react';
 import { StarIcon, TimeIcon, AtSignIcon, BellIcon } from '@chakra-ui/icons';
 import NavBar from './NavBar';
-
+import Rank from './rank';
 
 
 function Dashboard() {
@@ -43,6 +43,7 @@ function Dashboard() {
                                     <Text color="white">65% vers le prochain niveau</Text>
                                     <Text color="white">Bonus Actuel: 5% Points</Text>
                                     <Button colorScheme="purple">Modifier le profil</Button> */}
+                                  
                                 </VStack>
                             </GridItem> 
 

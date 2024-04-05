@@ -38,7 +38,6 @@ contract StakingContract is ReentrancyGuard, Ownable {
         _dailyInterestRate = 100; // taux fortement exagérés pour les besoins de la soutenance, il ne reflete pas un scénario d'utilisation réelle
     }
 
-
     /// @notice Permet à un utilisateur de déposer (staker) des tokens dans le contrat pour commencer à accumuler des récompenses.
     /// @dev Transfère les tokens du staker au contrat, met à jour les soldes, les états de staking et ajoute le montant au total staké
     /// @param _amount Le montant de tokens à staker.
@@ -46,13 +45,15 @@ contract StakingContract is ReentrancyGuard, Ownable {
     function Stake(uint256 _amount) external nonReentrant {
         if (_amount <= 0) revert CanStakeZeroToken();
         totalStaked += _amount;
-        stakingToken.transferFrom(msg.sender, address(this), _amount);
+        require(
+            stakingToken.transferFrom(msg.sender, address(this), _amount),
+            "Transfer failed"
+        );
         stakingBalance[msg.sender] += _amount;
         isStaking[msg.sender] = true;
         _stakeTimes[msg.sender] = block.timestamp;
         emit Staked(msg.sender, _amount);
     }
-
 
     /// @notice Permet à un utilisateur de retirer (unstake) ses tokens et les récompenses accumulées du contrat.
     /// @dev Transfère les tokens du contrat au staker, calcule les récompenses, ajuste le solde de staking,  met à jour les états de staking et soustrait le montant du total staké.
@@ -71,36 +72,35 @@ contract StakingContract is ReentrancyGuard, Ownable {
             isStaking[msg.sender] = false;
         }
         uint256 amountToTransfer = _amount + reward;
-        stakingToken.transfer(msg.sender, amountToTransfer);
+        require(
+            stakingToken.transfer(msg.sender, amountToTransfer),
+            "Transfer failed"
+        );
 
         emit Unstaked(msg.sender, _amount);
     }
 
-
     /// @notice Permet au propriétaire de modifier le taux d'intérêt quotidien pour le calcul des récompenses.
     /// @dev Cette fonction est restreinte au propriétaire du contrat.
     /// @param newRate Le nouveau taux d'intérêt quotidien, exprimé en pourcentage avec une précision de deux décimales (par exemple, 100 pour 1%).
-    
+
     function SetDailyInterestRate(uint16 newRate) public onlyOwner {
         _dailyInterestRate = newRate;
-
     }
-   
 
     /// @notice Renvoie le taux d'intérêt quotidien actuel pour le staking
     /// @dev Le taux d'intérêt est exprimé en pourcentage avec une précision de deux décimales
     /// @return  taux d'intérêt quotidien actuel
-    
+
     function DailyInterestRate() public view returns (uint16) {
         return _dailyInterestRate;
     }
-
 
     /// @notice Calcule la récompense accumulée pour un utilisateur en fonction de son montant en staking et du temps écoulé.
     /// @dev Cette fonction retourne le montant des récompenses calculé sans affecter le solde de l'utilisateur.
     /// @param gamer L'adresse de l'utilisateur pour lequel calculer les récompenses.
     /// @return reward Le montant des récompenses accumulées pour l'utilisateur.
-  
+
     function CalculateReward(address gamer) internal view returns (uint256) {
         uint256 stakedAmount = stakingBalance[gamer];
         if (stakedAmount == 0 || block.timestamp <= _stakeTimes[gamer]) {
@@ -109,12 +109,18 @@ contract StakingContract is ReentrancyGuard, Ownable {
 
         uint256 stakedTimeInSeconds = block.timestamp - _stakeTimes[gamer];
         uint256 precision = 1e18;
-
-        uint256 rewardPerSecondRate = (_dailyInterestRate * precision) /
-            (100 * 86400);
         uint256 reward = (stakedAmount *
-            rewardPerSecondRate *
-            stakedTimeInSeconds) / precision;
+            _dailyInterestRate *
+            stakedTimeInSeconds) /
+            (100 * 86400) /
+            precision;
         return reward;
+    }
+
+    /// @notice Renvoie la balance de staking d'un utilisateur spécifique.
+    /// @param user L'adresse de l'utilisateur dont on souhaite connaître la balance de staking.
+    /// @return balance de staking de l'utilisateur.
+    function getStakingBalance(address user) public view returns (uint256) {
+        return stakingBalance[user];
     }
 }
