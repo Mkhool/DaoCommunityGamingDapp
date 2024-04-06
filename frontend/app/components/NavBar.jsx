@@ -1,6 +1,6 @@
 'use Client'
 import { useRouter } from 'next/navigation'; 
-import { Box, VStack, Button, Link, HStack, Text } from '@chakra-ui/react';
+import { Box, VStack, Button } from '@chakra-ui/react';
 import { FaHome, FaGamepad, FaUsers, FaCog } from 'react-icons/fa';
 import Profil from '../DesignPage/Profil';
 
@@ -14,11 +14,11 @@ const SidebarLink = ({ href, label, icon }) => {
       variant="ghost"
       colorScheme="purple"
       width="full"
-      _hover={{ bg: 'purple.500', color: 'white' }} 
+      _hover={{ bg: '#BFA181' , color: 'black'}} 
       iconSpacing={2}
       fontSize="sm"
       onClick={() => router.push(href)}
-      style={{ textDecoration: 'none' }}
+      style={{ textDecoration: 'none', borderRadius:"0" }}
     >
       {label}
     </Button>

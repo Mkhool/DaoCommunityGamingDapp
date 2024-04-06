@@ -28,7 +28,7 @@ function Dashboard() {
 
 
     return (
-            <Box display="flex">
+            <Box display="flex" mt="10">
                  <NavBar />
                  <Box flex="1" ml="150px" maxWidth="calc(100vw - 150px - 2rem)">
       <Box p={35} color="white" minH="100vh">
@@ -37,12 +37,6 @@ function Dashboard() {
                             {/* Profil et Progression*/}
                             <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl' >
                                 <VStack spacing={4} align="stretch">
-                                    {/* <Avatar size="2xl" name="Medhi" src="/img/pp.jpg" />
-                                    <Text fontSize="xl" color="purple">Medhi</Text>
-                                    <Progress value={65} size="sm" colorScheme="purple" />
-                                    <Text color="white">65% vers le prochain niveau</Text>
-                                    <Text color="white">Bonus Actuel: 5% Points</Text>
-                                    <Button colorScheme="purple">Modifier le profil</Button> */}
                                   
                                 </VStack>
                             </GridItem> 
