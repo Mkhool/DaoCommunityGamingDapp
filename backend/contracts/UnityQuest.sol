@@ -268,8 +268,8 @@ contract UnityQuest is Ownable {
         GameSession storage session = gameSessions[_sessionId];
         session.isActive = false;
 
-        uint256 baseExperienceReward = 10; // Récompense de base pour la participation
-        uint256 bonusExperience = 100; // Bonus pour avoir choisi la direction majoritaire
+        uint256 baseExperienceReward = 100; // Récompense de base pour la participation
+        uint256 bonusExperience = 1000; // Bonus pour avoir choisi la direction majoritaire, haute pour montrer son impacte sur la soutenance
 
         for (uint256 i = 0; i < session.gamerInSession.length; i++) {
             address gamerAddress = session.gamerInSession[i];
