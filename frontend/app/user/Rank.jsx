@@ -2,9 +2,10 @@
 import { useEffect, useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { ContractAbi, ContractAddress } from "@/constants/index.js";
+import { Text} from '@chakra-ui/react'
 
 
-const Rank = () => {
+const Rank = ({color }) => {
     const { address: userAddress } = useAccount();
     const [stakingQuest, setstakingQuest] = useState("");
 
@@ -32,9 +33,11 @@ const Rank = () => {
 
 
     return (
-        <div>
-           Rang : {stakingQuest} 
+       
+          <div>
+           <Text color={color} as='b' fontSize="sm" > Rank : {stakingQuest} </Text>
         </div>
+        
     );
 
 };

@@ -49,7 +49,7 @@ const BuyTokens = ({ refetch, getEvents }) => {
         }
         else {
             toast({
-                title: "FAUT RENTRER UN NOMBRE :@ !!!",
+                title: "number expected",
                 status: "error",
                 duration: 3000,
                 isClosable: true,
@@ -64,13 +64,10 @@ const BuyTokens = ({ refetch, getEvents }) => {
 
     useEffect(() => {
         if(isConfirmed) {
-            // refetch la balance
-            // refetch()
-            // // refetch les events
-            // getEvents();
+
             setBuyTokensValue('');
             toast({
-                title: "Le deposit a bien été réalisé.",
+                title: "Thank for buying tokens",
                 status: "success",
                 duration: 3000,
                 isClosable: true,
@@ -80,8 +77,8 @@ const BuyTokens = ({ refetch, getEvents }) => {
     
     return (
        <>
-            <Heading as='h2' size='xl' mt='1rem'>
-                BuyTokens
+            <Heading as='h2' size='xs' mt='1rem'>
+                Buy Quest Tokens
             </Heading>
             {isConfirmed 
             &&  <Alert mt="1rem" status='success'>

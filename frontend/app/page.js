@@ -6,7 +6,7 @@ import NavBar from './components/NavBar';
 
 import { TimeIcon, AtSignIcon  } from '@chakra-ui/icons';
 import ProposeGame from './user/ProposeGame';
-import VoteGame from './components/VoteGame';
+import VoteGame from './components/VoteGameOld';
 import StartGameSession from './Admin/StartGameSession';
 import EndGameSession from './Admin/EndGameSession';
 import MakeChoice from './components/MakeChoice';

@@ -24,13 +24,13 @@ import {
 } from '@chakra-ui/react';
 import { TimeIcon, AtSignIcon  } from '@chakra-ui/icons';
 import ProposeGame from '../user/ProposeGame';
-import VoteGame from '../components/VoteGame';
+import VoteGame from '../components/VoteGameOld';
 import StartGameSession from './StartGameSession';
 import EndGameSession from './EndGameSession';
 import MakeChoice from '../components/MakeChoice';
 import ProposeGameTest from '../DaoComponents/ProposeGameTest';
 import OwnerChoice from './OwnerChoice';
-import VoteGameTest from '../DaoComponents/VoteGameTest';
+import VoteGameTest from '../DaoComponents/VoteGame';
 
 const Admin = () => {
 

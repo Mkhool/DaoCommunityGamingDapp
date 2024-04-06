@@ -7,7 +7,7 @@ import {
 } from '@chakra-ui/react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { parseEther } from "viem";
-import { StakingContractAddress, StakingcontractAbi } from "@/constants";
+import { StakingContractAddress, StakingContractAbi } from "@/constants";
 
 const BuyTokens = ({ refetch, getEvents }) => {
 
@@ -41,7 +41,7 @@ const BuyTokens = ({ refetch, getEvents }) => {
         if(!isNaN(buyTokensValue)) {
             writeContract({
                 address: StakingContractAddress,
-                abi: StakingcontractAbi,
+                abi: StakingContractAbi,
                 functionName: 'BuyTokens',
                 value: parseEther(buyTokensValue),
                 account: address
@@ -49,7 +49,7 @@ const BuyTokens = ({ refetch, getEvents }) => {
         }
         else {
             toast({
-                title: "FAUT RENTRER UN NOMBRE :@ !!!",
+                title: "number required",
                 status: "error",
                 duration: 3000,
                 isClosable: true,

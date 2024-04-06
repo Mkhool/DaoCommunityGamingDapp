@@ -1,8 +1,10 @@
 import { useReadContract } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
-import { useState } from 'react';
-function GameProposal() {
-  const [proposalId, setProposalId] = useState('');
+import { useState, useEffect  } from 'react';
+import Quorum from './Quorum';
+
+function GameProposal({ initialProposalId }) {
+  const [proposalId, setProposalId] = useState(initialProposalId || '');
   const { data, isError, isLoading } = useReadContract({
     address: ContractAddress, 
     abi: ContractAbi, 
@@ -11,39 +13,34 @@ function GameProposal() {
     enabled: proposalId !== '', 
   });
 
+  useEffect(() => {
+    if (initialProposalId) {
+      setProposalId(initialProposalId);
+    }
+  }, [initialProposalId]);
+  
+  useEffect(() => {
+    console.log(data);
+  }, [data]);
 
-  const handleSubmit = (event) => {
-    event.preventDefault(); 
-  }
 
-    return (
-<div>
-      <form onSubmit={handleSubmit}>
-        <label htmlFor="proposalId">Enter Proposal ID:</label>
-        <input
-          id="proposalId"
-          type="text"
-          value={proposalId}
-          onChange={(e) => setProposalId(e.target.value)}
-        />
-        <button type="submit" style={{ color: 'black' }}>Submit</button>
-      </form>
-
+  return (
+    <div>
       {isLoading && <div>Loading...</div>}
       {isError || !data ? (
         <div>No game with this ID</div>
       ) : (
         <div>
           <h2>Proposal Details</h2>
-          <p>ID: {data[0]}</p>
+          <p>ID: {initialProposalId || proposalId}</p>
           <p>Name: {data[1]}</p>
-          <p>Vote Count: {data[2]}</p>
+          <p>Vote Count: {Number(data[2] / BigInt(1e18)).toString()}</p>
           <p>Is Accepted: {data[3] ? 'Yes' : 'No'}</p>
-          <p>Quorum: {data[4]}</p>
+          <p><Quorum/></p>
         </div>
       )}
     </div>
-  );
+  )
 }
 
 export default GameProposal;

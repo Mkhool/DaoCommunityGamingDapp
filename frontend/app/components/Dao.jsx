@@ -30,13 +30,13 @@ import {
     Tag
 
 } from '@chakra-ui/react';
-import VoteGameTest from '../DaoComponents/VoteGameTest';
+import VoteGameTest from '../DaoComponents/VoteGame';
 import GameList from '../DaoComponents/GameList';
 
 const Dao = () => {
     return (
         <>
-            <Box display="flex" width="1080px">
+            <Box display="flex" justifyContent="center" mt="40" width="full">
                 <NavBar />
                 <Box flex="1" ml="200px" maxWidth="calc(100vw - 150px - 2rem)" width="1080px">
                     <Box p={35} color="white" minH="100vh" maxWidth="1080px">
@@ -52,14 +52,13 @@ const Dao = () => {
                             {/* Tableau de Bord Principal */}
                             <GridItem colSpan={6} p={4} borderRadius="md" boxShadow='xl'>
                                 <VStack spacing={4}>
-                                    <Text fontSize="2xl" mb={4} color="#7855de">DashBoard</Text>
+                                    <Text fontSize="2xl" mb={4} color="#7855de">DAO</Text>
                                     <HStack spacing={4}>
 
                                     </HStack>
                                     <Divider />
                                     <HStack spacing={4}>
-                                        <Button leftIcon={<TimeIcon />} colorScheme="purple">Daily Quest</Button>
-                                        <Button leftIcon={<AtSignIcon />} colorScheme="purple">Special Missions</Button>
+                                        
                                     </HStack>
                                 </VStack>
                             </GridItem>
