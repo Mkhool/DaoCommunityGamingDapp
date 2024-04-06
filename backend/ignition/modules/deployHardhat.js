@@ -13,12 +13,14 @@ async function main() {
    // Déployer StakingContract avec l'adresse de Quest 
    const StakingContractFactory = await hre.ethers.getContractFactory("StakingContract");
    stakingContract = await StakingContractFactory.deploy(questAdress);
+   await stakingContract.waitForDeployment();
    const stakingContractAddress = await stakingContract.getAddress();
    console.log(`StakingContract deployed to ${stakingContract.target}`);
 
    // Déployer questContract avec l'adresse de Quest 
    const questContractFactory = await hre.ethers.getContractFactory("UnityQuest");
    questContract = await questContractFactory.deploy(questAdress, stakingContractAddress);
+   await questContract.waitForDeployment();
    const questContractAddress = await questContract.getAddress();
    console.log(`UnityQuest deployed to ${questContract.target}`);
 }

@@ -3,10 +3,32 @@ const hre = require("hardhat");
 const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
 
 async function main() {
-    const stakeAmount = ethers.parseUnits("10000", 18);
+    [owner, addr1] = await ethers.getSigners();
+    const QuestFactory = await hre.ethers.getContractFactory("Quest");
+    quest = await QuestFactory.deploy();
+    await quest.waitForDeployment();
+    const questAdress = await quest.getAddress();
+    console.log(
+        `Quest deployed to ${quest.target}`
+    );
+    // Déployer StakingContract avec l'adresse de Quest 
+    const StakingContractFactory = await hre.ethers.getContractFactory("StakingContract");
+    stakingContract = await StakingContractFactory.deploy(questAdress);
+    await stakingContract.waitForDeployment();
+    const stakingContractAddress = await stakingContract.getAddress();
+    console.log(`StakingContract deployed to ${stakingContract.target}`);
+
+    // Déployer questContract avec l'adresse de Quest 
+    const questContractFactory = await hre.ethers.getContractFactory("UnityQuest");
+    questContract = await questContractFactory.deploy(questAdress, stakingContractAddress);
+    await questContract.waitForDeployment();
+    const questContractAddress = await questContract.getAddress();
+    console.log(`UnityQuest deployed to ${questContract.target}`);
+
+
+
+    const stakeAmount = ethers.parseUnits("1000", 18);
     const initialStakingContractSupply = ethers.parseUnits("999000", 18);
-    // Supposons que deployContractFixture est votre fonction de déploiement
-    const { quest, stakingContract, stakingContractAddress, owner } = await loadFixture(deployContractFixture);
 
     console.log("Approving Quest for staking...");
     await quest.connect(owner).approve(stakingContractAddress, stakeAmount);
@@ -28,28 +50,13 @@ async function main() {
     const stakingContractBalance = await quest.balanceOf(stakingContractAddress);
     console.log(`StakingContract balance: ${ethers.formatUnits(stakingContractBalance, 18)} QST`);
     console.log("Adresse du propriétaire (owner):", owner.address);
+    console.log("Proposing a new game: Zelda...");
+    await questContract.connect(owner).ProposeGame("Zelda");
+    console.log("Game proposed successfully.");
+
+
 }
 
-async function deployContractFixture() {
-    // Déployer le contract Quest
-    [owner, addr1] = await ethers.getSigners();
-    const QuestFactory = await hre.ethers.getContractFactory("Quest");
-    quest = await QuestFactory.deploy();
-    await quest.waitForDeployment();
-    const questAdress = await quest.getAddress();
-
-    // Déployer StakingContract avec l'adresse de Quest 
-    const StakingContractFactory = await hre.ethers.getContractFactory("StakingContract");
-    stakingContract = await StakingContractFactory.deploy(questAdress);
-    const stakingContractAddress = await stakingContract.getAddress();
-    
-    // Déployer questContract avec l'adresse de Quest 
-    const questContractFactory = await hre.ethers.getContractFactory("UnityQuest");
-    questContract = await questContractFactory.deploy(questAdress, stakingContractAddress);
-    const questContractAddress = await questContract.getAddress();
-
-    return { quest, questContract, questContractAddress, stakingContract, stakingContractAddress, owner, addr1 };
-};
 
 main().catch((error) => {
     console.error(error);

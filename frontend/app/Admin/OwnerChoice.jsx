@@ -81,25 +81,24 @@ function OwnerChoice({ address, onSuccessMakechoice }) {
 
     });
 
-    useEffect(() => {
-      const unsubscribe = useWatchContractEvent({
-        address: ContractAddress, // Remplacez par l'adresse de votre contrat
-        abi: ContractAbi, // Remplacez par l'ABI de votre contrat
-        eventName: 'OwnerChoice', // Le nom de l'événement que vous voulez écouter
-        listener: (event) => {
-          console.log('Event data:', event);
-          // Ici, vous pouvez traiter les données de l'événement comme nécessaire
-          // Par exemple, en extrayant la direction et en la passant à une fonction ou en mettant à jour l'état
-        },
-      });
-  
-      // Cleanup en désabonnant l'événement lors du démontage du composant
-      return () => unsubscribe();
-    }, []);
+    
 
   };
 
+  // useEffect(() => {
+  //   const unsubscribe = useWatchContractEvent({
+  //     address: ContractAddress, 
+  //     abi: ContractAbi, 
+  //     eventName: 'OwnerChoice', 
+  //     listener: (event) => {
+  //       console.log('Event data:', event);
+        
+  //     },
+  //   });
 
+  //   // Cleanup en désabonnant l'événement lors du démontage du composant
+  //   return () => unsubscribe();
+  // }, []);
 
   return (
     <Box>
