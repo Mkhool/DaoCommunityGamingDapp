@@ -440,7 +440,6 @@ export const QuestContractAbi= [
 ];
 
 export const StakingContractAddress=process.env.NEXT_PUBLIC_STAKING_CONTRACT_ADDRESS;
-// export const StakingContractAddress=process.env.NEXT_PUBLIC_STAKING_CONTRACT_ADDRESS;
 export const StakingContractAbi=[
   {
     "inputs": [

@@ -19,7 +19,7 @@ import './globals.css';
 const config = getDefaultConfig({
   appName: 'UnityQuest',
   projectId:process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID,
-  chains: [hardhat, sepolia],
+  chains: [hardhat],
   ssr: true, 
 });
 

@@ -10,7 +10,7 @@ import DailyInterestRate from '../DaoComponents/DailyInterestRate';
 import BuyTokens from './StakeToken';
 import Rank from '../user/Rank';
 import GameProposal from '../DaoComponents/GameProposal';
-
+import StakeTokens from '../user/StakeTokens';
 import {
     Box,
     Grid,
@@ -46,6 +46,7 @@ const Dao = () => {
                             <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl'width="100%">
                                 <VStack spacing={4} align="stretch">
                                     <BuyTokens />
+                                    <StakeTokens/>
                                 </VStack>
                             </GridItem>
 

@@ -1,7 +1,4 @@
 {
   "/dao/page": "app/dao/page.js",
-  "/game/page": "app/game/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/Admin/page": "app/Admin/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js"
 }
