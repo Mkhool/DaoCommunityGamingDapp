@@ -1,12 +1,16 @@
 'use client'
 import React, { useEffect } from 'react'
-import NavBar from './DesignPage/NavBar';
+import NavBar from './NavBar';
 import { TimeIcon, AtSignIcon } from '@chakra-ui/icons';
-import ProposeGameTest from './DaoComponents/ProposeGameTest';
-import Balance2 from './DaoComponents/Balance2';
-import Staking from './user/Staking';
-import TotalStaked from './DaoComponents/TotalStaked';
-import DailyInterestRate from './DaoComponents/DailyInterestRate';
+import ProposeGameTest from '../DaoComponents/ProposeGameTest';
+import Balance2 from '../DaoComponents/Balance2';
+import Staking from '../user/Staking';
+import TotalStaked from '../DaoComponents/TotalStaked';
+import DailyInterestRate from '../DaoComponents/DailyInterestRate';
+import BuyTokens from './StakeToken';
+import Rank from '../user/Rank';
+import GameProposal from '../DaoComponents/GameProposal';
+
 import {
     Box,
     Grid,
@@ -21,26 +25,25 @@ import {
     CircularProgressLabel,
     Divider,
     List,
+    SimpleGrid,
     ListItem,
     Tag
 
 } from '@chakra-ui/react';
 import VoteGameTest from '../DaoComponents/VoteGameTest';
-
-
-
+import GameList from '../DaoComponents/GameList';
 
 const Dao = () => {
     return (
         <>
-            <Box display="flex">
+            <Box display="flex" width="1080px">
                 <NavBar />
-                <Box flex="1" ml="150px" maxWidth="calc(100vw - 150px - 2rem)">
-                    <Box p={35} color="white" minH="100vh">
+                <Box flex="1" ml="200px" maxWidth="calc(100vw - 150px - 2rem)" width="1080px">
+                    <Box p={35} color="white" minH="100vh" maxWidth="1080px">
                         <Grid templateColumns="repeat(12, 1fr)" gap={6}>
 
                             {/* Profil et Progression*/}
-                            <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl' >
+                            <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl'width="100%">
                                 <VStack spacing={4} align="stretch">
                                     <BuyTokens />
                                 </VStack>
@@ -55,8 +58,8 @@ const Dao = () => {
                                     </HStack>
                                     <Divider />
                                     <HStack spacing={4}>
-                                        <Button leftIcon={<TimeIcon />} colorScheme="purple">Quêtes journalières</Button>
-                                        <Button leftIcon={<AtSignIcon />} colorScheme="purple">Missions spéciales</Button>
+                                        <Button leftIcon={<TimeIcon />} colorScheme="purple">Daily Quest</Button>
+                                        <Button leftIcon={<AtSignIcon />} colorScheme="purple">Special Missions</Button>
                                     </HStack>
                                 </VStack>
                             </GridItem>
@@ -73,29 +76,20 @@ const Dao = () => {
                                                 <Staking />
                                                 <TotalStaked />
                                                 <DailyInterestRate />
-                                                <BuyTokens />
+                                            
                                             </HStack>
                                         </ListItem>
                                         <ListItem>
-                                            <HStack>
-                                            <Rank/>
-                                <Balance2/>
-                             <Staking/>
-                             <TotalStaked/>
-                             <DailyInterestRate/>
-                                 <BuyTokens/>
-
-                                            </HStack>
                                         </ListItem>
                                     </List>
                                 </VStack>
                             </GridItem>
 
-                            {/* Leaderboard */}
-                            <GridItem colSpan={12} p={4} borderRadius="md" boxShadow='xl'>
-                                <VStack spacing={3}>
-
-                                </VStack>
+                            {/* Game List */}
+                            <GridItem colSpan={12} p={4} borderRadius="md" boxShadow='xl' >
+                                <HStack spacing={3}>
+                                    <GameList />
+                                </HStack>
                             </GridItem>
                             {/* Annonces */}
                             <GridItem colSpan={4} p={4} borderRadius="md" boxShadow='xl'>
@@ -121,12 +115,12 @@ const Dao = () => {
                             <GridItem colSpan={4} p={4} borderRadius="md" boxShadow='xl'>
                                 <VStack spacing={4}>
                                     <Text fontSize="2xl" color="#7855de">Game</Text>
-
+                                    <GameProposal />
                                 </VStack>
                             </GridItem>
                         </Grid>
                     </Box>
-                    <Events />
+                    {/* <Events /> */}
                 </Box>
 
             </Box>

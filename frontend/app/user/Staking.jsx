@@ -1,5 +1,5 @@
 "use client"
-import { createContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { StakingContractAbi, StakingContractAddress } from "@/constants/index.js";
 import { ethers } from "ethers"; 
@@ -11,7 +11,7 @@ const Staking = () => {
     const { data, refetch } = useReadContract({
         abi: StakingContractAbi,
         address: StakingContractAddress,
-        functionName: 'getStakingBalance',
+        functionName: 'stakingBalance',
         args: [userAddress],
     });
 

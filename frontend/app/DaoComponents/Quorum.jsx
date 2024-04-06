@@ -1,32 +1,32 @@
 "use client"
 import { createContext, useEffect, useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
-import { StakingContractAbi, StakingContractAddress } from "@/constants/index.js";
+import { ContractAbi, ContractAddress } from "@/constants/index.js";
 import { ethers } from "ethers"; 
 
-const DailyInterestRate = () => {
+const Quorum = () => {
     const [totalStaked, settotalStaked] = useState(0);
 
     const { data } = useReadContract({
-        abi: StakingContractAbi,
-        address: StakingContractAddress,
-        functionName: 'qorum',
+        abi: ContractAbi,
+        address: ContractAddress,
+        functionName: 'quorumPercentage',
         
     });
 
     useEffect(() => {
         if (data) {
     
-            let interestRatePercentage;
+            let QorumPercentage;
             if (typeof data.toNumber === 'function') {
-                interestRatePercentage = data.toNumber();
+                QorumPercentage = data.toNumber();
             } else if (typeof data === 'number') {
-                interestRatePercentage = data;
+                QorumPercentage = data;
             } else {
                 console.error('Unexpected type of data');
                 return;
             }
-            settotalStaked(interestRatePercentage);
+            settotalStaked(QorumPercentage);
         }
     }, [data]);
 
@@ -35,7 +35,7 @@ const DailyInterestRate = () => {
 
     return (
         <div>
-           Daily Interest Rate: {totalStaked} %
+           Quorum: {totalStaked} %
         </div>
     );
 
@@ -43,5 +43,5 @@ const DailyInterestRate = () => {
 
 
 
-export default DailyInterestRate;
+export default Quorum;
 

@@ -117,10 +117,4 @@ contract StakingContract is ReentrancyGuard, Ownable {
         return reward;
     }
 
-    /// @notice Renvoie la balance de staking d'un utilisateur spécifique.
-    /// @param user L'adresse de l'utilisateur dont on souhaite connaître la balance de staking.
-    /// @return balance de staking de l'utilisateur.
-    function getStakingBalance(address user) public view returns (uint256) {
-        return stakingBalance[user];
-    }
 }

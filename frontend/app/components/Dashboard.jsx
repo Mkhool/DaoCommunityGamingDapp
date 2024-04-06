@@ -21,7 +21,7 @@ import {
 } from '@chakra-ui/react';
 import { StarIcon, TimeIcon, AtSignIcon, BellIcon } from '@chakra-ui/icons';
 import NavBar from './NavBar';
-import Rank from './rank';
+import Rank from '../user/Rank';
 
 
 function Dashboard() {

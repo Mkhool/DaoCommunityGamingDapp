@@ -18,6 +18,7 @@ import Balance2 from './DaoComponents/Balance2';
 import Staking from './user/Staking';
 import TotalStaked from './DaoComponents/TotalStaked';
 import DailyInterestRate from './DaoComponents/DailyInterestRate';
+import Quorum from './DaoComponents/Quorum';
 import {
     Box,
     Grid,
@@ -37,7 +38,7 @@ import {
 
 } from '@chakra-ui/react';
 
-import Rank from './DaoComponents/Rank';
+import Rank from './user/Rank';
 const Page = () => {
 
     const { address } = useAccount();
@@ -60,6 +61,7 @@ const Page = () => {
                              <Staking/>
                              <TotalStaked/>
                              <DailyInterestRate/>
+                             <Quorum/>
                                  <BuyTokens/>
                                 </VStack>
                             </GridItem> 
