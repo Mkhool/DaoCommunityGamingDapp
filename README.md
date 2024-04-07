@@ -18,7 +18,7 @@ Screen interface Dashboard:
 
 
 
-<img width="1429" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/beubeubeubeu/Projet3_MEDXBEN/assets/4832337/a2e06b60-974b-4c0a-8880-f145af833795">
+<img width="1429" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/Mkhool/DaoCommunityGamingDapp/tree/main/frontend/public/image/UQT.png">
 
 ___
 ### Détails
