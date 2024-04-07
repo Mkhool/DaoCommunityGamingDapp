@@ -7,14 +7,14 @@ import { ContractAddress, ContractAbi } from '@/constants';
 
 function ProposeGameTest({ address, onSuccessAddProposal }) {
 
- useWatchContractEvent({
-    address: ContractAddress, // L'adresse de votre contrat
-    abi: ContractAbi, // L'ABI de votre contrat
-    eventName: 'GameProposed', // Le nom de l'événement à écouter
-    onLogs(logs) {
-      console.log('New logs!', logs)
-    },
-  });
+//  useWatchContractEvent({
+//     address: ContractAddress, 
+//     abi: ContractAbi, 
+//     eventName: 'GameProposed', 
+//     onLogs(logs) {
+//       console.log('New logs!', logs)
+//     },
+//   });
 
   const [proposalDescription, setProposalDescription] = useState('');
 
@@ -25,17 +25,16 @@ function ProposeGameTest({ address, onSuccessAddProposal }) {
     mutation: {
       onSuccess() {
         toast({
-          title: "Game proposal has been sent.",
+          title: "La proposition a été envoyée.",
           status: "success",
           duration: 9000,
           isClosable: true,
         });
-        // setProposalDescription('');
-        // onSuccessAddProposal();
+
       },
       onError(error) {
         toast({
-          title: "Failed to propose a Game.",
+          title: "Erreur la proposition n'a pas été envoyée.",
           description: error.shortMessage,
           status: "error",
           duration: 9000,
@@ -48,13 +47,14 @@ function ProposeGameTest({ address, onSuccessAddProposal }) {
   const handleProposalSubmission = () => {
     if (!proposalDescription.trim()) {
       toast({
-        title: 'Description cannot be empty.',
+        title: 'La description ne peux être vide.',
         status: 'error',
         duration: 5000,
         isClosable: true,
       });
       return;
     }
+
     ProposeGame({
       address: ContractAddress,
       abi: ContractAbi,
@@ -73,13 +73,10 @@ function ProposeGameTest({ address, onSuccessAddProposal }) {
 
   useEffect(() => {
       if(isConfirmed) {
-          // refetch la balance
-          // refetch()
-          // // refetch les events
-          // getEvents();
+
         
           toast({
-              title: "Transaction is done",
+              title: "Transaction envoyée avec succès.",
               status: "success",
               duration: 3000,
               isClosable: true,
@@ -90,21 +87,25 @@ function ProposeGameTest({ address, onSuccessAddProposal }) {
   return (
 <Box>
   <VStack spacing={4}>
-  {/* {isConfirmed 
-            &&  <Alert mt="1rem" status='success'>
-                    <AlertIcon />
-                    Your transaction has been confirmed
-                </Alert>} */}
+
     <Input
-      placeholder="Describe your game proposal"
+    focusBorderColor='#BFA181'
+    size='sm'
+      placeholder="Nom de jeu"
       value={proposalDescription}
       onChange={(e) => setProposalDescription(e.target.value)}
     />
-    <Button colorScheme='whiteAlpha'
+    <Button 
+     color="rgba(15, 15, 15)"
+     bg="#BFA181" maxHeight="250"
+     _hover={{ boxShadow: "0 0 12px 3px rgba(150, 70, 255, 0.6)" }}
+     sx={{
+         transition: 'box-shadow 0.33s ease-in-out',
+     }}
       onClick={handleProposalSubmission}
       isLoading={isProposalAdding}
     >
-      Propose a game
+      Envoyer
     </Button>
   </VStack>
  

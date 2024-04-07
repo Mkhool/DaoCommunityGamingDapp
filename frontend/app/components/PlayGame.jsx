@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Flex, Input, Button, Textarea, VStack, useToast } from '@chakra-ui/react';
-import { useWriteContract, useWatchContractEvent } from 'wagmi';
+import { useWriteContract, useWatchContractEvent, useWaitForTransactionReceipt } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
 import OwnerChoice from '../Admin/OwnerChoice';
 
 export default function PlayGame({ address, onSuccessMakechoice }) {
 
   useWatchContractEvent({
-    address: ContractAddress, // L'adresse de votre contrat
-    abi: ContractAbi, // L'ABI de votre contrat
-    eventName: 'ChoiceMade', // Le nom de l'événement à écouter
-    onLogs(logs) {
-      console.log('New logs!', logs)
+    address: ContractAddress, 
+    abi: ContractAbi, 
+    eventName: 'ChoiceMade',
+    listener: (event) => {
+      console.log('Nouvelle direction ajoutée!', event)
+      const newMessage = {
+        message: event.direction,
+        id: event.args.sessionId.toString(),
+      };
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
     },
   });
 
@@ -20,11 +25,11 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
   const [SessionId, setSessionId] = useState('');
   const toast = useToast();
 
-  const { writeContract: MakeChoice, isLoading: isProposalAdding } = useWriteContract({
+  const { writeContract: MakeChoice, isLoading: isProposalAdding, data: hash } = useWriteContract({
     mutation: {
       onSuccess() {
         toast({
-          title: "Direction has been sent.",
+          title: "Direction envoée",
           status: "success",
           duration: 9000,
           isClosable: true,
@@ -34,7 +39,7 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
       },
       onError(error) {
         toast({
-          title: "Failed to send direction.",
+          title: "Erreur",
           description: error.shortMessage,
           status: "error",
           duration: 9000,
@@ -47,7 +52,7 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
   const handleProposalSubmission = () => {
     if (!proposalDescription.trim() ||!SessionId.trim()) {
       toast({
-        title: 'Description cannot be empty.',
+        title: 'La description ne doit pas etre vide',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -59,8 +64,8 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
 
     if (isNaN(sessionIdNumber)) {
       toast({
-        title: 'Invalid Session ID',
-        description: 'Session ID must be a number.',
+        title: 'Numéro de session ID invalide',
+        description: 'Id doit être un nombre',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -70,7 +75,7 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
   
     if (!proposalDescription.trim()) {
       toast({
-        title: 'Description cannot be empty.',
+        title: 'La description ne doit pas etre vide',
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -85,15 +90,31 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
       args: [sessionIdNumber, proposalDescription]
     });
   };
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = 
+  useWaitForTransactionReceipt({ 
+    hash, 
+  }) 
+
+  useEffect(() => {
+      if(isConfirmed) {
+
+        
+          toast({
+              title: "Direction envoyée avec succès.",
+              status: "success",
+              duration: 1000,
+              isClosable: true,
+          });
+      }
+  }, [isConfirmed])
 
 return (
-
 
   <Flex height="calc(100vh - 30px)" alignItems="center" justifyContent="center" marginLeft="100px">
     <Flex width="calc(80vw - 10px)" height="calc(40vw - 30px)" bg="gray.800" borderRadius="lg" overflow="hidden">
       <Box flex="3" bg="black" display="flex" alignItems="center" justifyContent="center">
       </Box>
-      <Flex flex="1" flexDirection="column" bg="#2c3e50" p={4}>
+      <Flex flex="1" flexDirection="column" bg="#BFA181" p={4}>
         <VStack spacing={2} overflowY="auto" flex="1">
           {messages.map((msg, index) => (
             <Box key={index} bg="gray.700" p={2} borderRadius="md" width="100%">
@@ -123,9 +144,6 @@ return (
           >
             Envoyer
           </Button>
-        </Box>
-        <Box flex="1" bg="black" display="flex" alignItems="center" justifyContent="center">
-          <OwnerChoice/>
         </Box>
       </Flex>
     </Flex>

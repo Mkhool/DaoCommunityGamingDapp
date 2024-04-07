@@ -39,7 +39,7 @@ const Profil = () => {
       <Progress value={45} size="sm" colorScheme="purple" />
 
       <Rank color="#178582"/>
-      <Image src="/image/Diamond.png" alt="Banner" mx="auto" maxWidth="100px" maxHeight="10vh"  />
+      
       
     </VStack>
 

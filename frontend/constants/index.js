@@ -1,5 +1,5 @@
 export const QuestContractAddress=process.env.NEXT_PUBLIC_QUEST_ERC20_ADDRESS;
-export const QuestContractAbi= [
+export const QuestContractAbi=[
   {
     "inputs": [],
     "stateMutability": "nonpayable",
@@ -708,7 +708,7 @@ export const StakingContractAbi=[
 ];
 
 export const ContractAddress=process.env.NEXT_PUBLIC_UNITY_QUEST_DAO_CONTRACT_ADDRESS;
-export const ContractAbi= [
+export const ContractAbi=[
   {
     "inputs": [
       {

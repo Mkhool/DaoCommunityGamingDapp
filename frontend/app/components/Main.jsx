@@ -8,7 +8,7 @@ import { publicClient } from '@/utils/client'
 import { parseAbiItem } from 'viem'
 import { useState, useEffect } from 'react'
 import BuyTokens from '../user/BuyTokens';
-import Balance from '../user/Staking'
+import Balance from '../user/StakingBalance'
 import Events from './Events'
 import { ContractAddress, ContractAbi } from '@/constants';
 

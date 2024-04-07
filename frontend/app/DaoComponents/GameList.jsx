@@ -21,7 +21,7 @@ const GameList = () => {
     };
 
     return (
-        <SimpleGrid spacing={4} templateColumns='repeat(3, minmax(100px, 1fr))'>
+        <SimpleGrid spacing={24} templateColumns='repeat(3, minmax(100px, 1fr))'>
             {[
                 { title: "Zelda", image: "/image/Zelda.jpg", id: "1" },
                 { title: "Pokemon Red", image: "/image/Pokemon.png", id: "2" },

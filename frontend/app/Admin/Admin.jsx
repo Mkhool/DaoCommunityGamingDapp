@@ -46,8 +46,7 @@ const Admin = () => {
                             {/* Profil et Progression*/}
                             <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl' >
                                 <VStack spacing={4} align="stretch">
-                                 <BuyTokens/>
-                                </VStack>
+                              </VStack>
                             </GridItem> 
 
                             {/* Tableau de Bord Principal */}
@@ -94,8 +93,7 @@ const Admin = () => {
                                     <ProposeGameTest />
                                     <VoteGameTest/>
                                     <StartGameSession/>
-                                    <MakeChoice/>
-                                    <EndGameSession/>
+                                     <EndGameSession/>
                                     </HStack>
                                 </VStack>
                             </GridItem>

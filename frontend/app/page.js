@@ -15,7 +15,7 @@ import OwnerChoice from './Admin/OwnerChoice';
 import { useAccount, useReadContract  } from "wagmi";
 import NotConnected from './DesignPage/NotConnected';
 import Balance2 from './DaoComponents/Balance2';
-import Staking from './user/Staking';
+import Staking from './user/StakingBalance';
 import TotalStaked from './DaoComponents/TotalStaked';
 import DailyInterestRate from './DaoComponents/DailyInterestRate';
 import Quorum from './DaoComponents/Quorum';

@@ -486,7 +486,7 @@ describe("UnityQuest", function () {
             const { quest, unityContract, stakingContract, stakingContractAddress, owner } = await loadFixture(deployContractFixture);
 
             // Simulate staking
-            const stakeAmount = ethers.parseUnits("100", 18); // Make sure to use the correct variable name if it's `stakingContractAddress` instead of `stakingContractAddress`
+            const stakeAmount = ethers.parseUnits("100", 18); 
             await quest.connect(owner).approve(stakingContractAddress, stakeAmount);
             await stakingContract.connect(owner).Stake(stakeAmount);
 

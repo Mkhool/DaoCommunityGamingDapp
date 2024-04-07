@@ -90,15 +90,23 @@ function VoteGame({ address, onSuccessAddProposal, Events }) {
   <VStack spacing={4}>
     
     <Input
-      placeholder="Select an Id"
+    focusBorderColor='#BFA181'
+      placeholder="Id du jeu"
+      size='sm'
       value={voteFrorGame }
       onChange={(e) => serVoteFrorGame(e.target.value)}
     />
-    <Button colorScheme='whiteAlpha'
+    <Button
+     color="rgba(15, 15, 15)"
+     bg="#BFA181" maxHeight="250"
+     _hover={{ boxShadow: "0 0 12px 3px rgba(150, 70, 255, 0.6)" }}
+     sx={{
+         transition: 'box-shadow 0.33s ease-in-out',
+     }}
       onClick={handleVoteSubmission}
       isLoading={isVoteAdding}
     >
-      Vote for a Game
+      Envoyer
     </Button>
   </VStack>
  

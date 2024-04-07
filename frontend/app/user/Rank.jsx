@@ -35,7 +35,7 @@ const Rank = ({color }) => {
     return (
        
           <div>
-           <Text color={color} as='b' fontSize="sm" > Rank : {stakingQuest} </Text>
+           <Text color={color} as='b' fontSize="sm" > Rang : {stakingQuest} </Text>
         </div>
         
     );
