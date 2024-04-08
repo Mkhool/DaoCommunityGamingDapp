@@ -38,9 +38,7 @@ const Profil = () => {
 
       <Progress value={45} size="sm" colorScheme="purple" />
 
-      <Rank color="#178582"/>
-      
-      
+     
     </VStack>
 
   )

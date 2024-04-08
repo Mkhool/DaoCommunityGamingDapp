@@ -21,11 +21,8 @@ import {
 } from '@chakra-ui/react';
 import { StarIcon, TimeIcon, AtSignIcon, BellIcon } from '@chakra-ui/icons';
 import NavBar from './NavBar';
-import Rank from '../user/Rank';
-
 
 function Dashboard() {
-
 
     return (
             <Box display="flex" mt="10">
@@ -65,18 +62,18 @@ function Dashboard() {
                             {/* Notifications */}
                             <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl'>
                                 <VStack spacing={4}>
-                                    <Text fontSize="xl" color="#7855de">Notifications</Text>
+                                    <Text fontSize="xl" color="#7855de" as ='b'>Notifications</Text>
                                     <List spacing={3}>
                                         <ListItem>
                                             <HStack>
                                                 <BellIcon color="purple.500" />
-                                                <Text color="white">Nouvelle quête disponible!</Text>
+                                                <Text color="#BFA181">Nouvelle quête disponible!</Text>
                                             </HStack>
                                         </ListItem>
                                         <ListItem>
                                             <HStack>
                                                 <BellIcon color="purple.500" />
-                                                <Text color="white">Événement communautaire bientôt!</Text>
+                                                <Text color="#BFA181">Événement communautaire bientôt!</Text>
                                             </HStack>
                                         </ListItem>
                                     </List>
@@ -86,7 +83,7 @@ function Dashboard() {
                             {/* Leaderboard */}
                             <GridItem colSpan={12} p={4} borderRadius="md" boxShadow='xl'>
                                 <VStack spacing={4}>
-                                    <Text fontSize="2xl" color="#7855de">Leaderboard</Text>
+                                    <Text fontSize="2xl" color="#7855de" as ='b' >Leaderboard</Text>
                                     <HStack divider={<Divider orientation="vertical" />} spacing={4}>
                                         <Tag colorScheme="purple" borderRadius="full">LOL: 1500 LP</Tag>
                                         <Tag colorScheme="purple" borderRadius="full">WoW: 1280 XP</Tag>
@@ -97,14 +94,14 @@ function Dashboard() {
                             {/* Annonces */}
                             <GridItem colSpan={4}  p={4} borderRadius="md" boxShadow='xl'>
                                 <VStack spacing={4}>
-                                    <Text fontSize="2xl" color="#7855de">Annonces</Text>
+                                    <Text fontSize="2xl" color="#7855de" as ='b' >Annonces</Text>
                                     <Box p={4} bg="dark.300" borderRadius="md">
-                                        <Text fontWeight="bold" color="white">Maintenance planifiée</Text>
-                                        <Text color="white">Nous aurons une maintenance ce vendredi à 22h00 GMT. Attendez-vous à une courte interruption de service.</Text>
+                                        <Text fontWeight="bold" color="#BFA181">Maintenance planifiée</Text>
+                                        <Text color="#BFA181">Nous aurons une maintenance ce vendredi à 22h00 GMT. Attendez-vous à une courte interruption de service.</Text>
                                     </Box>
                                     <Box p={4} bg="dark.300" borderRadius="md">
-                                        <Text fontWeight="bold" color="white">Nouvelle fonctionnalité</Text>
-                                        <Text color="white">Découvrez notre toute nouvelle salle de quête pour des défis épiques!</Text>
+                                        <Text fontWeight="bold" color="#BFA181">Nouvelle fonctionnalité</Text>
+                                        <Text color="#BFA181">Découvrez notre toute nouvelle salle de quête pour des défis épiques!</Text>
                                     </Box>
                                 </VStack>
                             </GridItem>
@@ -112,18 +109,18 @@ function Dashboard() {
                             {/* Événements en Direct */}
                             <GridItem colSpan={4}  p={4} borderRadius="md" boxShadow='xl'>
                                 <VStack spacing={4}>
-                                    <Text fontSize="2xl" color="#7855de">Événements en Direct</Text>
+                                    <Text fontSize="2xl" color="#7855de" as ='b'>Événements en Direct</Text>
                                     <List spacing={3}>
                                         <ListItem>
                                             <HStack>
                                                 <StarIcon color="purple.500" />
-                                                <Text color="white">Stream spécial avec Invocateur1 - 20h00 GMT</Text>
+                                                <Text color="#BFA181">Stream spécial avec Vitalik - 20h00 GMT</Text>
                                             </HStack>
                                         </ListItem>
                                         <ListItem>
                                             <HStack>
                                                 <StarIcon color="purple.500" />
-                                                <Text color="white">Tournoi intercommunautaire de LoL - 18h00 GMT demain</Text>
+                                                <Text color="#BFA181">Tournoi intercommunautaire de LoL - 18h00 GMT demain</Text>
                                             </HStack>
                                         </ListItem>
                                     </List>
@@ -131,18 +128,18 @@ function Dashboard() {
                             </GridItem>
                             <GridItem colSpan={4} p={4} borderRadius="md" boxShadow='xl'>
                                 <VStack spacing={4}>
-                                    <Text fontSize="2xl" color="#7855de">Événements en Direct</Text>
+                                    <Text fontSize="2xl" color="#7855de" as ='b'>Ouverture saison 2</Text>
                                     <List spacing={3}>
                                         <ListItem>
                                             <HStack>
                                                 <StarIcon color="purple.500" />
-                                                <Text color="white">Stream spécial avec Vitalik - 20h00 GMT</Text>
+                                                <Text color="#BFA181">Nouvelle collection de nft disponibles</Text>
                                             </HStack>
                                         </ListItem>
                                         <ListItem>
                                             <HStack>
                                                 <StarIcon color="purple.500" />
-                                                <Text color="white">Tournoi intercommunautaire de LoL - 18h00 GMT demain</Text>
+                                                <Text color="#BFA181">Nouveaux objets à utiliser en jeu </Text>
                                             </HStack>
                                         </ListItem>
                                     </List>

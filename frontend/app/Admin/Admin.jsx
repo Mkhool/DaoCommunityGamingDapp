@@ -39,7 +39,7 @@ const Admin = () => {
     <>
                 <Box display="flex">
                  <NavBar />
-                 <Box flex="1" ml="150px" maxWidth="calc(100vw - 150px - 2rem)">
+                 <Box flex="1" ml="150px" maxWidth="calc(100vw - 150px - 2rem)" mt='20'>
       <Box p={35} color="white" minH="100vh">
         <Grid templateColumns="repeat(12, 1fr)" gap={6}>
 
@@ -58,8 +58,6 @@ const Admin = () => {
                                     </HStack>
                                     <Divider />
                                     <HStack spacing={4}>
-                                        <Button leftIcon={<TimeIcon />} colorScheme="purple">Quêtes journalières</Button>
-                                        <Button leftIcon={<AtSignIcon />} colorScheme="purple">Missions spéciales</Button>
                                     </HStack>
                                 </VStack>
                             </GridItem>
@@ -100,7 +98,7 @@ const Admin = () => {
                             {/* Annonces */}
                             <GridItem colSpan={4}  p={4} borderRadius="md" boxShadow='xl'>
                                 <VStack spacing={4}>
-                                    <Text fontSize="2xl" color="#7855de">Annonces</Text>
+                                    <Text fontSize="2xl" color="#7855de"></Text>
                                     <Box p={4} bg="dark.300" borderRadius="md">
                                       
                                     </Box>
@@ -125,13 +123,10 @@ const Admin = () => {
                             </GridItem>
                          </Grid>
                     </Box> 
-                    <Events/>
                 </Box>
                 
             </Box>
-            {/* <NextPhaseButton/> */}
-            {/* <WorkflowStepper /> */}
-            
+
     </>
  
   )

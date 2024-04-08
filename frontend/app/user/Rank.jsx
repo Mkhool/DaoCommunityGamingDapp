@@ -32,12 +32,10 @@ const Rank = ({color }) => {
 
 
 
-    return (
-       
+    return ( 
           <div>
-           <Text color={color} as='b' fontSize="sm" > Rang : {stakingQuest} </Text>
-        </div>
-        
+           <Text color='#BFA181' as='b' fontSize="lg" > Rang : {stakingQuest} </Text>
+        </div>    
     );
 
 };

@@ -21,15 +21,15 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dao/page.js"
     ],
-    "/game/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/game/page.js"
-    ],
     "/Admin/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/Admin/page.js"
+    ],
+    "/game/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/game/page.js"
     ]
   }
 }
