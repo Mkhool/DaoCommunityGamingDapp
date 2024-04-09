@@ -16,19 +16,19 @@ Lien Etherscan du contract déployé sur Sepolia : https://sepolia.etherscan.io/
 
 Screen interface Homepage:
 
-<img width="1429" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/UQ3.jpg?raw=true">
+<img width="1429" alt="Homepage" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/UQ3.jpg?raw=true">
 
 
 Screen interface Dashboard:
-<img width="1429" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/dashboard.jpg?raw=true">
+<img width="1429" alt="Dashboard" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/dashboard.JPG?raw=true">
 
 
 Screen interface DAO:
-<img width="1429" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/dao.jpg?raw=true">
+<img width="1429" alt="DAO" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/dao.JPG?raw=true">
 
 
 Screen interface jeu:
-<img width="1429" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/InGame.jpg?raw=true">
+<img width="1429" alt="Jeu" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/InGameJPG.JPG?raw=true">
 ___
 ### Détails
 
