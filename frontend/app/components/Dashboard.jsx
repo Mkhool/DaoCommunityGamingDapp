@@ -16,12 +16,14 @@ import {
     Divider,
     List,
     ListItem,
-    Tag 
+    Tag,
+    Image 
 
 } from '@chakra-ui/react';
 import { StarIcon, TimeIcon, AtSignIcon, BellIcon } from '@chakra-ui/icons';
 import NavBar from './NavBar';
-
+import Rank from '../user/Rank';
+import DisplayLevel from '../user/DisplayLevel';
 function Dashboard() {
 
     return (
@@ -34,7 +36,9 @@ function Dashboard() {
                             {/* Profil et Progression*/}
                             <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl' >
                                 <VStack spacing={4} align="stretch">
-                                  
+                                  <Rank />
+                                  <Image src="/image/Diamond.png" alt="Banner" mx="auto" maxWidth="160px" maxHeight="16vh" />
+                                {/* <DisplayLevel/> */}
                                 </VStack>
                             </GridItem> 
 

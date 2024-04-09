@@ -88,8 +88,7 @@ const Admin = () => {
                                 <VStack spacing={3}>
                                     <Text fontSize="2xl" color="#7855de">Administration</Text>
                                     <HStack divider={<Divider orientation="vertical" />} spacing={4}>
-                                    <ProposeGameTest />
-                                    <VoteGameTest/>
+
                                     <StartGameSession/>
                                      <EndGameSession/>
                                     </HStack>

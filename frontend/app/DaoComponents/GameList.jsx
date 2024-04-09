@@ -7,15 +7,13 @@ import VoteGame from './VoteGame';
 
 
 const GameList = () => {
-    // État pour suivre l'ID de la proposition actuellement sélectionnée
+   
     const [selectedProposalId, setSelectedProposalId] = useState(null);
 
-    // Fonction pour ouvrir le modal avec un ID spécifique
     const openModalWithId = (id) => {
         setSelectedProposalId(id);
     };
 
-    // Fonction pour fermer le modal
     const closeModal = () => {
         setSelectedProposalId(null);
     };

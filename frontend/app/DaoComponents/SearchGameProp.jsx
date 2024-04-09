@@ -1,8 +1,11 @@
-import { useState } from 'react';
+import { useState,  } from 'react';
 import { useReadContract } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants'; 
-function SearchGameProp() {
-  const [proposalId, setProposalId] = useState('');
+import Quorum from './Quorum';
+
+function SearchGameProp({initialProposalId}) {
+  
+  const [proposalId, setProposalId] = useState(initialProposalId || '');
   const { data, isError, isLoading } = useReadContract({
     address: ContractAddress, 
     abi: ContractAbi, 
@@ -16,11 +19,12 @@ function SearchGameProp() {
 
   };
 
+  
   return (
     <div>
       <form onSubmit={handleSubmit}>
   
-        <input
+        <input color='black'
           id="proposalId"
           type="text"
           value={proposalId}
@@ -34,11 +38,11 @@ function SearchGameProp() {
       ) : (
         <div>
           <h2>Proposal Details</h2>
-          <p>ID: {data[0]}</p>
+          <p>ID: {initialProposalId || proposalId}</p>
           <p>Name: {data[1]}</p>
-          <p>Vote Count: {data[2]}</p>
+          <p>Vote Count: {Number(data[2] / BigInt(1e18)).toString()}</p>
           <p>Is Accepted: {data[3] ? 'Yes' : 'No'}</p>
-          <p>Quorum: {data[4]}</p>
+          <p><Quorum/></p>
         </div>
       )}
     </div>

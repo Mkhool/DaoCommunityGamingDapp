@@ -6,8 +6,6 @@ import Balance2 from '../DaoComponents/Balance2';
 import Staking from '../user/StakingBalance';
 import TotalStaked from '../DaoComponents/TotalStaked';
 import DailyInterestRate from '../DaoComponents/DailyInterestRate';
-import Rank from '../user/Rank';
-import GameProposal from '../DaoComponents/GameProposal';
 import Quorum from '../DaoComponents/Quorum';
 import {
     Box,
@@ -25,6 +23,9 @@ import {
 import VoteGameTest from '../DaoComponents/VoteGame';
 import GameList from '../DaoComponents/GameList';
 import SearchGameProp from '../DaoComponents/SearchGameProp';
+import BuyTokens from '../user/BuyTokens';
+import StakeTokens from '../user/StakeTokens';
+
 
 const Dao = () => {
     return (
@@ -41,8 +42,9 @@ const Dao = () => {
                             {/* Profil et Progression*/}
                             <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl' width="100%">
                                 <VStack spacing={4} align="stretch">
-                                    <Rank />
-                                    <Image src="/image/Diamond.png" alt="Banner" mx="auto" maxWidth="160px" maxHeight="16vh" />
+                                <BuyTokens />
+                                <Divider />
+                                <StakeTokens />
                                 </VStack>
                             </GridItem>
 

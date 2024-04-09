@@ -67,7 +67,7 @@ const BuyTokens = ({ refetch, getEvents }) => {
 
             setBuyTokensValue('');
             toast({
-                title: "Thank for buying tokens",
+                title: "Merci mpour votre achat",
                 status: "success",
                 duration: 3000,
                 isClosable: true,
@@ -77,8 +77,8 @@ const BuyTokens = ({ refetch, getEvents }) => {
     
     return (
        <>
-            <Heading as='h2' size='xs' mt='1rem'>
-                Buy Quest Tokens
+            <Heading as='h2' size='xs' mt='2.8rem'>
+                Acheter des tokens Quest
             </Heading>
             {isConfirmed 
             &&  <Alert mt="1rem" status='success'>
@@ -91,8 +91,8 @@ const BuyTokens = ({ refetch, getEvents }) => {
                 width="100%"
                 mt="1rem"
             >
-                <Input placeholder='Amount in ETH' value={buyTokensValue} onChange={(e) => setBuyTokensValue(e.target.value)} />
-                <Button colorScheme='purple' onClick={buyTokens}>BuyTokens</Button>
+                <Input placeholder='Montant en ETH' size='xs' mt='-8' value={buyTokensValue} onChange={(e) => setBuyTokensValue(e.target.value)} />
+                <Button colorScheme='purple' size='xs' mt='-8' onClick={buyTokens}>BuyTokens</Button>
             </Flex>
        </> 
     )

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Box, Button, Input, Text, useToast, VStack, Tag } from '@chakra-ui/react';
-import { useWriteContract, useWatchContractEvent } from 'wagmi';
+import { useWriteContract, useWatchContractEvent, useWaitForTransactionReceipt } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
 
 function OwnerChoice({ address, onSuccessMakechoice }) {
@@ -14,7 +14,7 @@ function OwnerChoice({ address, onSuccessMakechoice }) {
   const toast = useToast();
 
   // Écrire une nouvelle proposition
-  const { writeContract: SetChoiceAsOwner, isLoading: isProposalAdding } = useWriteContract({
+  const { writeContract: SetChoiceAsOwner, isLoading: isProposalAdding, data:hash } = useWriteContract({
     mutation: {
       onSuccess() {
         toast({
@@ -80,25 +80,27 @@ function OwnerChoice({ address, onSuccessMakechoice }) {
       args: [sessionIdNumber, proposalDescription]
 
     });
-
-    
+  
 
   };
 
-  // useEffect(() => {
-  //   const unsubscribe = useWatchContractEvent({
-  //     address: ContractAddress, 
-  //     abi: ContractAbi, 
-  //     eventName: 'OwnerChoice', 
-  //     listener: (event) => {
-  //       console.log('Event data:', event);
-        
-  //     },
-  //   });
+  const { isLoading: isConfirming, isSuccess: isConfirmed } = 
+  useWaitForTransactionReceipt({ 
+    hash, 
+  }) 
 
-  //   // Cleanup en désabonnant l'événement lors du démontage du composant
-  //   return () => unsubscribe();
-  // }, []);
+  useEffect(() => {
+      if(isConfirmed) {
+
+          toast({
+              title: "Vote validated",
+              status: "success",
+              duration: 3000,
+              isClosable: true,
+          });
+      }
+  }, [isConfirmed])
+
 
   return (
     <Box>

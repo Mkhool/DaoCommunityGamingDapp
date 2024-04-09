@@ -77,8 +77,8 @@ const StakeTokens = ({ refetch, getEvents }) => {
     
     return (
        <>
-            <Heading as='h2' size='xs' mt='1rem'>
-                Stake your Quest Tokens
+            <Heading as='h2' size='xs' mt='0' >
+                Staker vos tokens Quest 
             </Heading>
             {isConfirmed 
             &&  <Alert mt="1rem" status='success'>
@@ -91,8 +91,8 @@ const StakeTokens = ({ refetch, getEvents }) => {
                 width="100%"
                 mt="1rem"
             >
-                <Input placeholder='Amount in ETH' value={StakeTokensValue} onChange={(e) => setStakeValue(e.target.value)} />
-                <Button colorScheme='purple' onClick={StakeTokens}>Stake</Button>
+                <Input placeholder='Montant en ETH'  size='xs' mt='-8'  value={StakeTokensValue} onChange={(e) => setStakeValue(e.target.value)} />
+                <Button colorScheme='purple' size='xs' mt='-8' onClick={StakeTokens}>Stake</Button>
             </Flex>
        </> 
     )

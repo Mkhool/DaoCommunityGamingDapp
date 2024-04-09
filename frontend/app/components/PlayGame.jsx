@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Flex, Input, Button, Textarea, VStack, useToast } from '@chakra-ui/react';
+import { Box, Flex, Input, Button, Textarea, VStack, useToast, Image } from '@chakra-ui/react';
 import { useWriteContract, useWatchContractEvent, useWaitForTransactionReceipt } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
 import OwnerChoice from '../Admin/OwnerChoice';
@@ -25,17 +25,17 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
   const [SessionId, setSessionId] = useState('');
   const toast = useToast();
 
-  const { writeContract: MakeChoice, isLoading: isProposalAdding, data: hash } = useWriteContract({
+  const { writeContract: SetChoiceAsOwner, isLoading: isProposalAdding, data: hash } = useWriteContract({
     mutation: {
       onSuccess() {
         toast({
-          title: "Direction envoée",
+          title: "Direction envoyée",
           status: "success",
           duration: 9000,
           isClosable: true,
         });
         setProposalDescription('');
-        onSuccessMakechoice();
+       
       },
       onError(error) {
         toast({
@@ -82,23 +82,24 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
       });
       return;
     }
-    MakeChoice({
+    SetChoiceAsOwner({
       address: ContractAddress,
       abi: ContractAbi,
-      functionName: "MakeChoice",
+      functionName: "SetChoiceAsOwner",
       account: address,
       args: [sessionIdNumber, proposalDescription]
     });
+
   };
+
   const { isLoading: isConfirming, isSuccess: isConfirmed } = 
   useWaitForTransactionReceipt({ 
     hash, 
   }) 
-
+  
   useEffect(() => {
       if(isConfirmed) {
-
-        
+       
           toast({
               title: "Direction envoyée avec succès.",
               status: "success",
@@ -110,8 +111,8 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
 
 return (
 
-  <Flex height="calc(100vh - 30px)" alignItems="center" justifyContent="center" marginLeft="100px">
-    <Flex width="calc(80vw - 10px)" height="calc(40vw - 30px)" bg="gray.800" borderRadius="lg" overflow="hidden">
+  <Flex height="calc(100vh - 30px)" alignItems="center" justifyContent="center" ml='-8'>
+    <Flex width="calc(95vw - 10px)" height="calc(50vw - 30px)" bg="gray.800" borderRadius="lg" overflow="hidden">
       <Box flex="3" bg="black" display="flex" alignItems="center" justifyContent="center">
       </Box>
       <Flex flex="1" flexDirection="column" bg="#BFA181" p={4}>
@@ -136,9 +137,9 @@ return (
             mb={2}
           />
           <Button
-            colorScheme='purple'
+            colorScheme='black'
             variant='outline'
-            _hover={{ bg: 'purple.500', color: 'white' }}
+            _hover={{ bg: 'black', color: 'white' }}
             onClick={handleProposalSubmission}
             isLoading={isProposalAdding}
           >

@@ -84,7 +84,7 @@ const Page = () => {
                                 {/* Événements en Direct */}
                                 <GridItem colSpan={4} p={4} borderRadius="md" boxShadow='xl'>
                                     <VStack spacing={4}>
-                                        <Text fontSize="2xl" color="#7855de" as='b'>Événements en Direct</Text>
+                                        <Text fontSize="2xl" color="#7855de" as='b'></Text>
                                         <Image src="/image/UQTDouble.png" alt="Banner" mx="auto" maxWidth="200px" maxHeight="50vh" />
                                     </VStack>
                                 </GridItem>

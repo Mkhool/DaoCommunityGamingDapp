@@ -1,5 +1,4 @@
 
-import React from 'react';
 import {
     Progress,
     Text,
@@ -13,13 +12,26 @@ import {
     EditablePreview
 } from '@chakra-ui/react';
 import Exp from '../user/Exp';
-import Rank from '../user/Rank';
-import { useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount } from 'wagmi';
+import React, { useState, useEffect } from 'react';
+
 
 
 const Profil = () => {
+  const { address: userAddress } = useAccount();
+  const [exp, setExp] = useState(0); 
 
+  
+  useEffect(() => {
+    
+    const fetchUserExperience = async () => {
+      
+      const userExp = "Nouvelle Expérience";
+      setExp(userExp);
+    };
+
+    fetchUserExperience();
+  }, [userAddress]);
 
   return (
     <VStack spacing={2} align="stretch" p={1} borderRadius="md" boxShadow='base' bg="rgba(15, 15, 15)">
@@ -33,11 +45,10 @@ const Profil = () => {
 </Editable>
 
     </Text>
-  <Exp color="#BFA181" />
+    <Exp color="#BFA181" />
 </HStack>
 
       <Progress value={45} size="sm" colorScheme="purple" />
-
      
     </VStack>
 
