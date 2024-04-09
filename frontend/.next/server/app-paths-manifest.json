@@ -1,7 +1,1 @@
-{
-  "/page": "app/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/dao/page": "app/dao/page.js",
-  "/game/page": "app/game/page.js"
-}
+{}
