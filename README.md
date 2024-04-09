@@ -14,10 +14,21 @@ Lien de la Dapp : https://unityquest.vercel.app/
 Lien Etherscan du contract déployé sur Sepolia : https://sepolia.etherscan.io/address/0x54C66969b05a5F68B5D5a4395CB2f5C3Beea44bF#code
 
 
-Screen interface Dashboard:
+Screen interface Homepage:
 
 <img width="1429" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/UQ3.jpg?raw=true">
 
+
+Screen interface Dashboard:
+<img width="1429" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/dashboard.jpg?raw=true">
+
+
+Screen interface DAO:
+<img width="1429" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/dao.jpg?raw=true">
+
+
+Screen interface jeu:
+<img width="1429" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/InGame.jpg?raw=true">
 ___
 ### Détails
 
