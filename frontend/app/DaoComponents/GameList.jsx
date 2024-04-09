@@ -1,13 +1,11 @@
 import { useState } from 'react';
-import { Card, CardHeader, CardBody, CardFooter, SimpleGrid, Heading, Button, Text, Image, useDisclosure } from '@chakra-ui/react'
+import { Card, CardHeader, CardBody, CardFooter, SimpleGrid, Heading, Button, Image, useDisclosure } from '@chakra-ui/react'
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody } from '@chakra-ui/react';
 import GameProposal from './GameProposal';
-import VoteGame from './VoteGame';
-
 
 
 const GameList = () => {
-   
+
     const [selectedProposalId, setSelectedProposalId] = useState(null);
 
     const openModalWithId = (id) => {
@@ -65,6 +63,5 @@ const GameList = () => {
         </SimpleGrid>
     );
 };
-
 
 export default GameList

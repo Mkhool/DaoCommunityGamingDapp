@@ -9,18 +9,9 @@ import { ContractAddress, ContractAbi } from '@/constants';
 function StartGameSession({ address, Events }) {
 
   useWatchContractEvent({
-    address: ContractAddress, // L'adresse de votre contrat
-    abi: ContractAbi, // L'ABI de votre contrat
-    eventName: 'GameSessionStarted', // Le nom de l'événement à écouter
-    onLogs(logs) {
-      console.log('New logs!', logs)
-    },
-  });
-
-  useWatchContractEvent({
-    address: ContractAddress, // L'adresse de votre contrat
-    abi: ContractAbi, // L'ABI de votre contrat
-    eventName: 'GameStatusChanged', // Le nom de l'événement à écouter
+    address: ContractAddress,
+    abi: ContractAbi,
+    eventName: 'GameSessionStarted',
     onLogs(logs) {
       console.log('New logs!', logs)
     },
@@ -30,7 +21,6 @@ function StartGameSession({ address, Events }) {
 
   const toast = useToast();
 
-  // Voter
   const { writeContract: StartGameSession, isLoading: isGameStart } = useWriteContract({
     mutation: {
       onSuccess() {

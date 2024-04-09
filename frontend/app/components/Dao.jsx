@@ -1,7 +1,6 @@
 'use client'
-import React, { useEffect } from 'react'
 import NavBar from './NavBar';
-import ProposeGameTest from '../DaoComponents/ProposeGameTest';
+import ProposeGameTest from '../DaoComponents/ProposeGame';
 import Balance2 from '../DaoComponents/Balance2';
 import Staking from '../user/StakingBalance';
 import TotalStaked from '../DaoComponents/TotalStaked';
@@ -31,8 +30,6 @@ const Dao = () => {
     return (
         <>
 
-        
-        
             <Box display="flex" justifyContent="center" mt="20" width="full">
                 <NavBar />
                 <Box flex="1" ml="200px" maxWidth="calc(100vw - 150px - 2rem)" width="1080px">
@@ -42,9 +39,9 @@ const Dao = () => {
                             {/* Profil et Progression*/}
                             <GridItem colSpan={3} p={4} borderRadius="md" boxShadow='xl' width="100%">
                                 <VStack spacing={4} align="stretch">
-                                <BuyTokens />
-                                <Divider />
-                                <StakeTokens />
+                                    <BuyTokens />
+                                    <Divider />
+                                    <StakeTokens />
                                 </VStack>
                             </GridItem>
 
@@ -118,13 +115,10 @@ const Dao = () => {
                             </GridItem>
                         </Grid>
                     </Box>
-                    {/* <Events /> */}
+
                 </Box>
 
             </Box>
-
-
-
         </>
 
     )

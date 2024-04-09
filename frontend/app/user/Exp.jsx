@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { ContractAbi, ContractAddress } from "@/constants/index.js";
-import { Text} from '@chakra-ui/react'
+import { Text } from '@chakra-ui/react'
 
 const Exp = ({ color }) => {
     const { address: userAddress } = useAccount();
@@ -17,7 +17,7 @@ const Exp = ({ color }) => {
 
     useEffect(() => {
         if (data) {
-            console.log('Niveau d\'expérience:', data); 
+            console.log('Niveau d\'expérience:', data);
             setstakingQuest(data.toString());
         }
     }, [data]);
@@ -29,7 +29,7 @@ const Exp = ({ color }) => {
 
     return (
         <div>
-          <Text color={color} fontSize="xs">{stakingQuest}</Text>
+            <Text color={color} fontSize="xs">{stakingQuest}</Text>
         </div>
     );
 

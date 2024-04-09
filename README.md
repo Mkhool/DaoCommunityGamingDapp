@@ -33,13 +33,11 @@ Screen interface DAO:
 
 Screen interface jeu:
 <img width="1429" alt="Jeu" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/InGameJPG.JPG?raw=true">
+
+
+
 ___
 ### Détails
-
-
-
-
-
 ___ 
 
 
@@ -49,6 +47,7 @@ Voici la liste de la stack utilisée pour la réalisation du projet
     Wagmi
     Chakra UI
     Solidity
+    Python
     Natspec
     Github
 

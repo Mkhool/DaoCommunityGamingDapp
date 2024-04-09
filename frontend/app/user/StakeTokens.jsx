@@ -16,8 +16,8 @@ const StakeTokens = ({ refetch, getEvents }) => {
 
     const [StakeTokensValue, setStakeValue] = useState('');
 
-    const { data: hash, isPending, writeContract} = useWriteContract({
-        mutation: { 
+    const { data: hash, isPending, writeContract } = useWriteContract({
+        mutation: {
             onSuccess: () => {
                 toast({
                     title: "La transaction  a été lancée",
@@ -35,10 +35,10 @@ const StakeTokens = ({ refetch, getEvents }) => {
                 });
             },
         }
-    }) 
+    })
 
-    const StakeTokens = async() => {
-        if(!isNaN(StakeTokensValue)) {
+    const StakeTokens = async () => {
+        if (!isNaN(StakeTokensValue)) {
             writeContract({
                 address: StakingContractAddress,
                 abi: StakingContractAbi,
@@ -57,13 +57,13 @@ const StakeTokens = ({ refetch, getEvents }) => {
         }
     }
 
-    const { isLoading: isConfirming, isSuccess: isConfirmed } = 
-    useWaitForTransactionReceipt({ 
-      hash, 
-    }) 
+    const { isLoading: isConfirming, isSuccess: isConfirmed } =
+        useWaitForTransactionReceipt({
+            hash,
+        })
 
     useEffect(() => {
-        if(isConfirmed) {
+        if (isConfirmed) {
 
             setStakeValue('');
             toast({
@@ -74,27 +74,27 @@ const StakeTokens = ({ refetch, getEvents }) => {
             });
         }
     }, [isConfirmed])
-    
+
     return (
-       <>
+        <>
             <Heading as='h2' size='xs' mt='0' >
-                Staker vos tokens Quest 
+                Staker vos tokens Quest
             </Heading>
-            {isConfirmed 
-            &&  <Alert mt="1rem" status='success'>
+            {isConfirmed
+                && <Alert mt="1rem" status='success'>
                     <AlertIcon />
                     Your transaction has been confirmed
                 </Alert>}
-            <Flex 
+            <Flex
                 justifyContent="space-between"
                 alignItems="center"
                 width="100%"
                 mt="1rem"
             >
-                <Input placeholder='Montant en ETH'  size='xs' mt='-8'  value={StakeTokensValue} onChange={(e) => setStakeValue(e.target.value)} />
+                <Input placeholder='Montant en ETH' size='xs' mt='-8' value={StakeTokensValue} onChange={(e) => setStakeValue(e.target.value)} />
                 <Button colorScheme='purple' size='xs' mt='-8' onClick={StakeTokens}>Stake</Button>
             </Flex>
-       </> 
+        </>
     )
 }
 

@@ -2,7 +2,6 @@
 import { createContext, useEffect, useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { ContractAbi, ContractAddress } from "@/constants/index.js";
-import { ethers } from "ethers"; 
 
 const Quorum = () => {
     const [totalStaked, settotalStaked] = useState(0);
@@ -11,12 +10,12 @@ const Quorum = () => {
         abi: ContractAbi,
         address: ContractAddress,
         functionName: 'quorumPercentage',
-        
+
     });
 
     useEffect(() => {
         if (data) {
-    
+
             let QorumPercentage;
             if (typeof data.toNumber === 'function') {
                 QorumPercentage = data.toNumber();
@@ -30,12 +29,12 @@ const Quorum = () => {
         }
     }, [data]);
 
-      useEffect(() => {
+    useEffect(() => {
     }, [totalStaked]);
 
     return (
         <div>
-           Quorum: {totalStaked} %
+            Quorum: {totalStaked} %
         </div>
     );
 

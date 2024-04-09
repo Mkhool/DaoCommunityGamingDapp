@@ -1,45 +1,23 @@
 'use client'
 import React, { useEffect } from 'react'
-import Events from './components/Events';
-import BuyTokens from './user/BuyTokens';
+
 import NavBar from './components/NavBar';
 
-import { TimeIcon, AtSignIcon } from '@chakra-ui/icons';
-import ProposeGame from './user/ProposeGame';
-import VoteGame from './components/VoteGameOld';
-import StartGameSession from './Admin/StartGameSession';
-import EndGameSession from './Admin/EndGameSession';
-import MakeChoice from './components/MakeChoice';
-import OwnerChoice from './Admin/OwnerChoice';
 
-import { useAccount, useReadContract } from "wagmi";
+import { useAccount } from "wagmi";
 import NotConnected from './DesignPage/NotConnected';
-import Balance2 from './DaoComponents/Balance2';
-import Staking from './user/StakingBalance';
-import TotalStaked from './DaoComponents/TotalStaked';
-import DailyInterestRate from './DaoComponents/DailyInterestRate';
-import Quorum from './DaoComponents/Quorum';
+
 import {
     Box,
     Grid,
     GridItem,
     VStack,
     HStack,
-    Avatar,
     Text,
-    Progress,
-    Button,
-    CircularProgress,
-    CircularProgressLabel,
     Divider,
-    List,
-    ListItem,
     Image
-
-
 } from '@chakra-ui/react';
 
-import Rank from './user/Rank';
 const Page = () => {
 
     const { address } = useAccount();
@@ -97,8 +75,6 @@ const Page = () => {
                                         <Text as='b'>Plusieurs mode de jeux: </Text> Anarchique, démocratique, speedrun et battle !
                                      
                                        <Text as='b'> Récompenses:  </Text> Les joueurs sont récompensés pour leur persévérance, intuition et rapidité.
-                                            
-
                                             </Text>
                                     </VStack>
                                 </GridItem>
@@ -110,9 +86,7 @@ const Page = () => {
             ) : (
                 <NotConnected />
             )}
-
         </>
-
     )
 }
 

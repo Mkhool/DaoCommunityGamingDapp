@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Box, Flex, Input, Button, Textarea, VStack, useToast, Image } from '@chakra-ui/react';
 import { useWriteContract, useWatchContractEvent, useWaitForTransactionReceipt } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
-import OwnerChoice from '../Admin/OwnerChoice';
 
 export default function PlayGame({ address, onSuccessMakechoice }) {
 
   useWatchContractEvent({
-    address: ContractAddress, 
-    abi: ContractAbi, 
+    address: ContractAddress,
+    abi: ContractAbi,
     eventName: 'ChoiceMade',
     listener: (event) => {
       console.log('Nouvelle direction ajoutée!', event)
@@ -35,7 +34,7 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
           isClosable: true,
         });
         setProposalDescription('');
-       
+
       },
       onError(error) {
         toast({
@@ -50,7 +49,7 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
   });
 
   const handleProposalSubmission = () => {
-    if (!proposalDescription.trim() ||!SessionId.trim()) {
+    if (!proposalDescription.trim() || !SessionId.trim()) {
       toast({
         title: 'La description ne doit pas etre vide',
         status: 'error',
@@ -72,7 +71,7 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
       });
       return;
     }
-  
+
     if (!proposalDescription.trim()) {
       toast({
         title: 'La description ne doit pas etre vide',
@@ -92,62 +91,62 @@ export default function PlayGame({ address, onSuccessMakechoice }) {
 
   };
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = 
-  useWaitForTransactionReceipt({ 
-    hash, 
-  }) 
-  
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    })
+
   useEffect(() => {
-      if(isConfirmed) {
-       
-          toast({
-              title: "Direction envoyée avec succès.",
-              status: "success",
-              duration: 1000,
-              isClosable: true,
-          });
-      }
+    if (isConfirmed) {
+
+      toast({
+        title: "Direction envoyée avec succès.",
+        status: "success",
+        duration: 1000,
+        isClosable: true,
+      });
+    }
   }, [isConfirmed])
 
-return (
+  return (
 
-  <Flex height="calc(100vh - 30px)" alignItems="center" justifyContent="center" ml='-8'>
-    <Flex width="calc(95vw - 10px)" height="calc(50vw - 30px)" bg="gray.800" borderRadius="lg" overflow="hidden">
-      <Box flex="3" bg="black" display="flex" alignItems="center" justifyContent="center">
-      </Box>
-      <Flex flex="1" flexDirection="column" bg="#BFA181" p={4}>
-        <VStack spacing={2} overflowY="auto" flex="1">
-          {messages.map((msg, index) => (
-            <Box key={index} bg="gray.700" p={2} borderRadius="md" width="100%">
-              ID: {msg.id}, Message: {msg.message}
-            </Box>
-          ))}
-        </VStack>
-        <Box mt="auto">
-          <Input
-            placeholder="Session ID"
-            value={SessionId}
-            onChange={(e) => setSessionId(e.target.value)}
-            mb={2}
-          />
-          <Textarea
-            placeholder="Direction"
-            value={proposalDescription}
-            onChange={(e) => setProposalDescription(e.target.value)}
-            mb={2}
-          />
-          <Button
-            colorScheme='black'
-            variant='outline'
-            _hover={{ bg: 'black', color: 'white' }}
-            onClick={handleProposalSubmission}
-            isLoading={isProposalAdding}
-          >
-            Envoyer
-          </Button>
+    <Flex height="calc(100vh - 30px)" alignItems="center" justifyContent="center" ml='-8'>
+      <Flex width="calc(95vw - 10px)" height="calc(50vw - 30px)" bg="gray.800" borderRadius="lg" overflow="hidden">
+        <Box flex="3" bg="black" display="flex" alignItems="center" justifyContent="center">
         </Box>
+        <Flex flex="1" flexDirection="column" bg="#BFA181" p={4}>
+          <VStack spacing={2} overflowY="auto" flex="1">
+            {messages.map((msg, index) => (
+              <Box key={index} bg="gray.700" p={2} borderRadius="md" width="100%">
+                ID: {msg.id}, Message: {msg.message}
+              </Box>
+            ))}
+          </VStack>
+          <Box mt="auto">
+            <Input
+              placeholder="Session ID"
+              value={SessionId}
+              onChange={(e) => setSessionId(e.target.value)}
+              mb={2}
+            />
+            <Textarea
+              placeholder="Direction"
+              value={proposalDescription}
+              onChange={(e) => setProposalDescription(e.target.value)}
+              mb={2}
+            />
+            <Button
+              colorScheme='black'
+              variant='outline'
+              _hover={{ bg: 'black', color: 'white' }}
+              onClick={handleProposalSubmission}
+              isLoading={isProposalAdding}
+            >
+              Envoyer
+            </Button>
+          </Box>
+        </Flex>
       </Flex>
     </Flex>
-  </Flex>
-);
+  );
 }

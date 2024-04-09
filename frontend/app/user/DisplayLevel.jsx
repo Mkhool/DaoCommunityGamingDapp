@@ -12,14 +12,14 @@ const DisplayLevel = () => {
     abi: ContractAbi,
     functionName: 'DetermineLevelByExperience',
     args: address ? [address] : [],
-    watch: true, 
+    watch: true,
   });
 
   useEffect(() => {
     console.log("Data:", data);
     console.log("Loading:", isLoading);
     console.log("Error:", isError);
-    
+
     if (data && !isLoading && !isError) {
       setLevel(data.toString());
     }

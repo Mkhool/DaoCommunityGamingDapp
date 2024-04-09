@@ -1,16 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Button, Input, Text, useToast, VStack , Tag } from '@chakra-ui/react';
+import { Box, Button, Input, Text, useToast, VStack, Tag } from '@chakra-ui/react';
 import { useWriteContract, useWatchContractEvent } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
 
 function ProposeGame({ address, onSuccessAddProposal, Events }) {
 
- useWatchContractEvent({
-    address: ContractAddress, // L'adresse de votre contrat
-    abi: ContractAbi, // L'ABI de votre contrat
-    eventName: 'GameProposed', // Le nom de l'événement à écouter
+  useWatchContractEvent({
+    address: ContractAddress,
+    abi: ContractAbi,
+    eventName: 'GameProposed',
     onLogs(logs) {
       console.log('New logs!', logs)
     },
@@ -20,7 +20,6 @@ function ProposeGame({ address, onSuccessAddProposal, Events }) {
 
   const toast = useToast();
 
-  // Écrire une nouvelle proposition
   const { writeContract: ProposeGame, isLoading: isProposalAdding } = useWriteContract({
     mutation: {
       onSuccess() {
@@ -61,31 +60,29 @@ function ProposeGame({ address, onSuccessAddProposal, Events }) {
       functionName: "ProposeGame",
       account: address,
       args: [proposalDescription]
-      
+
     });
 
   };
 
-
-
   return (
-<Box>
-  <VStack spacing={4}>
-   
-    <Input
-      placeholder="Describe your game proposal"
-      value={proposalDescription}
-      onChange={(e) => setProposalDescription(e.target.value)}
-    />
-    <Button colorScheme='whiteAlpha'
-      onClick={handleProposalSubmission}
-      isLoading={isProposalAdding}
-    >
-      Propose a game
-    </Button>
-  </VStack>
- 
-</Box>
+    <Box>
+      <VStack spacing={4}>
+
+        <Input
+          placeholder="Describe your game proposal"
+          value={proposalDescription}
+          onChange={(e) => setProposalDescription(e.target.value)}
+        />
+        <Button colorScheme='whiteAlpha'
+          onClick={handleProposalSubmission}
+          isLoading={isProposalAdding}
+        >
+          Propose a game
+        </Button>
+      </VStack>
+
+    </Box>
   );
 }
 

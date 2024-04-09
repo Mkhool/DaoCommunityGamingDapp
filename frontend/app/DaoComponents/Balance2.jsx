@@ -1,8 +1,8 @@
 "use client"
-import { createContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { QuestContractAbi, QuestContractAddress } from "@/constants/index.js";
-import { ethers } from "ethers"; 
+import { ethers } from "ethers";
 
 const Balance2 = () => {
     const { address: userAddress } = useAccount();
@@ -18,7 +18,7 @@ const Balance2 = () => {
     useEffect(() => {
         if (data) {
             const balanceFormatted = ethers.formatUnits(data, 18);
-            const balanceRounded = parseFloat(balanceFormatted).toFixed(0); 
+            const balanceRounded = parseFloat(balanceFormatted).toFixed(0);
             setbalanceQuest(balanceRounded);
         }
     }, [data]);
@@ -27,7 +27,7 @@ const Balance2 = () => {
         refetch();
     }, [userAddress, refetch]);
 
-      useEffect(() => {
+    useEffect(() => {
         console.log("Mise à jour de balanceQuest: ", balanceQuest);
     }, [balanceQuest]);
 
@@ -38,8 +38,6 @@ const Balance2 = () => {
     );
 
 };
-
-
 
 export default Balance2;
 

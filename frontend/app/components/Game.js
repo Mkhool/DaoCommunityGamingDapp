@@ -7,9 +7,6 @@ const Game = () => {
         kaboomScript.src = 'https://kaboomjs.com/lib/0.5.0/kaboom.js';
         kaboomScript.async = true;
 
-
-
-
         kaboomScript.onload = () => {
             const gameScript = document.createElement('script');
             gameScript.src= '/game.js'; 

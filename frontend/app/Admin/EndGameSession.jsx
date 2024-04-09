@@ -1,32 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Button, Input, Text, useToast, VStack , Tag } from '@chakra-ui/react';
+import { Box, Button, Input, Text, useToast, VStack, Tag } from '@chakra-ui/react';
 import { useWriteContract, useWatchContractEvent } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
 
 
 function EndGameSession({ address, Events }) {
 
- useWatchContractEvent({
-    address: ContractAddress, // L'adresse de votre contrat
-    abi: ContractAbi, // L'ABI de votre contrat
-    eventName: 'GameStatusChanged', // Le nom de l'événement à écouter
+  useWatchContractEvent({
+    address: ContractAddress,
+    abi: ContractAbi,
+    eventName: 'GameSessionEnded',
     onLogs(logs) {
       console.log('New logs!', logs)
     },
   });
 
-  useWatchContractEvent({
-    address: ContractAddress, // L'adresse de votre contrat
-    abi: ContractAbi, // L'ABI de votre contrat
-    eventName: 'GameSessionEnded', // Le nom de l'événement à écouter
-    onLogs(logs) {
-      console.log('New logs!', logs)
-    },
-  });
-  
-  const [gameSession , SetgameSession] = useState('');
+  const [gameSession, SetgameSession] = useState('');
 
   const toast = useToast();
 
@@ -40,7 +31,7 @@ function EndGameSession({ address, Events }) {
           isClosable: true,
         });
         SetgameSession('');
-     
+
       },
       onError(error) {
         toast({
@@ -55,7 +46,7 @@ function EndGameSession({ address, Events }) {
   });
 
   const handleGameSession = () => {
-    if (!gameSession .trim()) {
+    if (!gameSession.trim()) {
       toast({
         title: 'Choice cannot be empty.',
         status: 'error',
@@ -69,30 +60,30 @@ function EndGameSession({ address, Events }) {
       abi: ContractAbi,
       functionName: "EndGameSession",
       account: address,
-      args: [gameSession ]
-      
+      args: [gameSession]
+
     });
 
   };
 
   return (
-<Box>
-  <VStack spacing={4}>
-    
-    <Input
-      placeholder="Select an Id"
-      value={gameSession }
-      onChange={(e) => SetgameSession(e.target.value)}
-    />
-    <Button colorScheme='whiteAlpha'
-      onClick={handleGameSession}
-      isLoading={isGameEnded}
-    >
-      Close Game Session
-    </Button>
-  </VStack>
- 
-</Box>
+    <Box>
+      <VStack spacing={4}>
+
+        <Input
+          placeholder="Select an Id"
+          value={gameSession}
+          onChange={(e) => SetgameSession(e.target.value)}
+        />
+        <Button colorScheme='whiteAlpha'
+          onClick={handleGameSession}
+          isLoading={isGameEnded}
+        >
+          Close Game Session
+        </Button>
+      </VStack>
+
+    </Box>
   );
 }
 

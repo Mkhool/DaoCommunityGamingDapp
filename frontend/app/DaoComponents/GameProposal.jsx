@@ -1,16 +1,16 @@
 import { useReadContract } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
-import { useState, useEffect  } from 'react';
+import { useState, useEffect } from 'react';
 import Quorum from './Quorum';
 
 function GameProposal({ initialProposalId }) {
   const [proposalId, setProposalId] = useState(initialProposalId || '');
   const { data, isError, isLoading } = useReadContract({
-    address: ContractAddress, 
-    abi: ContractAbi, 
-    functionName: 'GetProposal', 
-    args: [proposalId], 
-    enabled: proposalId !== '', 
+    address: ContractAddress,
+    abi: ContractAbi,
+    functionName: 'GetProposal',
+    args: [proposalId],
+    enabled: proposalId !== '',
   });
 
   useEffect(() => {
@@ -18,7 +18,7 @@ function GameProposal({ initialProposalId }) {
       setProposalId(initialProposalId);
     }
   }, [initialProposalId]);
-  
+
   useEffect(() => {
     console.log(data);
   }, [data]);
@@ -36,7 +36,7 @@ function GameProposal({ initialProposalId }) {
           <p>Name: {data[1]}</p>
           <p>Vote Count: {Number(data[2] / BigInt(1e18)).toString()}</p>
           <p>Is Accepted: {data[3] ? 'Yes' : 'No'}</p>
-          <p><Quorum/></p>
+          <p><Quorum /></p>
         </div>
       )}
     </div>

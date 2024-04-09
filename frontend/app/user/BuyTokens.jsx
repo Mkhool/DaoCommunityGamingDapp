@@ -16,8 +16,8 @@ const BuyTokens = ({ refetch, getEvents }) => {
 
     const [buyTokensValue, setBuyTokensValue] = useState('');
 
-    const { data: hash, isPending, writeContract} = useWriteContract({
-        mutation: { 
+    const { data: hash, isPending, writeContract } = useWriteContract({
+        mutation: {
             onSuccess: () => {
                 toast({
                     title: "La transaction  a été lancée",
@@ -35,10 +35,10 @@ const BuyTokens = ({ refetch, getEvents }) => {
                 });
             },
         }
-    }) 
+    })
 
-    const buyTokens = async() => {
-        if(!isNaN(buyTokensValue)) {
+    const buyTokens = async () => {
+        if (!isNaN(buyTokensValue)) {
             writeContract({
                 address: QuestContractAddress,
                 abi: QuestContractAbi,
@@ -57,13 +57,13 @@ const BuyTokens = ({ refetch, getEvents }) => {
         }
     }
 
-    const { isLoading: isConfirming, isSuccess: isConfirmed } = 
-    useWaitForTransactionReceipt({ 
-      hash, 
-    }) 
+    const { isLoading: isConfirming, isSuccess: isConfirmed } =
+        useWaitForTransactionReceipt({
+            hash,
+        })
 
     useEffect(() => {
-        if(isConfirmed) {
+        if (isConfirmed) {
 
             setBuyTokensValue('');
             toast({
@@ -74,18 +74,18 @@ const BuyTokens = ({ refetch, getEvents }) => {
             });
         }
     }, [isConfirmed])
-    
+
     return (
-       <>
+        <>
             <Heading as='h2' size='xs' mt='2.8rem'>
                 Acheter des tokens Quest
             </Heading>
-            {isConfirmed 
-            &&  <Alert mt="1rem" status='success'>
+            {isConfirmed
+                && <Alert mt="1rem" status='success'>
                     <AlertIcon />
                     Your transaction has been confirmed
                 </Alert>}
-            <Flex 
+            <Flex
                 justifyContent="space-between"
                 alignItems="center"
                 width="100%"
@@ -94,7 +94,7 @@ const BuyTokens = ({ refetch, getEvents }) => {
                 <Input placeholder='Montant en ETH' size='xs' mt='-8' value={buyTokensValue} onChange={(e) => setBuyTokensValue(e.target.value)} />
                 <Button colorScheme='purple' size='xs' mt='-8' onClick={buyTokens}>BuyTokens</Button>
             </Flex>
-       </> 
+        </>
     )
 }
 

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { StakingContractAbi, StakingContractAddress } from "@/constants/index.js";
-import { ethers } from "ethers"; 
+import { ethers } from "ethers";
 
 const Staking = () => {
     const { address: userAddress } = useAccount();
@@ -18,7 +18,7 @@ const Staking = () => {
     useEffect(() => {
         if (data) {
             const balanceFormatted = ethers.formatUnits(data, 18);
-            const balanceRounded = parseFloat(balanceFormatted).toFixed(0); 
+            const balanceRounded = parseFloat(balanceFormatted).toFixed(0);
             setstakingQuest(balanceRounded);
         }
     }, [data]);
@@ -27,7 +27,7 @@ const Staking = () => {
         refetch();
     }, [userAddress, refetch]);
 
-      useEffect(() => {
+    useEffect(() => {
 
     }, [stakingQuest]);
 

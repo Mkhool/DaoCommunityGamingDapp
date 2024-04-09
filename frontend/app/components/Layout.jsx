@@ -3,7 +3,6 @@
 import { Flex } from '@chakra-ui/react'
 import "../globals.css";
 import Header from '../DesignPage/Header'
-import Footer from './Footer'
 
 const Layout = ({ children }) => {
   return (
@@ -19,7 +18,7 @@ const Layout = ({ children }) => {
       >
         {children}
       </Flex></Flex>
-      )
+  )
 }
 
-      export default Layout
+export default Layout

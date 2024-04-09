@@ -1,23 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Box, Button, Input, Text, useToast, VStack , Tag } from '@chakra-ui/react';
+import { Box, Button, Input, Text, useToast, VStack, Tag } from '@chakra-ui/react';
 import { useWriteContract, useWatchContractEvent, useWaitForTransactionReceipt } from 'wagmi';
 import { ContractAddress, ContractAbi } from '@/constants';
 
 
 function VoteGame({ address, onSuccessAddProposal, Events }) {
 
- useWatchContractEvent({
-    address: ContractAddress, 
+  useWatchContractEvent({
+    address: ContractAddress,
     abi: ContractAbi,
-    eventName: 'GameProposalAccepted', 
+    eventName: 'GameProposalAccepted',
     onLogs(logs) {
       console.log('New logs!', logs)
     },
   });
- 
-  const [voteFrorGame , serVoteFrorGame] = useState('');
+
+  const [voteFrorGame, serVoteFrorGame] = useState('');
 
   const toast = useToast();
 
@@ -32,7 +32,7 @@ function VoteGame({ address, onSuccessAddProposal, Events }) {
           isClosable: true,
         });
         serVoteFrorGame('');
-        
+
       },
       onError(error) {
         toast({
@@ -47,7 +47,7 @@ function VoteGame({ address, onSuccessAddProposal, Events }) {
   });
 
   const handleVoteSubmission = () => {
-    if (!voteFrorGame .trim()) {
+    if (!voteFrorGame.trim()) {
       toast({
         title: 'Choice cannot be empty.',
         status: 'error',
@@ -61,56 +61,56 @@ function VoteGame({ address, onSuccessAddProposal, Events }) {
       abi: ContractAbi,
       functionName: "VoteForGame",
       account: address,
-      args: [voteFrorGame ]
-      
+      args: [voteFrorGame]
+
     });
 
   };
 
-  const { isLoading: isConfirming, isSuccess: isConfirmed } = 
-  useWaitForTransactionReceipt({ 
-    hash, 
-  }) 
+  const { isLoading: isConfirming, isSuccess: isConfirmed } =
+    useWaitForTransactionReceipt({
+      hash,
+    })
 
   useEffect(() => {
-      if(isConfirmed) {
+    if (isConfirmed) {
 
-          toast({
-              title: "Vote validated",
-              status: "success",
-              duration: 3000,
-              isClosable: true,
-          });
-      }
+      toast({
+        title: "Vote validated",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
   }, [isConfirmed])
 
 
   return (
-<Box>
-  <VStack spacing={4}>
-    
-    <Input
-    focusBorderColor='#BFA181'
-      placeholder="Id du jeu"
-      size='sm'
-      value={voteFrorGame }
-      onChange={(e) => serVoteFrorGame(e.target.value)}
-    />
-    <Button
-     color="rgba(15, 15, 15)"
-     bg="#BFA181" maxHeight="250"
-     _hover={{ boxShadow: "0 0 12px 3px rgba(150, 70, 255, 0.6)" }}
-     sx={{
-         transition: 'box-shadow 0.33s ease-in-out',
-     }}
-      onClick={handleVoteSubmission}
-      isLoading={isVoteAdding}
-    >
-      Envoyer
-    </Button>
-  </VStack>
- 
-</Box>
+    <Box>
+      <VStack spacing={4}>
+
+        <Input
+          focusBorderColor='#BFA181'
+          placeholder="Id du jeu"
+          size='sm'
+          value={voteFrorGame}
+          onChange={(e) => serVoteFrorGame(e.target.value)}
+        />
+        <Button
+          color="rgba(15, 15, 15)"
+          bg="#BFA181" maxHeight="250"
+          _hover={{ boxShadow: "0 0 12px 3px rgba(150, 70, 255, 0.6)" }}
+          sx={{
+            transition: 'box-shadow 0.33s ease-in-out',
+          }}
+          onClick={handleVoteSubmission}
+          isLoading={isVoteAdding}
+        >
+          Envoyer
+        </Button>
+      </VStack>
+
+    </Box>
   );
 }
 

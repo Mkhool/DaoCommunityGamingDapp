@@ -1,11 +1,11 @@
 'use client';
-import { Flex, Text, Box, Avatar, AvatarBadge, Image } from '@chakra-ui/react';
+import { Flex, Box, Image } from '@chakra-ui/react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from "wagmi";
 import Link from 'next/link';
 
 const Header = () => {
-  
+
   const { isConnected } = useAccount();
   return isConnected ? (
     <Box pos="fixed" top={0} left={0} h="10vh" w="100vw" bg="rgba(15, 15, 15)">

@@ -2,7 +2,7 @@
 import { createContext, useEffect, useState } from "react";
 import { useAccount, useReadContract } from "wagmi";
 import { StakingContractAbi, StakingContractAddress } from "@/constants/index.js";
-import { ethers } from "ethers"; 
+import { ethers } from "ethers";
 
 const DailyInterestRate = () => {
     const [totalStaked, settotalStaked] = useState(0);
@@ -11,12 +11,12 @@ const DailyInterestRate = () => {
         abi: StakingContractAbi,
         address: StakingContractAddress,
         functionName: 'DailyInterestRate',
-        
+
     });
 
     useEffect(() => {
         if (data) {
-    
+
             let interestRatePercentage;
             if (typeof data.toNumber === 'function') {
                 interestRatePercentage = data.toNumber();
@@ -30,18 +30,16 @@ const DailyInterestRate = () => {
         }
     }, [data]);
 
-      useEffect(() => {
+    useEffect(() => {
     }, [totalStaked]);
 
     return (
         <div>
-           Daily Interest Rate: {totalStaked} %
+            Daily Interest Rate: {totalStaked} %
         </div>
     );
 
 };
-
-
 
 export default DailyInterestRate;
 
