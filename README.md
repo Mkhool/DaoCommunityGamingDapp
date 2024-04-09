@@ -16,7 +16,7 @@ Lien Etherscan du contract déployé sur Sepolia : https://sepolia.etherscan.io/
 
 Screen interface Dashboard:
 
-<img width="1429" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/UQ3.jpg?raw=true">
+<img width="100" alt="Screenshot 2024-03-18 at 14 52 31" src="https://github.com/Mkhool/DaoCommunityGamingDapp/blob/main/frontend/public/image/UQ3.jpg?raw=true">
 
 ___
 ### Détails
