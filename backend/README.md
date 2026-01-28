@@ -106,3 +106,4 @@ La session de jeu passe alors au statut terminé, et une nouvelle session peut �
 
 Vérification des Résultats et des Récompenses :
 Les joueurs et autres parties intéressées peuvent vérifier le statut et les résultats des jeux, ainsi que les récompenses distribuées, grâce aux événements émis par le contrat et les fonctions de lecture disponibles.
+
